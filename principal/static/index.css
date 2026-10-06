@@ -1013,3 +1013,386 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* ─── SECCIÓN CARRUSEL DE FRUTAS CON PESTAÑAS ─── */
+.fruits-carousel-section {
+    padding: 5rem 3.5rem;
+    background: #fff;
+    position: relative;
+    border-top: 1px solid #E5E7EB;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.carousel-header-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2.2rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.carousel-header-left .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 0.6rem;
+    display: block;
+}
+
+.carousel-header-left h2 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--green-deep);
+}
+
+.carousel-header-left h2 span {
+    color: var(--orange);
+    font-style: italic;
+}
+
+.btn-view-all-fruits {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--green-deep);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.8rem 1.6rem;
+    border: 1.5px solid var(--green-deep);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-view-all-fruits:hover {
+    background: var(--green-deep);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(26, 58, 38, 0.2);
+}
+
+/* Pestañas (Tabs) */
+.carousel-tabs-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    overflow-x: auto;
+    padding-bottom: 0.8rem;
+    margin-bottom: 2.5rem;
+    scrollbar-width: none;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.carousel-tabs-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-tab {
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    color: var(--muted);
+    padding: 0.65rem 1.4rem;
+    border-radius: 30px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.carousel-tab:hover {
+    background: #E5E7EB;
+    color: var(--green-deep);
+}
+
+.carousel-tab.active {
+    background: var(--green-deep);
+    color: #fff;
+    border-color: var(--green-deep);
+    box-shadow: 0 4px 12px rgba(26, 58, 38, 0.25);
+}
+
+/* Contenedor del Carrusel y Flechas */
+.carousel-outer {
+    position: relative;
+    margin: 0 -0.5rem;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 0.8rem 0.5rem 1.5rem;
+    scrollbar-width: none;
+    cursor: grab;
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-track.dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    user-select: none;
+}
+
+/* Tarjetas del Carrusel */
+.carousel-card {
+    flex: 0 0 calc(25% - 1.15rem);
+    min-width: 270px;
+    background: var(--bg);
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.carousel-card:hover {
+    border-color: #D1D5DB;
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(26, 58, 38, 0.08);
+}
+
+.carousel-card.hidden-carousel-card {
+    display: none !important;
+}
+
+.card-img-wrap {
+    width: 100%;
+    height: 180px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1.2rem;
+    background: #eef2eb;
+}
+
+.card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.carousel-card:hover .card-img-wrap img {
+    transform: scale(1.08);
+}
+
+.badge-tag-fresh {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(26, 58, 38, 0.88);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-tag-fresh .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-accent);
+}
+
+.card-badge-emoji {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.carousel-card-cat {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--orange);
+    margin-bottom: 0.3rem;
+}
+
+.carousel-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--green-deep);
+    margin-bottom: 0.5rem;
+}
+
+.carousel-card-origin {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+}
+
+.carousel-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.carousel-price-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.carousel-price {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--green-deep);
+    letter-spacing: -0.5px;
+}
+
+.carousel-unit {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.btn-add-fruit {
+    background: var(--green-deep);
+    color: #fff;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-add-fruit:hover {
+    background: var(--orange);
+    transform: scale(1.08);
+}
+
+.btn-add-fruit.added {
+    background: var(--green-accent);
+}
+
+/* Flechas de navegación */
+.carousel-nav-btn {
+    position: absolute;
+    top: 45%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    color: var(--green-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.carousel-nav-btn:hover {
+    background: var(--green-deep);
+    color: #fff;
+    border-color: var(--green-deep);
+    transform: translateY(-50%) scale(1.06);
+}
+
+.carousel-prev { left: -20px; }
+.carousel-next { right: -20px; }
+
+/* Indicadores de Puntos (Dots) */
+.carousel-dots-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 2rem;
+}
+
+.carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #D1D5DB;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+    width: 26px;
+    border-radius: 5px;
+    background: var(--orange);
+}
+
+/* Toast */
+.fruit-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--green-deep);
+    color: #fff;
+    padding: 0.85rem 1.8rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(8px);
+}
+
+.fruit-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1024px) {
+    .fruits-carousel-section { padding: 4rem 1.5rem; }
+    .carousel-header-left h2 { font-size: 2.4rem; }
+    .carousel-prev { left: 0; }
+    .carousel-next { right: 0; }
+}
