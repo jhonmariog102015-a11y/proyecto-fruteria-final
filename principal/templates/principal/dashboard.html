@@ -2,18 +2,26 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- Metadatos de codificación y renderizado en el panel administrativo -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Paso Frutería — Panel Administrativo</title>
+  <!-- Hoja de estilos del Dashboard con tema oscuro/verde moderno -->
   <link rel="stylesheet" href="{% static 'panel.css' %}">
 </head>
 
 <body>
   <div class="dashboard">
 
+    <!-- ====================================================================== -->
+    <!-- 1. BARRA LATERAL (Sidebar de Navegación)                               -->
+    <!-- Menú con enlaces a vistas de la tienda, catálogo, Django admin y salir -->
+    <!-- ====================================================================== -->
     <aside class="sidebar">
+      <!-- Marca corporativa del panel -->
       <div class="logo">🌿 El Paso Frutería</div>
 
+      <!-- Menú principal de enlaces del administrador -->
       <nav class="navigation" aria-label="Main navigation">
         <a class="active" href="#overview" aria-current="page">
           <span class="nav-icon">▦</span> Resumen
@@ -29,6 +37,7 @@
         </a>
       </nav>
 
+      <!-- Pie de la barra lateral: Botón de Logout y perfil del usuario activo -->
       <div class="sidebar-bottom">
         <form action="{% url 'logout' %}" method="post" style="margin: 0; width: 100%;">
           {% csrf_token %}
@@ -37,6 +46,7 @@
           </button>
         </form>
 
+        <!-- Tarjeta de perfil: Iniciales y nombre del usuario autenticado -->
         <div class="profile" style="margin-top: 10px;">
           <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
           <div>
@@ -47,7 +57,12 @@
       </div>
     </aside>
 
+    <!-- ====================================================================== -->
+    <!-- 2. CONTENIDO PRINCIPAL DEL DASHBOARD (Main Workspace)                  -->
+    <!-- Topbar, KPIs en tiempo real y tabla de existencias de inventario       -->
+    <!-- ====================================================================== -->
     <main class="main" id="overview">
+      <!-- Barra superior con saludo al usuario y buscador rápido -->
       <header class="topbar">
         <div class="greeting">
           <h1>Hola, {{ request.user.username|capfirst }}</h1>
@@ -68,6 +83,10 @@
       </header>
 
       <div class="content">
+        <!-- ================================================================== -->
+        <!-- 3. MÉTRICAS CLAVE (KPI Cards)                                      -->
+        <!-- Conteo dinámico de productos, usuarios registrados y categorías    -->
+        <!-- ================================================================== -->
         <section class="dashboard-products" aria-labelledby="products-heading">
           <div class="stats-row">
             <div class="dash-card">
@@ -84,6 +103,10 @@
             </div>
           </div>
 
+          <!-- ================================================================ -->
+          <!-- 4. TABLA DE INVENTARIO DE PRODUCTOS EN TIEMPO REAL                -->
+          <!-- Itera sobre el queryset de productos enviados por dashboard_view  -->
+          <!-- ================================================================ -->
           <div class="products-table-container">
             <h2 id="products-heading">Inventario de Productos Frutícolas</h2>
             <table>
