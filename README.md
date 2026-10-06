@@ -76,8 +76,8 @@ Para clonar y poner en marcha el proyecto en cualquier entorno de desarrollo:
 
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/jhonmariog102015-a11y/ProyectoFinalSenaFruteria.git
-cd ProyectoFinalSenaFruteria
+git clone https://github.com/jhonmariog102015-a11y/proyecto-fruteria-final.git
+cd proyecto-fruteria-final
 ```
 
 ### 2. Crear y Activar el Entorno Virtual
