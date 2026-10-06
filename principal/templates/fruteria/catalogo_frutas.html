@@ -22,7 +22,7 @@
 
     <!-- NAVEGACIÓN -->
     <header class="navbar">
-        <a href="/tienda/" class="nav-brand">
+        <a href="{% url 'inicio' %}" class="nav-brand">
             <div class="brand-icon">EP</div>
             <div>
                 <div class="brand-name">El Paso</div>
@@ -33,7 +33,7 @@
         <nav class="nav-links">
             <a href="{% url 'inicio' %}" class="nav-link">Inicio</a>
             <a href="{% url 'catalogo_frutas' %}" class="nav-link active">Catálogo de Frutas</a>
-            <a href="{% url 'inicio' %}#categorias" class="nav-link">Categorías</a>
+            <a href="{% url 'inicio' %}#lo-que-tenemos" class="nav-link">Categorías</a>
             <a href="{% url 'inicio' %}#carrusel-frutas" class="nav-link">Temporada</a>
             <a href="{% url 'inicio' %}#nosotros" class="nav-link">Nosotros</a>
             {% if user.is_authenticated %}
@@ -60,7 +60,7 @@
     <!-- CABECERA DEL CATÁLOGO -->
     <main class="catalog-hero">
         <div class="catalog-breadcrumb">
-            <a href="/tienda/">Inicio</a>
+            <a href="{% url 'inicio' %}">Inicio</a>
             <span>/</span>
             <span>Catálogo de Frutas</span>
         </div>
