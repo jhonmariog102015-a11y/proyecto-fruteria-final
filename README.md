@@ -98,12 +98,20 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 5. Iniciar el Servidor de Desarrollo
+### 5. Cargar Productos y Datos Iniciales (¡Paso Importante!)
+Para cargar automáticamente las 17 frutas, categorías, proveedores y usuario admin:
+```bash
+python manage.py poblar_datos
+```
+*(O alternativamente: `python manage.py loaddata productos_iniciales`)*
+
+### 6. Iniciar el Servidor de Desarrollo
 ```bash
 python manage.py runserver
 ```
 
 El aplicativo estará disponible en: **`http://127.0.0.1:8000/`**
+
 
 ---
 
