@@ -92,20 +92,15 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-### 4. Aplicar Migraciones de Base de Datos
+### 4. Base de Datos Incluida (Lista para Usar)
+La base de datos SQLite (`db.sqlite3`) ya viene incluida en el repositorio con las **17 frutas, categorías, proveedores y el usuario administrador** listos para operar sin necesidad de pasos adicionales.
+
+*(Opcional para verificar migraciones):*
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 5. Cargar Productos y Datos Iniciales (¡Paso Importante!)
-Para cargar automáticamente las 17 frutas, categorías, proveedores y usuario admin:
-```bash
-python manage.py poblar_datos
-```
-*(O alternativamente: `python manage.py loaddata productos_iniciales`)*
-
-### 6. Iniciar el Servidor de Desarrollo
+### 5. Iniciar el Servidor de Desarrollo
 ```bash
 python manage.py runserver
 ```
