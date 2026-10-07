@@ -66,7 +66,10 @@
                 </form>
             <!-- Si es un cliente no autenticado, ve el botón de Ingresar al Login -->
             {% else %}
-                <a class="btn-login" href="{% url 'login' %}">Ingresar</a>
+                <a class="btn-login" href="{% url 'login' %}">
+                    <span class="btn-login-icon" aria-hidden="true">👤</span>
+                    <span>Ingresar</span>
+                </a>
             {% endif %}
             
             <!-- Botón de contacto directo por WhatsApp para pedidos -->
