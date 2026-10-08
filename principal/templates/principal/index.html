@@ -37,14 +37,10 @@
     <!-- Contiene el logo, enlaces de navegación, auth dinámico y WhatsApp     -->
     <!-- ====================================================================== -->
     <header class="navbar">
-        <!-- Logotipo e identidad visual de la frutería -->
-        <div class="nav-brand">
-            <div class="brand-icon">EP</div>
-            <div>
-                <div class="brand-name">El Paso</div>
-                <div class="brand-tagline">Frutería</div>
-            </div>
-        </div>
+        <!-- Logotipo transparente de la frutería -->
+        <a class="nav-brand" href="{% url 'index' %}" aria-label="El Paso Frutería, inicio">
+            <img class="navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="El Paso Frutería">
+        </a>
 
         <!-- Enlaces de navegación con scroll suave y rutas oficiales de Django -->
         <nav class="nav-links">
@@ -328,13 +324,13 @@
     <!-- ====================================================================== -->
     <footer class="footer">
         <div class="footer-brand">
-            <div class="brand-icon">EP</div>
+            <div class="brand-icon">AL</div>
             <div>
-                <div class="brand-name">El Paso</div>
+                <div class="brand-name">Al Paso</div>
                 <div class="brand-tagline">Frutería</div>
             </div>
         </div>
-        <p class="footer-copy">© 2026 El Paso Frutería. Todos los derechos reservados.</p>
+        <p class="footer-copy">© 2026 Al Paso Frutería. Todos los derechos reservados.</p>
     </footer>
 
     <!-- ====================================================================== -->
@@ -368,4 +364,4 @@
     <script src="{% static 'js/carrusel.js' %}"></script>
 </body>
 
-</html>
+</html>
