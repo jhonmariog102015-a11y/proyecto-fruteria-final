@@ -5,6 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // Referencias DOM
+    const catalogNavToggle = document.getElementById('catalogNavToggle');
+    const catalogNavLinks = document.getElementById('catalogNavLinks');
     const chips = document.querySelectorAll('.filter-chip');
     const cards = document.querySelectorAll('.fruit-card');
     const searchInput = document.getElementById('fruitSearch');
@@ -19,6 +21,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartTotalAmount = document.getElementById('cartTotalAmount');
     const btnSendWhatsapp = document.getElementById('btnSendWhatsapp');
     const cartEmptyMsg = document.getElementById('cartEmptyMessage');
+
+    if (catalogNavToggle && catalogNavLinks) {
+        const setNavOpen = (isOpen) => {
+            catalogNavToggle.classList.toggle('open', isOpen);
+            catalogNavLinks.classList.toggle('active-menu', isOpen);
+            catalogNavToggle.setAttribute('aria-expanded', String(isOpen));
+            catalogNavToggle.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú');
+        };
+
+        catalogNavToggle.addEventListener('click', () => {
+            setNavOpen(catalogNavToggle.getAttribute('aria-expanded') !== 'true');
+        });
+
+        catalogNavLinks.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => setNavOpen(false));
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') setNavOpen(false);
+        });
+
+        document.addEventListener('click', event => {
+            if (!catalogNavToggle.contains(event.target) && !catalogNavLinks.contains(event.target)) {
+                setNavOpen(false);
+            }
+        });
+    }
 
     let activeFilter = 'all';
     let searchQuery = '';
