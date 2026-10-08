@@ -25,14 +25,6 @@
         "documentation": {}
     },
     {
-        "label": "Path",
-        "importPath": "pathlib",
-        "description": "pathlib",
-        "isExtraImport": true,
-        "detail": "pathlib",
-        "documentation": {}
-    },
-    {
         "label": "admin",
         "importPath": "django.contrib",
         "description": "django.contrib",
@@ -65,14 +57,6 @@
         "documentation": {}
     },
     {
-        "label": "dashboard_view",
-        "importPath": "principal.views",
-        "description": "principal.views",
-        "isExtraImport": true,
-        "detail": "principal.views",
-        "documentation": {}
-    },
-    {
         "label": "inicio",
         "importPath": "principal.views",
         "description": "principal.views",
@@ -81,7 +65,55 @@
         "documentation": {}
     },
     {
+        "label": "tienda_view",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "catalogo_frutas_view",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "dashboard_view",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
         "label": "logout_view",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "admin_preview",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "admin_productos_preview",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "admin_producto_list_preview",
         "importPath": "principal.views",
         "description": "principal.views",
         "isExtraImport": true,
@@ -113,11 +145,20 @@
         "documentation": {}
     },
     {
-        "label": "AppConfig",
-        "importPath": "django.apps",
-        "description": "django.apps",
+        "label": "django.db.models.deletion",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "django.apps",
+        "importPath": "django.db.models.deletion",
+        "description": "django.db.models.deletion",
+        "detail": "django.db.models.deletion",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
         "documentation": {}
     },
     {
@@ -126,6 +167,54 @@
         "description": "django.db",
         "isExtraImport": true,
         "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "AppConfig",
+        "importPath": "django.apps",
+        "description": "django.apps",
+        "isExtraImport": true,
+        "detail": "django.apps",
         "documentation": {}
     },
     {
@@ -183,7 +272,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "BASE_DIR = Path(__file__).resolve().parent.parent\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [",
+        "peekOfCode": "BASE_DIR = Path(__file__).resolve().parent.parent\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', '*']\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -192,7 +281,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "SECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',",
+        "peekOfCode": "SECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', '*']\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -201,7 +290,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "DEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',",
+        "peekOfCode": "DEBUG = True\nALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', '*']\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -210,7 +299,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "ALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    'principal',",
+        "peekOfCode": "ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', '*']\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    'principal',",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -255,7 +344,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "WSGI_APPLICATION = 'config.wsgi.application'\n# Database\n# https://docs.djangoproject.com/en/6.1/ref/settings/#databases\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': BASE_DIR / 'db.sqlite3',\n    }\n}\n# Password validation",
+        "peekOfCode": "WSGI_APPLICATION = 'config.wsgi.application'\n# Database\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': BASE_DIR / 'db.sqlite3',\n    }\n}\n# Password validation\nAUTH_PASSWORD_VALIDATORS = [",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -264,7 +353,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "DATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': BASE_DIR / 'db.sqlite3',\n    }\n}\n# Password validation\n# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators\nAUTH_PASSWORD_VALIDATORS = [\n    {",
+        "peekOfCode": "DATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': BASE_DIR / 'db.sqlite3',\n    }\n}\n# Password validation\nAUTH_PASSWORD_VALIDATORS = [\n    {\n        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -282,7 +371,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "LANGUAGE_CODE = 'en-us'\nTIME_ZONE = 'UTC'\nUSE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
+        "peekOfCode": "LANGUAGE_CODE = 'es-co'\nTIME_ZONE = 'America/Bogota'\nUSE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\nSTATIC_URL = 'static/'\n# Redirecciones de autenticación\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -291,7 +380,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "TIME_ZONE = 'UTC'\nUSE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'\n\"\"\"",
+        "peekOfCode": "TIME_ZONE = 'America/Bogota'\nUSE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\nSTATIC_URL = 'static/'\n# Redirecciones de autenticación\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -300,7 +389,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "USE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'\n\"\"\"\nDjango settings for config project.",
+        "peekOfCode": "USE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\nSTATIC_URL = 'static/'\n# Redirecciones de autenticación\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -309,7 +398,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "USE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'\n\"\"\"\nDjango settings for config project.\nGenerated by 'django-admin startproject' using Django 6.1.1.",
+        "peekOfCode": "USE_TZ = True\n# Static files (CSS, JavaScript, Images)\nSTATIC_URL = 'static/'\n# Redirecciones de autenticación\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -318,187 +407,7 @@
         "kind": 5,
         "importPath": "config.settings",
         "description": "config.settings",
-        "peekOfCode": "STATIC_URL = 'static/'\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'\n\"\"\"\nDjango settings for config project.\nGenerated by 'django-admin startproject' using Django 6.1.1.\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/6.1/topics/settings/\nFor the full list of settings and their values, see",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "LOGIN_URL",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "LOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'\n\"\"\"\nDjango settings for config project.\nGenerated by 'django-admin startproject' using Django 6.1.1.\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/6.1/topics/settings/\nFor the full list of settings and their values, see\nhttps://docs.djangoproject.com/en/6.1/ref/settings/",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "LOGIN_REDIRECT_URL",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "LOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'\n\"\"\"\nDjango settings for config project.\nGenerated by 'django-admin startproject' using Django 6.1.1.\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/6.1/topics/settings/\nFor the full list of settings and their values, see\nhttps://docs.djangoproject.com/en/6.1/ref/settings/\n\"\"\"",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "LOGOUT_REDIRECT_URL",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "LOGOUT_REDIRECT_URL = '/'\n\"\"\"\nDjango settings for config project.\nGenerated by 'django-admin startproject' using Django 6.1.1.\nFor more information on this file, see\nhttps://docs.djangoproject.com/en/6.1/topics/settings/\nFor the full list of settings and their values, see\nhttps://docs.djangoproject.com/en/6.1/ref/settings/\n\"\"\"\nfrom pathlib import Path",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "BASE_DIR",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "BASE_DIR = Path(__file__).resolve().parent.parent\n# Quick-start development settings - unsuitable for production\n# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/\n# SECURITY WARNING: keep the secret key used in production secret!\nSECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "SECRET_KEY",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "SECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'\n# SECURITY WARNING: don't run with debug turned on in production!\nDEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "DEBUG",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "DEBUG = True\nALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "ALLOWED_HOSTS",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "ALLOWED_HOSTS = []\n# Application definition\nINSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    'principal',",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "INSTALLED_APPS",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "INSTALLED_APPS = [\n    'django.contrib.admin',\n    'django.contrib.auth',\n    'django.contrib.contenttypes',\n    'django.contrib.sessions',\n    'django.contrib.messages',\n    'django.contrib.staticfiles',\n    'principal',\n]\nMIDDLEWARE = [",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "MIDDLEWARE",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "MIDDLEWARE = [\n    'django.middleware.security.SecurityMiddleware',\n    'django.contrib.sessions.middleware.SessionMiddleware',\n    'django.middleware.common.CommonMiddleware',\n    'django.middleware.csrf.CsrfViewMiddleware',\n    'django.contrib.auth.middleware.AuthenticationMiddleware',\n    'django.contrib.messages.middleware.MessageMiddleware',\n    'django.middleware.clickjacking.XFrameOptionsMiddleware',\n]\nROOT_URLCONF = 'config.urls'",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "ROOT_URLCONF",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "ROOT_URLCONF = 'config.urls'\nTEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': [BASE_DIR / 'templates'],\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.request',\n                'django.contrib.auth.context_processors.auth',",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "TEMPLATES",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "TEMPLATES = [\n    {\n        'BACKEND': 'django.template.backends.django.DjangoTemplates',\n        'DIRS': [BASE_DIR / 'templates'],\n        'APP_DIRS': True,\n        'OPTIONS': {\n            'context_processors': [\n                'django.template.context_processors.request',\n                'django.contrib.auth.context_processors.auth',\n                'django.contrib.messages.context_processors.messages',",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "WSGI_APPLICATION",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "WSGI_APPLICATION = 'config.wsgi.application'\n# Database\n# https://docs.djangoproject.com/en/6.1/ref/settings/#databases\nDATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': BASE_DIR / 'db.sqlite3',\n    }\n}\n# Password validation",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "DATABASES",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "DATABASES = {\n    'default': {\n        'ENGINE': 'django.db.backends.sqlite3',\n        'NAME': BASE_DIR / 'db.sqlite3',\n    }\n}\n# Password validation\n# https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators\nAUTH_PASSWORD_VALIDATORS = [\n    {",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "AUTH_PASSWORD_VALIDATORS",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "AUTH_PASSWORD_VALIDATORS = [\n    {\n        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',\n    },\n    {\n        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',\n    },\n    {\n        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',\n    },",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "LANGUAGE_CODE",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "LANGUAGE_CODE = 'es-co'\nTIME_ZONE = 'UTC'\nUSE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\n# Email\n# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration\nMAILERS = {",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "TIME_ZONE",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "TIME_ZONE = 'UTC'\nUSE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\n# Email\n# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration\nMAILERS = {\n    'default': {",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "USE_I18N",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "USE_I18N = True\nUSE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\n# Email\n# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration\nMAILERS = {\n    'default': {\n        'BACKEND': 'django.core.mail.backends.console.EmailBackend',",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "USE_TZ",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "USE_TZ = True\n# Static files (CSS, JavaScript, Images)\n# https://docs.djangoproject.com/en/6.1/howto/static-files/\nSTATIC_URL = 'static/'\n# Email\n# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration\nMAILERS = {\n    'default': {\n        'BACKEND': 'django.core.mail.backends.console.EmailBackend',\n    },",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "STATIC_URL",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "STATIC_URL = 'static/'\n# Email\n# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration\nMAILERS = {\n    'default': {\n        'BACKEND': 'django.core.mail.backends.console.EmailBackend',\n    },\n}\n# Redirección tras iniciar sesión y cerrar sesión (¡FUERA de MAILERS!)\nLOGIN_URL = '/accounts/login/'",
-        "detail": "config.settings",
-        "documentation": {}
-    },
-    {
-        "label": "MAILERS",
-        "kind": 5,
-        "importPath": "config.settings",
-        "description": "config.settings",
-        "peekOfCode": "MAILERS = {\n    'default': {\n        'BACKEND': 'django.core.mail.backends.console.EmailBackend',\n    },\n}\n# Redirección tras iniciar sesión y cerrar sesión (¡FUERA de MAILERS!)\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
+        "peekOfCode": "STATIC_URL = 'static/'\n# Redirecciones de autenticación\nLOGIN_URL = '/accounts/login/'\nLOGIN_REDIRECT_URL = '/dashboard/'\nLOGOUT_REDIRECT_URL = '/'",
         "detail": "config.settings",
         "documentation": {}
     },
@@ -534,7 +443,7 @@
         "kind": 5,
         "importPath": "config.urls",
         "description": "config.urls",
-        "peekOfCode": "urlpatterns = [\n    path('admin/', admin.site.urls),\n    path('', inicio, name='inicio'),\n    path('dashboard/', dashboard_view, name='dashboard'),\n    path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),\n    path('accounts/logout/', logout_view, name='logout'),\n]",
+        "peekOfCode": "urlpatterns = [\n    # -------------------------------------------------------------------------\n    # 1. PANEL DE ADMINISTRACIÓN DE DJANGO (ORM & CRUD Nativo)\n    # -------------------------------------------------------------------------\n    # Acceso oficial para administradores del sistema (requiere superusuario)\n    path('admin/', admin.site.urls),\n    # Rutas auxiliares de previsualización para auditoría y capturas del informe técnico\n    path('admin-preview/', admin_preview, name='admin_preview'),\n    path('admin-preview/principal/', admin_productos_preview, name='admin_productos_preview'),\n    path('admin-preview/principal/producto/', admin_producto_list_preview, name='admin_producto_list_preview'),",
         "detail": "config.urls",
         "documentation": {}
     },
@@ -548,6 +457,69 @@
         "documentation": {}
     },
     {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "principal.migrations.0001_initial",
+        "description": "principal.migrations.0001_initial",
+        "peekOfCode": "class Migration(migrations.Migration):\n    initial = True\n    dependencies = [\n    ]\n    operations = [\n        migrations.CreateModel(\n            name='Categoria',\n            fields=[\n                ('id_categoria', models.BigAutoField(primary_key=True, serialize=False)),\n                ('nombre', models.CharField(max_length=60, verbose_name='Nombre de Categoría')),",
+        "detail": "principal.migrations.0001_initial",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "principal.migrations.0002_producto_icono_emoji_producto_origen",
+        "description": "principal.migrations.0002_producto_icono_emoji_producto_origen",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        ('principal', '0001_initial'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='producto',\n            name='icono_emoji',\n            field=models.CharField(default='🍎', max_length=10, verbose_name='Icono / Emoji'),\n        ),",
+        "detail": "principal.migrations.0002_producto_icono_emoji_producto_origen",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "principal.migrations.0003_producto_imagen_url",
+        "description": "principal.migrations.0003_producto_imagen_url",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        ('principal', '0002_producto_icono_emoji_producto_origen'),\n    ]\n    operations = [\n        migrations.AddField(\n            model_name='producto',\n            name='imagen_url',\n            field=models.URLField(blank=True, max_length=500, null=True, verbose_name='URL de Imagen'),\n        ),",
+        "detail": "principal.migrations.0003_producto_imagen_url",
+        "documentation": {}
+    },
+    {
+        "label": "CategoriaAdmin",
+        "kind": 6,
+        "importPath": "principal.admin",
+        "description": "principal.admin",
+        "peekOfCode": "class CategoriaAdmin(admin.ModelAdmin):\n    list_display = ('id_categoria', 'nombre', 'descripcion')\n    search_fields = ('nombre',)\n@admin.register(Proveedor)\nclass ProveedorAdmin(admin.ModelAdmin):\n    list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')\n    search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')\n    list_filter = ('estado',)\n@admin.register(Producto)\nclass ProductoAdmin(admin.ModelAdmin):",
+        "detail": "principal.admin",
+        "documentation": {}
+    },
+    {
+        "label": "ProveedorAdmin",
+        "kind": 6,
+        "importPath": "principal.admin",
+        "description": "principal.admin",
+        "peekOfCode": "class ProveedorAdmin(admin.ModelAdmin):\n    list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')\n    search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')\n    list_filter = ('estado',)\n@admin.register(Producto)\nclass ProductoAdmin(admin.ModelAdmin):\n    list_display = ('id_producto', 'icono_emoji', 'nombre', 'categoria', 'precio_venta_unitario', 'stock_actual', 'unidad_medida', 'brix_minimo', 'estado')\n    search_fields = ('nombre', 'categoria__nombre', 'origen')\n    list_filter = ('categoria', 'estado', 'unidad_medida')\n    list_editable = ('precio_venta_unitario', 'stock_actual', 'estado')",
+        "detail": "principal.admin",
+        "documentation": {}
+    },
+    {
+        "label": "ProductoAdmin",
+        "kind": 6,
+        "importPath": "principal.admin",
+        "description": "principal.admin",
+        "peekOfCode": "class ProductoAdmin(admin.ModelAdmin):\n    list_display = ('id_producto', 'icono_emoji', 'nombre', 'categoria', 'precio_venta_unitario', 'stock_actual', 'unidad_medida', 'brix_minimo', 'estado')\n    search_fields = ('nombre', 'categoria__nombre', 'origen')\n    list_filter = ('categoria', 'estado', 'unidad_medida')\n    list_editable = ('precio_venta_unitario', 'stock_actual', 'estado')\n@admin.register(Cliente)\nclass ClienteAdmin(admin.ModelAdmin):\n    list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')\n    list_filter = ('tipo_cliente',)",
+        "detail": "principal.admin",
+        "documentation": {}
+    },
+    {
+        "label": "ClienteAdmin",
+        "kind": 6,
+        "importPath": "principal.admin",
+        "description": "principal.admin",
+        "peekOfCode": "class ClienteAdmin(admin.ModelAdmin):\n    list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')\n    list_filter = ('tipo_cliente',)",
+        "detail": "principal.admin",
+        "documentation": {}
+    },
+    {
         "label": "PrincipalConfig",
         "kind": 6,
         "importPath": "principal.apps",
@@ -557,11 +529,65 @@
         "documentation": {}
     },
     {
+        "label": "Categoria",
+        "kind": 6,
+        "importPath": "principal.models",
+        "description": "principal.models",
+        "peekOfCode": "class Categoria(models.Model):\n    \"\"\"\n    Representa las categorías taxonómicas del inventario.\n    Permite agrupar productos para filtrado rápido y reportes comerciales.\n    \"\"\"\n    id_categoria = models.BigAutoField(primary_key=True)\n    nombre = models.CharField(max_length=60, verbose_name=\"Nombre de Categoría\")\n    descripcion = models.TextField(blank=True, null=True, verbose_name=\"Descripción\")\n    class Meta:\n        verbose_name = \"Categoría\"",
+        "detail": "principal.models",
+        "documentation": {}
+    },
+    {
+        "label": "Proveedor",
+        "kind": 6,
+        "importPath": "principal.models",
+        "description": "principal.models",
+        "peekOfCode": "class Proveedor(models.Model):\n    \"\"\"\n    Registra los datos fiscales y de contacto de los productores del campo.\n    Incluye trazabilidad de calidad mediante calificación en estrellas.\n    \"\"\"\n    id_proveedor = models.BigAutoField(primary_key=True)\n    razon_social = models.CharField(max_length=150, verbose_name=\"Razón Social\")\n    nit_rut = models.CharField(max_length=30, unique=True, verbose_name=\"NIT / RUT\")\n    contacto_nombre = models.CharField(max_length=100, blank=True, null=True, verbose_name=\"Nombre de Contacto\")\n    telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name=\"Teléfono\")",
+        "detail": "principal.models",
+        "documentation": {}
+    },
+    {
+        "label": "Producto",
+        "kind": 6,
+        "importPath": "principal.models",
+        "description": "principal.models",
+        "peekOfCode": "class Producto(models.Model):\n    \"\"\"\n    Entidad nuclear del sistema de frutería.\n    Almacena especificaciones técnicas del producto agrícola:\n    - Grados Brix (°Brix): Indicador de dulzor natural y madurez.\n    - Origen: Identificación de la finca y frescura de la cosecha.\n    - Stocks: Control de existencias y alertas de reposición.\n    \"\"\"\n    ESTADO_CHOICES = [\n        (\"Disponible\", \"Disponible\"),",
+        "detail": "principal.models",
+        "documentation": {}
+    },
+    {
+        "label": "Cliente",
+        "kind": 6,
+        "importPath": "principal.models",
+        "description": "principal.models",
+        "peekOfCode": "class Cliente(models.Model):\n    \"\"\"\n    Modela los perfiles de compradores de la frutería.\n    Permite asignar cupos de crédito comercial y acumulación de puntos de fidelización.\n    \"\"\"\n    TIPO_CHOICES = [\n        (\"DETAL\", \"Al Detal\"),\n        (\"MAYORISTA\", \"Mayorista\"),\n    ]\n    id_cliente = models.BigAutoField(primary_key=True)",
+        "detail": "principal.models",
+        "documentation": {}
+    },
+    {
         "label": "inicio",
         "kind": 2,
         "importPath": "principal.views",
         "description": "principal.views",
-        "peekOfCode": "def inicio(request):\n    return render(request, 'principal/inicio.html')\n@login_required\ndef dashboard_view(request):\n    # Tu lógica del dashboard\n    return render(request, 'principal/dashboard.html')\ndef logout_view(request):\n    logout(request)\n    return redirect('inicio')",
+        "peekOfCode": "def inicio(request):\n    \"\"\"\n    VISTA PRINCIPAL / LANDING PAGE ('/' y '/inicio/')\n    -------------------------------------------------\n    1. Consulta la base de datos para obtener todos los productos ordenados por su ID.\n    2. Utiliza 'select_related('categoria')' para optimizar la consulta SQL (JOIN)\n       y evitar problemas de rendimiento (N+1 queries).\n    3. Obtiene todas las categorías disponibles para alimentar las tarjetas y carrusel.\n    4. Envía los datos al contexto para que 'index.html' dibuje dinámicamente las tarjetas.\n    \"\"\"",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "tienda_view",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def tienda_view(request):\n    \"\"\"\n    VISTA DE TIENDA ALTERNATIVA ('/tienda/')\n    ----------------------------------------\n    Provee una vista complementaria con diseño de vitrina comercial para los productos.\n    \"\"\"\n    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')\n    categorias = Categoria.objects.all()\n    context = {\n        'titulo': 'El Paso Frutería — Tienda Oficial',",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "catalogo_frutas_view",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def catalogo_frutas_view(request):\n    \"\"\"\n    CATÁLOGO INTERACTIVO DE FRUTAS ('/catalogo-frutas/')\n    ----------------------------------------------------\n    Renderiza la vitrina especializada de frutas donde el usuario puede\n    interactuar con filtros reactivos en vivo, ver grados Brix (°Brix), origen y precios.\n    \"\"\"\n    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')\n    categorias = Categoria.objects.all()\n    context = {",
         "detail": "principal.views",
         "documentation": {}
     },
@@ -570,7 +596,7 @@
         "kind": 2,
         "importPath": "principal.views",
         "description": "principal.views",
-        "peekOfCode": "def dashboard_view(request):\n    # Tu lógica del dashboard\n    return render(request, 'principal/dashboard.html')\ndef logout_view(request):\n    logout(request)\n    return redirect('inicio')",
+        "peekOfCode": "def dashboard_view(request):\n    \"\"\"\n    PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')\n    --------------------------------------------\n    - Protegido por el decorador '@login_required': sólo usuarios autenticados pueden entrar.\n    - Calcula estadísticas en tiempo real:\n      * Conteo total de productos en inventario.\n      * Conteo de usuarios registrados en el sistema.\n      * Listado de productos para la tabla de gestión de stock.\n    \"\"\"",
         "detail": "principal.views",
         "documentation": {}
     },
@@ -579,7 +605,34 @@
         "kind": 2,
         "importPath": "principal.views",
         "description": "principal.views",
-        "peekOfCode": "def logout_view(request):\n    logout(request)\n    return redirect('inicio')",
+        "peekOfCode": "def logout_view(request):\n    \"\"\"\n    CIERRE DE SESIÓN SEGURO ('/accounts/logout/')\n    ---------------------------------------------\n    Destruye la sesión activa del usuario y lo redirige limpiamente a la portada.\n    \"\"\"\n    logout(request)\n    return redirect('index')\ndef admin_preview(request):\n    \"\"\"",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "admin_preview",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def admin_preview(request):\n    \"\"\"\n    PREVISUALIZACIÓN DE AUDITORÍA: PANEL GENERAL\n    Permite generar reportes técnicos y capturas del estado del admin.\n    \"\"\"\n    from django.contrib import admin\n    from django.contrib.auth.models import User\n    user = User.objects.filter(username='admin').first()\n    if user:\n        request.user = user",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "admin_productos_preview",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def admin_productos_preview(request):\n    \"\"\"\n    PREVISUALIZACIÓN DE AUDITORÍA: APP PRINCIPAL\n    Carga el índice de modelos de la app 'principal' en el panel de Django.\n    \"\"\"\n    from django.contrib import admin\n    from django.contrib.auth.models import User\n    user = User.objects.filter(username='admin').first()\n    if user:\n        request.user = user",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "admin_producto_list_preview",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def admin_producto_list_preview(request):\n    \"\"\"\n    PREVISUALIZACIÓN DE AUDITORÍA: LISTADO DE PRODUCTOS\n    Genera la vista de tabla tabular de productos en el admin de Django.\n    \"\"\"\n    from django.contrib import admin\n    from django.contrib.auth.models import User\n    user = User.objects.filter(username='admin').first()\n    if user:\n        request.user = user",
         "detail": "principal.views",
         "documentation": {}
     },

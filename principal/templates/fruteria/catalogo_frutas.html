@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Frutas Frescas — El Paso Frutería</title>
+    <title>Catálogo de Frutas Frescas — Al Paso Frutería</title>
     <meta name="description" content="Catálogo completo de frutas frescas cultivadas directamente en el campo. Variedades cítricas, tropicales, berries, importadas y exóticas.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,15 +22,12 @@
 
     <!-- NAVEGACIÓN -->
     <header class="navbar">
-        <a href="{% url 'inicio' %}" class="nav-brand">
-            <div class="brand-icon">EP</div>
-            <div>
-                <div class="brand-name">El Paso</div>
-                <div class="brand-tagline">Frutería</div>
-            </div>
+        <!-- Logotipo transparente de la frutería -->
+        <a class="nav-brand" href="{% url 'index' %}" aria-label="El Paso Frutería, inicio">
+            <img class="navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="El Paso Frutería">
         </a>
 
-        <nav class="nav-links">
+        <nav class="nav-links" id="catalogNavLinks">
             <a href="{% url 'inicio' %}" class="nav-link">Inicio</a>
             <a href="{% url 'catalogo_frutas' %}" class="nav-link active">Catálogo de Frutas</a>
             <a href="{% url 'inicio' %}#lo-que-tenemos" class="nav-link">Categorías</a>
@@ -55,6 +52,12 @@
                 Pide por WhatsApp
             </a>
         </div>
+
+        <button class="hamburger-btn" id="catalogNavToggle" type="button" aria-label="Abrir menú" aria-controls="catalogNavLinks" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </header>
 
     <!-- CABECERA DEL CATÁLOGO -->
@@ -179,13 +182,13 @@
     <!-- FOOTER -->
     <footer class="footer">
         <div class="nav-brand">
-            <div class="brand-icon">EP</div>
+            <div class="brand-icon">AL </div>
             <div>
-                <div class="brand-name">El Paso</div>
+                <div class="brand-name">Al Paso</div>
                 <div class="brand-tagline">Frutería</div>
             </div>
         </div>
-        <p class="footer-copy">© 2026 El Paso Frutería — Calidad, frescura y sabor directo de los mejores campos.</p>
+        <p class="footer-copy">© 2026 Al Paso Frutería — Calidad, frescura y sabor directo de los mejores campos.</p>
     </footer>
 
     <!-- SCRIPTS -->
