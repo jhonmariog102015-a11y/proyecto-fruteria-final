@@ -86,12 +86,14 @@ def dashboard_view(request):
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
     total_productos = productos.count()
+    total_ofertas = productos.filter(en_oferta=True).count()
     total_usuarios = User.objects.count()
 
     return render(request, 'principal/dashboard.html', {
         'productos': productos,
         'categorias': categorias,
         'total_productos': total_productos,
+        'total_ofertas': total_ofertas,
         'total_usuarios': total_usuarios,
     })
 

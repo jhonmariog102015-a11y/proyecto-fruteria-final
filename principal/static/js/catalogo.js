@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardTitle = (card.querySelector('h3')?.textContent || '').toLowerCase();
             const cardOrigin = (card.querySelector('.fruit-origin')?.textContent || '').toLowerCase();
 
-            const matchesCategory = (activeFilter === 'all' || cardCat === activeFilter);
+            const matchesCategory = (activeFilter === 'all' || cardCat.split(/\s+/).includes(activeFilter) || cardCat === activeFilter);
             const matchesSearch = searchQuery === '' || 
                                   cardTitle.includes(searchQuery) || 
                                   cardOrigin.includes(searchQuery);

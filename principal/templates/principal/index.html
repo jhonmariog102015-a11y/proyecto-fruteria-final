@@ -200,6 +200,7 @@
         <!-- Pestañas de filtrado (Tabs): carrusel.js detecta 'data-filter' para mostrar/ocultar tarjetas -->
         <div class="carousel-tabs-bar" role="tablist">
             <button class="carousel-tab active" data-filter="all" role="tab">✨ Todas las Frutas</button>
+            <button class="carousel-tab" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">🔥 En Oferta</button>
             <button class="carousel-tab" data-filter="citricos" role="tab">🍊 Cítricos</button>
             <button class="carousel-tab" data-filter="tropicales" role="tab">🥑 Tropicales</button>
             <button class="carousel-tab" data-filter="berries" role="tab">🍓 Berries</button>
@@ -218,13 +219,16 @@
 
                 <!-- Ciclo Django Template: Itera sobre la lista 'productos' enviada desde views.py -->
                 {% for producto in productos %}
-                <!-- Tarjeta con etiqueta data-categoria computada dinámicamente para el filtrado en JS -->
-                <div class="carousel-card" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}">
+                <!-- Tarjeta con etiqueta data-categoria computada dinámicamente para el filtrado en JS (incluye 'ofertas' si aplica) -->
+                <div class="carousel-card" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
                     <div>
-                        <!-- Envoltura de imagen con badge de 'Fresco' y emoji característico -->
+                        <!-- Envoltura de imagen con badge de 'Fresco' y etiqueta de 'Oferta' si aplica -->
                         <div class="card-img-wrap">
                             <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
                             <span class="badge-tag-fresh"><span class="dot"></span>Fresco</span>
+                            {% if producto.en_oferta and producto.precio_oferta %}
+                                <span class="badge-tag-oferta">🔥 -{{ producto.porcentaje_descuento }}%</span>
+                            {% endif %}
                             <span class="card-badge-emoji">{{ producto.icono_emoji }}</span>
                         </div>
                         <!-- Metadatos del producto: Nombre de categoría, nombre de fruta y procedencia -->
@@ -232,10 +236,17 @@
                         <h3>{{ producto.nombre }}</h3>
                         <p class="carousel-card-origin">{{ producto.origen }}</p>
                     </div>
-                    <!-- Pie de tarjeta: Precio formateado sin decimales y botón rápido para añadir -->
+                    <!-- Pie de tarjeta: Precio de oferta resaltado o regular, y botón rápido para añadir -->
                     <div class="carousel-card-footer">
                         <div class="carousel-price-box">
-                            <span class="carousel-price">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                            {% if producto.en_oferta and producto.precio_oferta %}
+                                <div style="display:flex; align-items:baseline; gap:6px;">
+                                    <span class="carousel-price" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
+                                    <del class="old-price">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
+                                </div>
+                            {% else %}
+                                <span class="carousel-price">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                            {% endif %}
                             <span class="carousel-unit">desde / {{ producto.unidad_medida }}</span>
                         </div>
                         <!-- Botón interactivo que dispara el mensaje Toast 'Producto agregado' -->

@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Oculta o muestra tarjetas aplicando animación CSS 'fadeInUp'
             cards.forEach(card => {
-                const cardCat = card.dataset.categoria;
-                const match = activeFilter === 'all' || cardCat === activeFilter;
+                const cardCat = (card.dataset.categoria || '').trim();
+                const match = activeFilter === 'all' || cardCat.split(/\s+/).includes(activeFilter) || cardCat === activeFilter;
                 
                 if (match) {
                     card.classList.remove('hidden-carousel-card');

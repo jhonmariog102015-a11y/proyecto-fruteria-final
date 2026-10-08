@@ -102,8 +102,18 @@ class Producto(models.Model):
     stock_minimo = models.DecimalField(
         max_digits=10, decimal_places=3, default=0.000, verbose_name="Stock Mínimo"
     )
+    # Estructura Financiera, Costos y Ofertas (Control de Margen de Ganancia)
+    costo_compra = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0.00, verbose_name="Costo de Compra"
+    )
     precio_venta_unitario = models.DecimalField(
         max_digits=12, decimal_places=2, verbose_name="Precio de Venta Unitario"
+    )
+    en_oferta = models.BooleanField(
+        default=False, verbose_name="¿En Oferta / Promoción?"
+    )
+    precio_oferta = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True, verbose_name="Precio de Oferta"
     )
     estado = models.CharField(
         max_length=20, choices=ESTADO_CHOICES, default="Disponible", verbose_name="Estado"
@@ -115,14 +125,44 @@ class Producto(models.Model):
         db_table = "productos"
 
     # --------------------------------------------------------------------------
-    # PROPIEDADES DE COMPATIBILIDAD (Dual API)
-    # Permiten que las vistas de Guti que usaban '.precio' o '.stock' sigan
-    # funcionando sin necesidad de modificar el esquema relacional G-03.
+    # PROPIEDADES FINANCIERAS Y DE COMPATIBILIDAD
+    # Permiten calcular rentabilidad en tiempo real y mantener compatibilidad
+    # con templates que usan .precio, .stock o necesitan ver promociones.
     # --------------------------------------------------------------------------
     @property
-    def precio(self):
-        """Retorna el precio unitario para compatibilidad con templates heredados"""
+    def precio_efectivo(self):
+        """Retorna el precio de oferta si está activo y es válido, o el precio regular"""
+        if self.en_oferta and self.precio_oferta and self.precio_oferta > 0:
+            return self.precio_oferta
         return self.precio_venta_unitario
+
+    @property
+    def margen_ganancia(self):
+        """Calcula el margen de ganancia en pesos: (Precio Efectivo - Costo de Compra)"""
+        precio_actual = self.precio_efectivo
+        return precio_actual - self.costo_compra
+
+    @property
+    def porcentaje_margen(self):
+        """Calcula el porcentaje de rentabilidad bruta sobre el costo de adquisición"""
+        if self.costo_compra and self.costo_compra > 0:
+            margen = self.margen_ganancia
+            return round((margen / self.costo_compra) * 100, 1)
+        return 0.0
+
+    @property
+    def porcentaje_descuento(self):
+        """Calcula el porcentaje de descuento promocional si está en oferta"""
+        if self.en_oferta and self.precio_oferta and self.precio_venta_unitario > 0:
+            if self.precio_oferta < self.precio_venta_unitario:
+                ahorro = self.precio_venta_unitario - self.precio_oferta
+                return round((ahorro / self.precio_venta_unitario) * 100)
+        return 0
+
+    @property
+    def precio(self):
+        """Retorna el precio efectivo para compatibilidad con plantillas del frontend"""
+        return self.precio_efectivo
 
     @property
     def stock(self):
@@ -130,7 +170,9 @@ class Producto(models.Model):
         return int(self.stock_actual)
 
     def __str__(self):
-        return f"{self.icono_emoji} {self.nombre} - ${self.precio_venta_unitario:,.0f} / {self.unidad_medida}"
+        oferta_tag = f" [OFERTA: ${self.precio_oferta:,.0f}]" if self.en_oferta and self.precio_oferta else ""
+        return f"{self.icono_emoji} {self.nombre} - Venta: ${self.precio_venta_unitario:,.0f}{oferta_tag} (Costo: ${self.costo_compra:,.0f})"
+
 
 
 # ==============================================================================

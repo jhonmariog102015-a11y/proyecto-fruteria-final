@@ -94,6 +94,10 @@
               <h3>{{ total_productos }}</h3>
             </div>
             <div class="dash-card">
+              <h5>🔥 Ofertas Activas</h5>
+              <h3 style="color: #e11d48;">{{ total_ofertas }}</h3>
+            </div>
+            <div class="dash-card">
               <h5>Usuarios del Sistema</h5>
               <h3>{{ total_usuarios }}</h3>
             </div>
@@ -104,17 +108,25 @@
           </div>
 
           <!-- ================================================================ -->
-          <!-- 4. TABLA DE INVENTARIO DE PRODUCTOS EN TIEMPO REAL                -->
+          <!-- 4. TABLA DE INVENTARIO Y MÁRGENES DE GANANCIA EN TIEMPO REAL      -->
           <!-- Itera sobre el queryset de productos enviados por dashboard_view  -->
           <!-- ================================================================ -->
           <div class="products-table-container">
-            <h2 id="products-heading">Inventario de Productos Frutícolas</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h2 id="products-heading" style="margin: 0;">Inventario y Control de Rentabilidad</h2>
+              <a href="/admin/principal/producto/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #2e7d32; color: #fff; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
+                ⚙ Gestionar en Django Admin
+              </a>
+            </div>
             <table>
               <thead>
                 <tr>
                   <th scope="col">Nombre</th>
                   <th scope="col">Categoría</th>
-                  <th scope="col">Precio Unitario</th>
+                  <th scope="col">Costo Compra</th>
+                  <th scope="col">Precio Venta</th>
+                  <th scope="col">Margen Ganancia</th>
+                  <th scope="col">Oferta</th>
                   <th scope="col">Stock Disponible</th>
                   <th scope="col">Estado</th>
                 </tr>
@@ -124,13 +136,33 @@
                 <tr>
                   <td><strong>{{ producto.nombre }}</strong></td>
                   <td>{{ producto.categoria.nombre|default:"General" }}</td>
-                  <td>${{ producto.precio|floatformat:0 }}</td>
+                  <td>${{ producto.costo_compra|floatformat:0 }}</td>
+                  <td>
+                    {% if producto.en_oferta and producto.precio_oferta %}
+                      <strong style="color: #e11d48;">${{ producto.precio_oferta|floatformat:0 }}</strong>
+                      <span style="font-size: 0.75rem; text-decoration: line-through; color: #94a3b8; margin-left: 4px;">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                    {% else %}
+                      ${{ producto.precio_venta_unitario|floatformat:0 }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge-margen">
+                      +${{ producto.margen_ganancia|floatformat:0 }} ({{ producto.porcentaje_margen|floatformat:1 }}%)
+                    </span>
+                  </td>
+                  <td>
+                    {% if producto.en_oferta %}
+                      <span class="badge-oferta">🔥 -{{ producto.porcentaje_descuento|floatformat:0 }}%</span>
+                    {% else %}
+                      <span style="color: #94a3b8; font-size: 0.8rem;">Normal</span>
+                    {% endif %}
+                  </td>
                   <td>{{ producto.stock }} {{ producto.unidad_medida|default:"kg" }}</td>
                   <td><span class="badge-status">{{ producto.estado|default:"Disponible" }}</span></td>
                 </tr>
                 {% empty %}
                 <tr>
-                  <td class="empty-products" colspan="5">No hay productos registrados todavía.</td>
+                  <td class="empty-products" colspan="8">No hay productos registrados todavía.</td>
                 </tr>
                 {% endfor %}
               </tbody>

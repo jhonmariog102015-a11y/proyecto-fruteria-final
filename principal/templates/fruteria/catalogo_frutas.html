@@ -85,6 +85,7 @@
         <div class="filters-bar" role="tablist">
             <span class="filter-label">Filtrar:</span>
             <button class="filter-chip active" data-filter="all" role="tab">Todas</button>
+            <button class="filter-chip" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">🔥 Ofertas</button>
             <button class="filter-chip" data-filter="citricos" role="tab">Cítricos</button>
             <button class="filter-chip" data-filter="tropicales" role="tab">Tropicales</button>
             <button class="filter-chip" data-filter="berries" role="tab">Berries</button>
@@ -102,7 +103,7 @@
         <div class="fruits-grid" id="fruitsGrid">
 
             {% for producto in productos %}
-            <article class="fruit-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}">
+            <article class="fruit-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
                 <div>
                     <div class="card-top">
                         <div class="fruit-visual">
@@ -110,6 +111,9 @@
                             <span class="fruit-card-emoji">{{ producto.icono_emoji }}</span>
                         </div>
                         <span class="badge-fresco"><span class="dot"></span>fresco</span>
+                        {% if producto.en_oferta and producto.precio_oferta %}
+                        <span class="badge-fresco" style="background:#d32f2f; color:#fff; font-weight:700; margin-left:6px;">🔥 -{{ producto.porcentaje_descuento }}%</span>
+                        {% endif %}
                     </div>
                     <span class="fruit-category">{{ producto.categoria.nombre }}</span>
                     <h3>{{ producto.nombre }}</h3>
@@ -117,7 +121,14 @@
                 </div>
                 <div class="fruit-price-row">
                     <div class="price-container">
-                        <span class="price-val">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                        {% if producto.en_oferta and producto.precio_oferta %}
+                            <div style="display:flex; align-items:baseline; gap:5px;">
+                                <span class="price-val" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
+                                <del style="font-size:0.8rem; color:#888;">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
+                            </div>
+                        {% else %}
+                            <span class="price-val">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                        {% endif %}
                         <span class="price-unit">desde / {{ producto.unidad_medida }}</span>
                     </div>
                     <button class="add-btn" aria-label="Añadir {{ producto.nombre }}">＋</button>

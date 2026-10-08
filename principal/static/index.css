@@ -1217,6 +1217,30 @@ body {
     background: var(--green-accent);
 }
 
+.badge-tag-oferta {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #d32f2f;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(211, 47, 47, 0.4);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+
 .card-badge-emoji {
     position: absolute;
     bottom: 8px;
