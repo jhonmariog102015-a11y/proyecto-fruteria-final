@@ -32,15 +32,14 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 2. VISTAS PÚBLICAS DE LA TIENDA WEB (FRONTEND CLIENTES)
     # -------------------------------------------------------------------------
-    # Ruta raíz ('/') y alias ('/inicio/'): Carga la página de aterrizaje con carrusel
+    # Ruta raíz ('/') y alias ('/inicio/', '/tienda/'): Carga la tienda principal
     path('', inicio, name='index'),
     path('inicio/', inicio, name='inicio'),
-
-    # Tienda alternativa del proyecto formativo
-    path('tienda/', tienda_view, name='tienda'),
+    path('tienda/', inicio, name='tienda'),
 
     # Catálogo especializado de frutas con filtrado reactivo por categorías
     path('catalogo-frutas/', catalogo_frutas_view, name='catalogo_frutas'),
+    path('catalogo/', catalogo_frutas_view, name='catalogo'),
 
     # -------------------------------------------------------------------------
     # 3. PANEL DE CONTROL INTERNO (DASHBOARD)
@@ -51,10 +50,12 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
     # -------------------------------------------------------------------------
-    # Login oficial de Django usando la plantilla personalizada login.html
+    # Soporta tanto /login/ como /accounts/login/
+    path('login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login_direct'),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),
 
     # Cierre de sesión seguro y redirección a la página principal
+    path('logout/', logout_view, name='logout_direct'),
     path('accounts/logout/', logout_view, name='logout'),
 ]
 
