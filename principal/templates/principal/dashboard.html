@@ -5,9 +5,117 @@
   <!-- Metadatos de codificación y renderizado en el panel administrativo -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Al Paso Frutería — Panel Administrativo</title>
-  <!-- Hoja de estilos del Dashboard con tema oscuro/verde moderno -->
+  <title>Al Paso Frutería — Panel de Control Administrativo</title>
+  <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
   <link rel="stylesheet" href="{% static 'panel.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos específicos para la gestión interactiva del dashboard */
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+    .kpi-subtext {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 4px;
+      display: block;
+    }
+    .table-prod-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .table-prod-icon {
+      font-size: 1.5rem;
+      background: #f1f5f9;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .badge-cat {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .stock-badge-low {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .finanzas-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1.4rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      border: 1px solid #eef2f6;
+    }
+    .finanzas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.75rem;
+    }
+    .finanzas-header h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #1e293b;
+      font-weight: 700;
+    }
+    .finanzas-metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 0;
+      border-bottom: 1px dashed #f1f5f9;
+      font-size: 0.88rem;
+    }
+    .finanzas-metric-row:last-child {
+      border-bottom: none;
+    }
+    .finanzas-metric-row .val {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .finanzas-metric-row .val.green {
+      color: #15803d;
+    }
+    .cat-item-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      transition: all 0.15s ease;
+    }
+    .cat-item-pill:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+    .cat-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
 </head>
 
 <body>
@@ -24,16 +132,16 @@
       <!-- Menú principal de enlaces del administrador -->
       <nav class="navigation" aria-label="Main navigation">
         <a class="active" href="#overview" aria-current="page">
-          <span class="nav-icon">▦</span> Resumen
+          <span class="nav-icon">▦</span> Resumen & Catálogo
         </a>
-        <a href="{% url 'catalogo_frutas' %}">
-          <span class="nav-icon">🍊</span> Catálogo de Frutas
+        <a href="{% url 'catalogo_frutas' %}" target="_blank">
+          <span class="nav-icon">🍊</span> Catálogo de Frutas ↗
         </a>
-        <a href="{% url 'index' %}">
-          <span class="nav-icon">🏪</span> Ir a la Tienda
+        <a href="{% url 'index' %}" target="_blank">
+          <span class="nav-icon">🏪</span> Ir a la Tienda ↗
         </a>
-        <a href="/admin/">
-          <span class="nav-icon">⚙</span> Django Admin
+        <a href="/admin/" target="_blank">
+          <span class="nav-icon">⚙</span> Django Admin Avanzado ↗
         </a>
       </nav>
 
@@ -42,7 +150,7 @@
         <form action="{% url 'logout' %}" method="post" style="margin: 0; width: 100%;">
           {% csrf_token %}
           <button type="submit" class="logout" style="background:none; border:none; width: 100%; text-align: left; cursor: pointer; color: inherit; font: inherit;">
-            <span class="nav-icon">↪</span> Salir
+            <span class="nav-icon">↪</span> Cerrar Sesión
           </button>
         </form>
 
@@ -59,23 +167,24 @@
 
     <!-- ====================================================================== -->
     <!-- 2. CONTENIDO PRINCIPAL DEL DASHBOARD (Main Workspace)                  -->
-    <!-- Topbar, KPIs en tiempo real y tabla de existencias de inventario       -->
+    <!-- Topbar, KPIs en tiempo real y tabla interactiva de inventario          -->
     <!-- ====================================================================== -->
     <main class="main" id="overview">
       <!-- Barra superior con saludo al usuario y buscador rápido -->
       <header class="topbar">
         <div class="greeting">
-          <h1>Hola, {{ request.user.username|capfirst }}</h1>
-          <span class="date">» &nbsp; El Paso Frutería • Panel de Control</span>
+          <h1>Hola, {{ request.user.username|capfirst }} 👋</h1>
+          <span class="date">» &nbsp; El Paso Frutería • Panel de Control Integral</span>
         </div>
 
         <div class="header-actions">
-          <button class="notification" aria-label="Notifications">🔔</button>
-          <label class="search">
+          <label class="search" style="width: 280px;">
             <input
               type="search"
-              placeholder="Buscar producto..."
-              aria-label="Search"
+              id="inputBuscarProducto"
+              placeholder="Buscar producto o categoría..."
+              aria-label="Buscar en el catálogo"
+              onkeyup="filtrarTablaProductos()"
             >
             <span aria-hidden="true">⌕</span>
           </label>
@@ -83,45 +192,75 @@
       </header>
 
       <div class="content">
+
+        <!-- ================================================================== -->
+        <!-- MENSAJES FLASH Y NOTIFICACIONES                                   -->
+        <!-- ================================================================== -->
+        {% if messages %}
+          <div class="dash-alerts-container">
+            {% for message in messages %}
+              <div class="dash-alert dash-alert-{{ message.tags|default:'success' }}">
+                <span>{{ message }}</span>
+                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:inherit; line-height:1;">✕</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
         <!-- ================================================================== -->
         <!-- 3. MÉTRICAS CLAVE (KPI Cards)                                      -->
-        <!-- Conteo dinámico de productos, usuarios registrados y categorías    -->
+        <!-- Conteo dinámico y rentabilidad global en tiempo real              -->
         <!-- ================================================================== -->
         <section class="dashboard-products" aria-labelledby="products-heading">
           <div class="stats-row">
             <div class="dash-card">
               <h5>Productos Registrados</h5>
               <h3>{{ total_productos }}</h3>
+              <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
             </div>
             <div class="dash-card">
               <h5>🔥 Ofertas Activas</h5>
               <h3 style="color: #e11d48;">{{ total_ofertas }}</h3>
+              <span class="kpi-subtext">Precios promocionales vigentes</span>
             </div>
             <div class="dash-card">
-              <h5>Usuarios del Sistema</h5>
-              <h3>{{ total_usuarios }}</h3>
+              <h5>Inversión en Inventario</h5>
+              <h3 style="color: #2563eb;">${{ inversion_total|floatformat:0 }}</h3>
+              <span class="kpi-subtext">Costo total de compra en bodega</span>
             </div>
             <div class="dash-card">
-              <h5>Categorías Activas</h5>
-              <h3>{{ categorias.count|default:"5" }}</h3>
+              <h5>Ganancia Proyectada</h5>
+              <h3 style="color: #15803d;">+${{ ganancia_potencial|floatformat:0 }}</h3>
+              <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
             </div>
           </div>
 
           <!-- ================================================================ -->
-          <!-- 4. TABLA DE INVENTARIO Y MÁRGENES DE GANANCIA EN TIEMPO REAL      -->
-          <!-- Itera sobre el queryset de productos enviados por dashboard_view  -->
+          <!-- 4. TABLA DE INVENTARIO Y GESTIÓN CRUD EN TIEMPO REAL              -->
           <!-- ================================================================ -->
           <div class="products-table-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-              <h2 id="products-heading" style="margin: 0;">Inventario y Control de Rentabilidad</h2>
-              <a href="/admin/principal/producto/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #2e7d32; color: #fff; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
-                ⚙ Gestionar en Django Admin
-              </a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h2 id="products-heading" style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700;">Catálogo e Inventario en Tiempo Real</h2>
+                <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">Administra precios de venta, costos de compra, promociones y existencias directamente aquí.</p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProducto()">
+                  <span>＋</span> Nuevo Producto
+                </button>
+                <button type="button" class="btn-secondary-dash" onclick="abrirModalNuevaCategoria()">
+                  <span>🏷</span> Nueva Categoría
+                </button>
+                <a href="/admin/principal/producto/" target="_blank" class="btn-secondary-dash" title="Abrir Django Admin">
+                  ⚙ Admin Técnico ↗
+                </a>
+              </div>
             </div>
+
             <table>
               <thead>
                 <tr>
-                  <th scope="col">Nombre</th>
+                  <th scope="col">Producto</th>
                   <th scope="col">Categoría</th>
                   <th scope="col">Costo Compra</th>
                   <th scope="col">Precio Venta</th>
@@ -129,13 +268,24 @@
                   <th scope="col">Oferta</th>
                   <th scope="col">Stock Disponible</th>
                   <th scope="col">Estado</th>
+                  <th scope="col" style="text-align: center;">Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="tablaProductosBody">
                 {% for producto in productos %}
-                <tr>
-                  <td><strong>{{ producto.nombre }}</strong></td>
-                  <td>{{ producto.categoria.nombre|default:"General" }}</td>
+                <tr class="fila-producto" data-busqueda="{{ producto.nombre|lower }} {{ producto.categoria.nombre|lower }} {{ producto.estado|lower }}">
+                  <td>
+                    <div class="table-prod-info">
+                      <span class="table-prod-icon">{{ producto.icono_emoji|default:"🍎" }}</span>
+                      <div>
+                        <strong>{{ producto.nombre }}</strong>
+                        <div style="font-size: 0.75rem; color: #94a3b8;">{{ producto.origen|truncatechars:35 }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge-cat">{{ producto.categoria.nombre|default:"General" }}</span>
+                  </td>
                   <td>${{ producto.costo_compra|floatformat:0 }}</td>
                   <td>
                     {% if producto.en_oferta and producto.precio_oferta %}
@@ -157,12 +307,43 @@
                       <span style="color: #94a3b8; font-size: 0.8rem;">Normal</span>
                     {% endif %}
                   </td>
-                  <td>{{ producto.stock }} {{ producto.unidad_medida|default:"kg" }}</td>
+                  <td>
+                    <strong>{{ producto.stock_actual }}</strong> {{ producto.unidad_medida|default:"kg" }}
+                    {% if producto.stock_actual <= producto.stock_minimo %}
+                      <br><span class="stock-badge-low">Bajo Stock</span>
+                    {% endif %}
+                  </td>
                   <td><span class="badge-status">{{ producto.estado|default:"Disponible" }}</span></td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <button type="button" class="btn-action-edit"
+                      data-id="{{ producto.id_producto }}"
+                      data-nombre="{{ producto.nombre }}"
+                      data-categoria="{{ producto.categoria.id_categoria }}"
+                      data-costo="{{ producto.costo_compra }}"
+                      data-precio="{{ producto.precio_venta_unitario }}"
+                      data-oferta="{% if producto.en_oferta %}true{% else %}false{% endif %}"
+                      data-precio-oferta="{{ producto.precio_oferta|default:'' }}"
+                      data-stock="{{ producto.stock_actual }}"
+                      data-stock-min="{{ producto.stock_minimo }}"
+                      data-unidad="{{ producto.unidad_medida }}"
+                      data-origen="{{ producto.origen }}"
+                      data-emoji="{{ producto.icono_emoji }}"
+                      data-imagen="{{ producto.imagen_url|default:'' }}"
+                      data-estado="{{ producto.estado }}"
+                      onclick="abrirModalEditar(this)">
+                      ✏ Editar
+                    </button>
+                    <button type="button" class="btn-action-delete"
+                      data-id="{{ producto.id_producto }}"
+                      data-nombre="{{ producto.nombre }}"
+                      onclick="abrirModalEliminar(this)">
+                      🗑
+                    </button>
+                  </td>
                 </tr>
                 {% empty %}
                 <tr>
-                  <td class="empty-products" colspan="8">No hay productos registrados todavía.</td>
+                  <td class="empty-products" colspan="9">No hay productos registrados en el catálogo. ¡Crea el primero usando el botón superior!</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -170,360 +351,519 @@
           </div>
         </section>
 
-        <div class="summary-grid">
+        <!-- ================================================================== -->
+        <!-- 5. PANELES DE GESTIÓN Y RESUMEN FINANCIERO                        -->
+        <!-- ================================================================== -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
 
-          <section id="balance">
-            <div class="section-heading">
-              <h2>Total Balance</h2>
+          <!-- Panel: Rentabilidad & Valoración de Inventario -->
+          <div class="finanzas-card">
+            <div class="finanzas-header">
+              <h3>📊 Rentabilidad & Finanzas</h3>
+              <span style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #f0fdf4; padding: 4px 8px; border-radius: 6px;">
+                Margen Promedio: {{ margen_promedio|floatformat:1 }}%
+              </span>
             </div>
-
-            <div class="panel">
-              <div class="panel-top">
-                <span class="amount">$240,390</span>
-                <span class="small">All Accounts</span>
+            <div>
+              <div class="finanzas-metric-row">
+                <span style="color: #64748b;">Inversión Total en Compras:</span>
+                <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
               </div>
-
-              <div class="bank-card">
-                <small>Account Type</small>
-                <strong>Credit Card</strong>
-                <div class="card-number">•••• •••• •••• 2598</div>
-
-                <div class="mastercard" aria-label="Mastercard">
-                  <i></i><i></i>
-                </div>
-
-                <div class="card-bottom">
-                  <span>$25,000</span>
-                  <span aria-hidden="true">➜</span>
-                </div>
+              <div class="finanzas-metric-row">
+                <span style="color: #64748b;">Valor Comercial de Venta:</span>
+                <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
               </div>
-
-              <div class="card-pagination">
-                <span>‹ &nbsp; Previous</span>
-                <span class="dots"><i></i><i></i><i></i></span>
-                <span>Next &nbsp; ›</span>
+              <div class="finanzas-metric-row">
+                <span style="color: #64748b;">Utilidad Bruta Estimada:</span>
+                <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
+              </div>
+              <div class="finanzas-metric-row">
+                <span style="color: #64748b;">Promoción / Descuentos:</span>
+                <span class="val" style="color: #e11d48;">{{ total_ofertas }} productos rebajados</span>
               </div>
             </div>
-          </section>
-
-          <section id="goals">
-            <div class="section-heading">
-              <h2>Goals</h2>
+            <div style="margin-top: 1rem; padding: 0.85rem; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; color: #475569;">
+              💡 <em>Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
             </div>
-
-            <div class="panel">
-              <div class="panel-top">
-                <span class="amount">
-                  $20,000 <span class="small">✎</span>
-                </span>
-                <span class="small">May, 2023</span>
-              </div>
-
-              <div class="goal-content">
-                <div>
-                  <div class="goal-item">
-                    <span class="symbol">♜</span>
-                    <div>
-                      <small>Target Achieved</small>
-                      <strong>$12,500</strong>
-                    </div>
-                  </div>
-
-                  <div class="goal-item">
-                    <span class="symbol">⚑</span>
-                    <div>
-                      <small>This month Target</small>
-                      <strong>$20,000</strong>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="goal-chart">
-                  <div
-                    class="gauge"
-                    role="img"
-                    aria-label="Target achieved: $12,500 of $20,000"
-                  ></div>
-
-                  <div class="gauge-labels">
-                    <span>$0</span>
-                    <span>12.5K</span>
-                    <span>$20K</span>
-                  </div>
-                  <p>Target vs Achievement</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="bills">
-            <div class="section-heading">
-              <h2>Upcoming Bill</h2>
-              <a class="subtle-link" href="#bills">View All ›</a>
-            </div>
-
-            <div class="panel">
-              <div class="bill">
-                <div class="bill-date">
-                  <small>May</small>
-                  <strong>15</strong>
-                </div>
-                <div class="bill-info">
-                  <span class="brand">Figma</span>
-                  <p>Figma - Monthly</p>
-                  <small>Last Charge - 14 May, 2023</small>
-                </div>
-                <span class="bill-price">$150</span>
-              </div>
-
-              <div class="bill">
-                <div class="bill-date">
-                  <small>Jun</small>
-                  <strong>16</strong>
-                </div>
-                <div class="bill-info">
-                  <span class="brand adobe">Adobe</span>
-                  <p>Adobe - Yearly</p>
-                  <small>Last Charge - 17 Jun, 2022</small>
-                </div>
-                <span class="bill-price">$559</span>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <div class="details-grid">
-          <section id="transactions">
-            <div class="section-heading">
-              <h2>Recent Transaction</h2>
-              <a class="subtle-link" href="#transactions">View All ›</a>
-            </div>
-
-            <div class="panel">
-              <div class="tabs" aria-label="Transaction categories">
-                <button class="active" type="button">All</button>
-                <button type="button">Revenue</button>
-                <button type="button">Expenses</button>
-              </div>
-
-              <div class="transaction">
-                <span class="transaction-icon">▣</span>
-                <div class="transaction-info">
-                  <strong>GTR 5</strong>
-                  <small>Gadget & Gear</small>
-                </div>
-                <div class="transaction-price">
-                  <strong>$160.00</strong>
-                  <small>17 May 2023</small>
-                </div>
-              </div>
-
-              <div class="transaction">
-                <span class="transaction-icon">♧</span>
-                <div class="transaction-info">
-                  <strong>Polo Shirt</strong>
-                  <small>XL fashions</small>
-                </div>
-                <div class="transaction-price">
-                  <strong>$20.00</strong>
-                  <small>17 May 2023</small>
-                </div>
-              </div>
-
-              <div class="transaction">
-                <span class="transaction-icon">▧</span>
-                <div class="transaction-info">
-                  <strong>Biriyani</strong>
-                  <small>Hajir Biriyani</small>
-                </div>
-                <div class="transaction-price">
-                  <strong>$10.00</strong>
-                  <small>17 May 2023</small>
-                </div>
-              </div>
-
-              <div class="transaction">
-                <span class="transaction-icon">▱</span>
-                <div class="transaction-info">
-                  <strong>Taxi Fare</strong>
-                  <small>Uber</small>
-                </div>
-                <div class="transaction-price">
-                  <strong>$12.00</strong>
-                  <small>17 May 2023</small>
-                </div>
-              </div>
-
-              <div class="transaction">
-                <span class="transaction-icon">▤</span>
-                <div class="transaction-info">
-                  <strong>Keyboard</strong>
-                  <small>Gadget & Gear</small>
-                </div>
-                <div class="transaction-price">
-                  <strong>$22.00</strong>
-                  <small>17 May 2023</small>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div>
-            <section>
-              <div class="section-heading">
-                <h2>Statistics</h2>
-              </div>
-
-              <div class="panel">
-                <div class="chart-top">
-                  <h3>Weekly Comparison &nbsp;⌄</h3>
-                  <div class="legend">
-                    <span><i></i>This week</span>
-                    <span><i></i>Last week</span>
-                  </div>
-                </div>
-
-                <div
-                  class="chart"
-                  role="img"
-                  aria-label="Weekly spending comparison from May 15 to May 21"
-                >
-                  <div class="y-axis">
-                    <span>$250</span>
-                    <span>$200</span>
-                    <span>$150</span>
-                    <span>$100</span>
-                    <span>$50</span>
-                    <span>$0</span>
-                  </div>
-
-                  <div class="plot">
-                    <div class="bar-group day-1">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>15 May</small>
-                    </div>
-
-                    <div class="bar-group day-2">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>16 May</small>
-                    </div>
-
-                    <div class="bar-group day-3">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>17 May</small>
-                    </div>
-
-                    <div class="bar-group day-4">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>18 May</small>
-                    </div>
-
-                    <div class="bar-group day-5">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>19 May</small>
-                    </div>
-
-                    <div class="bar-group day-6">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>20 May</small>
-                    </div>
-
-                    <div class="bar-group day-7">
-                      <div class="bars">
-                        <div class="bar"></div>
-                        <div class="bar previous"></div>
-                      </div>
-                      <small>21 May</small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section class="expenses" id="expenses">
-              <div class="section-heading">
-                <h2>Expenses Breakdown</h2>
-                <span class="subtle-link">Compare to last month</span>
-              </div>
-
-              <div class="panel expenses-grid">
-                <div class="expense">
-                  <span class="expense-icon">⌂</span>
-                  <div>
-                    <small>Housing</small>
-                    <strong>$250.00</strong>
-                    <span class="change up">15% <b>↑</b></span>
-                  </div>
-                </div>
-
-                <div class="expense">
-                  <span class="expense-icon">♧</span>
-                  <div>
-                    <small>Food</small>
-                    <strong>$350.00</strong>
-                    <span class="change down">8% <b>↓</b></span>
-                  </div>
-                </div>
-
-                <div class="expense">
-                  <span class="expense-icon">▱</span>
-                  <div>
-                    <small>Transportation</small>
-                    <strong>$50.00</strong>
-                    <span class="change down">12% <b>↓</b></span>
-                  </div>
-                </div>
-
-                <div class="expense">
-                  <span class="expense-icon">▦</span>
-                  <div>
-                    <small>Entertainment</small>
-                    <strong>$80.00</strong>
-                    <span class="change up">15% <b>↑</b></span>
-                  </div>
-                </div>
-
-                <div class="expense">
-                  <span class="expense-icon">▢</span>
-                  <div>
-                    <small>Shopping</small>
-                    <strong>$420.00</strong>
-                    <span class="change up">25% <b>↑</b></span>
-                  </div>
-                </div>
-
-                <div class="expense">
-                  <span class="expense-icon">⋯</span>
-                  <div>
-                    <small>Others</small>
-                    <strong>$50.00</strong>
-                    <span class="change down">23% <b>↓</b></span>
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
+
+          <!-- Panel: Gestión de Categorías del Catálogo -->
+          <div class="finanzas-card">
+            <div class="finanzas-header">
+              <h3>🏷 Categorías del Catálogo ({{ categorias.count }})</h3>
+              <button type="button" class="btn-primary-dash" style="padding: 4px 10px; font-size: 0.78rem;" onclick="abrirModalNuevaCategoria()">
+                ＋ Crear
+              </button>
+            </div>
+            <div style="max-height: 250px; overflow-y: auto;">
+              {% for cat in categorias %}
+              <div class="cat-item-pill">
+                <div>
+                  <strong style="color: #1e293b; font-size: 0.9rem;">{{ cat.nombre }}</strong>
+                  <span class="cat-chip-count" style="margin-left: 6px;">{{ cat.num_productos }} prod.</span>
+                </div>
+                <div class="cat-item-actions">
+                  {% if cat.num_productos == 0 %}
+                    <form action="{% url 'dashboard_eliminar_categoria' cat.id_categoria %}" method="post" style="margin: 0;" onsubmit="return confirm('¿Eliminar la categoría {{ cat.nombre }}?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-action-delete" style="padding: 3px 8px; font-size: 0.75rem;" title="Eliminar categoría vacía">
+                        🗑 Borrar
+                      </button>
+                    </form>
+                  {% else %}
+                    <span style="font-size: 0.75rem; color: #94a3b8;">En catálogo</span>
+                  {% endif %}
+                </div>
+              </div>
+              {% empty %}
+                <p style="font-size: 0.85rem; color: #94a3b8;">No hay categorías registradas.</p>
+              {% endfor %}
+            </div>
+          </div>
+
         </div>
+
       </div>
     </main>
   </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 1: CREAR NUEVO PRODUCTO                                          -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalNuevoProducto">
+    <div class="dash-modal">
+      <div class="dash-modal-header">
+        <h3>＋ Registrar Nuevo Producto</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalNuevoProducto()">✕</button>
+      </div>
+      <form action="{% url 'dashboard_crear_producto' %}" method="post">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="nuevo_nombre">Nombre del Producto *</label>
+            <input type="text" id="nuevo_nombre" name="nombre" class="form-input" placeholder="Ej: Manzana Royal Gala" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_categoria">Categoría *</label>
+              <select id="nuevo_categoria" name="categoria_id" class="form-select" required>
+                {% for cat in categorias %}
+                  <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_emoji">Icono / Emoji</label>
+              <input type="text" id="nuevo_emoji" name="icono_emoji" class="form-input" placeholder="🍎" value="🍎">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_costo">Costo de Compra ($ COP) *</label>
+              <input type="number" step="0.01" id="nuevo_costo" name="costo_compra" class="form-input" placeholder="2500" required oninput="calcularMargenNuevo()">
+            </div>
+            <div class="form-group">
+              <label for="nuevo_precio">Precio Venta ($ COP) *</label>
+              <input type="number" step="0.01" id="nuevo_precio" name="precio_venta_unitario" class="form-input" placeholder="4000" required oninput="calcularMargenNuevo()">
+            </div>
+          </div>
+
+          <!-- Caja de cálculo automático del margen -->
+          <div class="margin-calc-box" id="calcBoxNuevo">
+            <span class="label">📈 Margen Bruto Proyectado:</span>
+            <span class="value" id="calcValNuevo">$0 COP (0%)</span>
+          </div>
+
+          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+            <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
+              <input type="checkbox" id="nuevo_en_oferta" name="en_oferta" onchange="toggleOfertaNuevo()">
+              🔥 Activar Precio de Oferta / Promoción
+            </label>
+            <div id="wrapOfertaNuevo" style="display: none; margin-top: 0.6rem;">
+              <label for="nuevo_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de Oferta ($ COP)</label>
+              <input type="number" step="0.01" id="nuevo_precio_oferta" name="precio_oferta" class="form-input" placeholder="3200" oninput="calcularMargenNuevo()">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_stock">Stock Inicial *</label>
+              <input type="number" step="0.01" id="nuevo_stock" name="stock_actual" class="form-input" value="50" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_stock_min">Stock Mínimo (Alerta) *</label>
+              <input type="number" step="0.01" id="nuevo_stock_min" name="stock_minimo" class="form-input" value="5" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_unidad">Unidad de Medida</label>
+              <select id="nuevo_unidad" name="unidad_medida" class="form-select">
+                <option value="kg" selected>Kilogramo (kg)</option>
+                <option value="lb">Libra (lb)</option>
+                <option value="unidad">Unidad</option>
+                <option value="bandeja">Bandeja</option>
+                <option value="paquete">Paquete</option>
+                <option value="canastilla">Canastilla</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_estado">Estado</label>
+              <select id="nuevo_estado" name="estado" class="form-select">
+                <option value="Disponible" selected>Disponible</option>
+                <option value="Agotado">Agotado</option>
+                <option value="Próximamente">Próximamente</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nuevo_origen">Origen / Cosecha</label>
+            <input type="text" id="nuevo_origen" name="origen" class="form-input" placeholder="🌱 Cosecha: Boyacá • Finca El Campo" value="🌱 Cosecha: Hace 1 día • Finca El Campo">
+          </div>
+
+          <div class="form-group">
+            <label for="nuevo_imagen">URL de Imagen (Opcional)</label>
+            <input type="url" id="nuevo_imagen" name="imagen_url" class="form-input" placeholder="https://images.unsplash.com/...">
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevoProducto()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">✓ Guardar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 2: EDITAR PRODUCTO EXISTENTE                                     -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEditarProducto">
+    <div class="dash-modal">
+      <div class="dash-modal-header">
+        <h3>✏ Modificar Producto</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEditar()">✕</button>
+      </div>
+      <form id="formEditarProducto" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="edit_nombre">Nombre del Producto *</label>
+            <input type="text" id="edit_nombre" name="nombre" class="form-input" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_categoria">Categoría *</label>
+              <select id="edit_categoria" name="categoria_id" class="form-select" required>
+                {% for cat in categorias %}
+                  <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_emoji">Icono / Emoji</label>
+              <input type="text" id="edit_emoji" name="icono_emoji" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_costo">Costo de Compra ($ COP) *</label>
+              <input type="number" step="0.01" id="edit_costo" name="costo_compra" class="form-input" required oninput="calcularMargenEditar()">
+            </div>
+            <div class="form-group">
+              <label for="edit_precio">Precio Venta ($ COP) *</label>
+              <input type="number" step="0.01" id="edit_precio" name="precio_venta_unitario" class="form-input" required oninput="calcularMargenEditar()">
+            </div>
+          </div>
+
+          <!-- Caja de cálculo dinámico para el modal de edición -->
+          <div class="margin-calc-box" id="calcBoxEditar">
+            <span class="label">📈 Margen Bruto Resultante:</span>
+            <span class="value" id="calcValEditar">$0 COP (0%)</span>
+          </div>
+
+          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+            <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
+              <input type="checkbox" id="edit_en_oferta" name="en_oferta" onchange="toggleOfertaEditar()">
+              🔥 Activar Precio de Oferta / Promoción
+            </label>
+            <div id="wrapOfertaEditar" style="display: none; margin-top: 0.6rem;">
+              <label for="edit_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de Oferta ($ COP)</label>
+              <input type="number" step="0.01" id="edit_precio_oferta" name="precio_oferta" class="form-input" oninput="calcularMargenEditar()">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_stock">Stock Actual *</label>
+              <input type="number" step="0.01" id="edit_stock" name="stock_actual" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_stock_min">Stock Mínimo (Alerta) *</label>
+              <input type="number" step="0.01" id="edit_stock_min" name="stock_minimo" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_unidad">Unidad de Medida</label>
+              <select id="edit_unidad" name="unidad_medida" class="form-select">
+                <option value="kg">Kilogramo (kg)</option>
+                <option value="lb">Libra (lb)</option>
+                <option value="unidad">Unidad</option>
+                <option value="bandeja">Bandeja</option>
+                <option value="paquete">Paquete</option>
+                <option value="canastilla">Canastilla</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_estado">Estado</label>
+              <select id="edit_estado" name="estado" class="form-select">
+                <option value="Disponible">Disponible</option>
+                <option value="Agotado">Agotado</option>
+                <option value="Próximamente">Próximamente</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit_origen">Origen / Cosecha</label>
+            <input type="text" id="edit_origen" name="origen" class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="edit_imagen">URL de Imagen (Opcional)</label>
+            <input type="url" id="edit_imagen" name="imagen_url" class="form-input">
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEditar()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">✓ Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 3: CONFIRMACIÓN DE ELIMINACIÓN DE PRODUCTO                       -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEliminarProducto">
+    <div class="dash-modal" style="max-width: 440px;">
+      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
+        <h3 style="color: #991b1b;">⚠️ Eliminar Producto</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEliminar()">✕</button>
+      </div>
+      <form id="formEliminarProducto" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🗑</div>
+          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+            ¿Estás seguro de que deseas eliminar permanentemente el producto
+          </p>
+          <strong id="eliminarNombreProducto" style="font-size: 1.1rem; color: #0f172a; display: block; margin-bottom: 0.75rem;"></strong>
+          <p style="font-size: 0.8rem; color: #dc2626; margin: 0;">
+            Esta acción no se puede deshacer y el producto ya no aparecerá en la tienda ni en el catálogo.
+          </p>
+        </div>
+        <div class="dash-modal-footer" style="justify-content: center;">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminar()">Cancelar</button>
+          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">Sí, Eliminar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 4: CREAR NUEVA CATEGORÍA                                         -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalNuevaCategoria">
+    <div class="dash-modal" style="max-width: 480px;">
+      <div class="dash-modal-header">
+        <h3>🏷 Registrar Nueva Categoría</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalNuevaCategoria()">✕</button>
+      </div>
+      <form action="{% url 'dashboard_crear_categoria' %}" method="post">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="cat_nombre">Nombre de la Categoría *</label>
+            <input type="text" id="cat_nombre" name="nombre" class="form-input" placeholder="Ej: Frutas Exóticas, Verduras, Cítricos" required>
+          </div>
+          <div class="form-group">
+            <label for="cat_desc">Descripción (Opcional)</label>
+            <textarea id="cat_desc" name="descripcion" class="form-textarea" rows="3" placeholder="Breve descripción de los productos que pertenecen a este grupo..."></textarea>
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevaCategoria()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">✓ Crear Categoría</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- JAVASCRIPT: CONTROLADORES DE MODALES, CÁLCULO DE MÁRGENES Y BÚSQUEDA    -->
+  <!-- ====================================================================== -->
+  <script>
+    // 1. Funciones para Modal Nuevo Producto
+    function abrirModalNuevoProducto() {
+      document.getElementById('modalNuevoProducto').classList.add('open');
+      document.getElementById('nuevo_nombre').focus();
+    }
+    function cerrarModalNuevoProducto() {
+      document.getElementById('modalNuevoProducto').classList.remove('open');
+    }
+    function toggleOfertaNuevo() {
+      const chk = document.getElementById('nuevo_en_oferta');
+      const wrap = document.getElementById('wrapOfertaNuevo');
+      wrap.style.display = chk.checked ? 'block' : 'none';
+      if (!chk.checked) {
+        document.getElementById('nuevo_precio_oferta').value = '';
+      }
+      calcularMargenNuevo();
+    }
+    function calcularMargenNuevo() {
+      const costo = parseFloat(document.getElementById('nuevo_costo').value) || 0;
+      const precio = parseFloat(document.getElementById('nuevo_precio').value) || 0;
+      const enOferta = document.getElementById('nuevo_en_oferta').checked;
+      const precioOferta = parseFloat(document.getElementById('nuevo_precio_oferta').value) || 0;
+
+      const precioEfectivo = (enOferta && precioOferta > 0) ? precioOferta : precio;
+      const ganancia = precioEfectivo - costo;
+      const margenPorcentaje = costo > 0 ? ((ganancia / costo) * 100).toFixed(1) : '0.0';
+
+      const valBox = document.getElementById('calcValNuevo');
+      valBox.textContent = `+$${Math.round(ganancia).toLocaleString('es-CO')} COP (${margenPorcentaje}%)`;
+      valBox.style.color = ganancia >= 0 ? '#15803d' : '#dc2626';
+    }
+
+    // 2. Funciones para Modal Editar Producto
+    function abrirModalEditar(btn) {
+      const id = btn.getAttribute('data-id');
+      const nombre = btn.getAttribute('data-nombre');
+      const catId = btn.getAttribute('data-categoria');
+      const costo = btn.getAttribute('data-costo');
+      const precio = btn.getAttribute('data-precio');
+      const enOferta = btn.getAttribute('data-oferta') === 'true';
+      const precioOferta = btn.getAttribute('data-precio-oferta');
+      const stock = btn.getAttribute('data-stock');
+      const stockMin = btn.getAttribute('data-stock-min');
+      const unidad = btn.getAttribute('data-unidad');
+      const origen = btn.getAttribute('data-origen');
+      const emoji = btn.getAttribute('data-emoji');
+      const imagen = btn.getAttribute('data-imagen');
+      const estado = btn.getAttribute('data-estado');
+
+      // Actualizar action del formulario
+      document.getElementById('formEditarProducto').action = `/dashboard/producto/${id}/editar/`;
+
+      // Cargar valores en los inputs
+      document.getElementById('edit_nombre').value = nombre || '';
+      document.getElementById('edit_categoria').value = catId || '';
+      document.getElementById('edit_costo').value = costo || '';
+      document.getElementById('edit_precio').value = precio || '';
+      document.getElementById('edit_stock').value = stock || '';
+      document.getElementById('edit_stock_min').value = stockMin || '';
+      document.getElementById('edit_unidad').value = unidad || 'kg';
+      document.getElementById('edit_origen').value = origen || '';
+      document.getElementById('edit_emoji').value = emoji || '🍎';
+      document.getElementById('edit_imagen').value = imagen || '';
+      document.getElementById('edit_estado').value = estado || 'Disponible';
+
+      const chkOferta = document.getElementById('edit_en_oferta');
+      chkOferta.checked = enOferta;
+      document.getElementById('wrapOfertaEditar').style.display = enOferta ? 'block' : 'none';
+      document.getElementById('edit_precio_oferta').value = precioOferta || '';
+
+      calcularMargenEditar();
+      document.getElementById('modalEditarProducto').classList.add('open');
+    }
+    function cerrarModalEditar() {
+      document.getElementById('modalEditarProducto').classList.remove('open');
+    }
+    function toggleOfertaEditar() {
+      const chk = document.getElementById('edit_en_oferta');
+      const wrap = document.getElementById('wrapOfertaEditar');
+      wrap.style.display = chk.checked ? 'block' : 'none';
+      if (!chk.checked) {
+        document.getElementById('edit_precio_oferta').value = '';
+      }
+      calcularMargenEditar();
+    }
+    function calcularMargenEditar() {
+      const costo = parseFloat(document.getElementById('edit_costo').value) || 0;
+      const precio = parseFloat(document.getElementById('edit_precio').value) || 0;
+      const enOferta = document.getElementById('edit_en_oferta').checked;
+      const precioOferta = parseFloat(document.getElementById('edit_precio_oferta').value) || 0;
+
+      const precioEfectivo = (enOferta && precioOferta > 0) ? precioOferta : precio;
+      const ganancia = precioEfectivo - costo;
+      const margenPorcentaje = costo > 0 ? ((ganancia / costo) * 100).toFixed(1) : '0.0';
+
+      const valBox = document.getElementById('calcValEditar');
+      valBox.textContent = `+$${Math.round(ganancia).toLocaleString('es-CO')} COP (${margenPorcentaje}%)`;
+      valBox.style.color = ganancia >= 0 ? '#15803d' : '#dc2626';
+    }
+
+    // 3. Funciones para Modal Eliminar Producto
+    function abrirModalEliminar(btn) {
+      const id = btn.getAttribute('data-id');
+      const nombre = btn.getAttribute('data-nombre');
+      document.getElementById('formEliminarProducto').action = `/dashboard/producto/${id}/eliminar/`;
+      document.getElementById('eliminarNombreProducto').textContent = `"${nombre}"`;
+      document.getElementById('modalEliminarProducto').classList.add('open');
+    }
+    function cerrarModalEliminar() {
+      document.getElementById('modalEliminarProducto').classList.remove('open');
+    }
+
+    // 4. Funciones para Modal Categoría
+    function abrirModalNuevaCategoria() {
+      document.getElementById('modalNuevaCategoria').classList.add('open');
+      document.getElementById('cat_nombre').focus();
+    }
+    function cerrarModalNuevaCategoria() {
+      document.getElementById('modalNuevaCategoria').classList.remove('open');
+    }
+
+    // 5. Filtro de búsqueda instantáneo en la tabla
+    function filtrarTablaProductos() {
+      const termino = document.getElementById('inputBuscarProducto').value.toLowerCase().trim();
+      const filas = document.querySelectorAll('#tablaProductosBody tr.fila-producto');
+
+      filas.forEach(fila => {
+        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
+        if (busquedaTexto.includes(termino)) {
+          fila.style.display = '';
+        } else {
+          fila.style.display = 'none';
+        }
+      });
+    }
+
+    // 6. Cerrar modales con tecla Escape o clic fuera
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        cerrarModalNuevoProducto();
+        cerrarModalEditar();
+        cerrarModalEliminar();
+        cerrarModalNuevaCategoria();
+      }
+    });
+
+    document.querySelectorAll('.dash-modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('open');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

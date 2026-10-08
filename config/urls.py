@@ -10,6 +10,11 @@ from principal.views import (
     tienda_view,
     catalogo_frutas_view,
     dashboard_view,
+    crear_producto_dashboard,
+    editar_producto_dashboard,
+    eliminar_producto_dashboard,
+    crear_categoria_dashboard,
+    eliminar_categoria_dashboard,
     logout_view,
     admin_preview,
     admin_productos_preview,
@@ -42,10 +47,14 @@ urlpatterns = [
     path('catalogo/', catalogo_frutas_view, name='catalogo'),
 
     # -------------------------------------------------------------------------
-    # 3. PANEL DE CONTROL INTERNO (DASHBOARD)
+    # 3. PANEL DE CONTROL INTERNO (DASHBOARD Y GESTIÓN TOTAL)
     # -------------------------------------------------------------------------
-    # Panel privado con métricas en tiempo real de inventario y usuarios
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('dashboard/producto/crear/', crear_producto_dashboard, name='dashboard_crear_producto'),
+    path('dashboard/producto/<int:id_producto>/editar/', editar_producto_dashboard, name='dashboard_editar_producto'),
+    path('dashboard/producto/<int:id_producto>/eliminar/', eliminar_producto_dashboard, name='dashboard_eliminar_producto'),
+    path('dashboard/categoria/crear/', crear_categoria_dashboard, name='dashboard_crear_categoria'),
+    path('dashboard/categoria/<int:id_categoria>/eliminar/', eliminar_categoria_dashboard, name='dashboard_eliminar_categoria'),
 
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
