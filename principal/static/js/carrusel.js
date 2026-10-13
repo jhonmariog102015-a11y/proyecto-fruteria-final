@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fruitName = btn.dataset.nombre || 'Fruta fresca';
             btn.classList.add('added');
             
-            showToast(`🛒 "${fruitName}" agregado a tu lista de compra`);
+            showToast(`"${fruitName}" agregado a tu lista de compra`);
             
             setTimeout(() => {
                 btn.classList.remove('added');

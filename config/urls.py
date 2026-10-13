@@ -7,7 +7,6 @@ from django.contrib import admin
 from django.urls import path, include
 from principal.views import (
     inicio,
-    tienda_view,
     catalogo_frutas_view,
     dashboard_view,
     crear_producto_dashboard,

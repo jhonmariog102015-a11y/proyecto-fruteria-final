@@ -5,7 +5,7 @@
   <!-- Metadatos de codificación y renderizado en el panel administrativo -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Al Paso Frutería — Panel de Control Administrativo</title>
+  <title>El Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
   <link rel="stylesheet" href="{% static 'panel.css' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,15 +28,18 @@
       gap: 10px;
     }
     .table-prod-icon {
-      font-size: 1.5rem;
-      background: #f1f5f9;
-      width: 38px;
-      height: 38px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1e3a29;
+      background: #e8f5e9;
+      width: 36px;
+      height: 36px;
       border-radius: 8px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      border: 1px solid #c8e6c9;
     }
     .badge-cat {
       background: #e0f2fe;
@@ -127,21 +130,21 @@
     <!-- ====================================================================== -->
     <aside class="sidebar">
       <!-- Marca corporativa del panel -->
-      <div class="logo">🌿 Al Paso Frutería</div>
+      <div class="logo">El Paso Frutería</div>
 
       <!-- Menú principal de enlaces del administrador -->
       <nav class="navigation" aria-label="Main navigation">
         <a class="active" href="#overview" aria-current="page">
-          <span class="nav-icon">▦</span> Resumen & Catálogo
+          <span class="nav-icon">▪</span> Resumen e Inventario
         </a>
         <a href="{% url 'catalogo_frutas' %}" target="_blank">
-          <span class="nav-icon">🍊</span> Catálogo de Frutas ↗
+          <span class="nav-icon">▪</span> Catálogo de Frutas ↗
         </a>
         <a href="{% url 'index' %}" target="_blank">
-          <span class="nav-icon">🏪</span> Ir a la Tienda ↗
+          <span class="nav-icon">▪</span> Ver Tienda ↗
         </a>
         <a href="/admin/" target="_blank">
-          <span class="nav-icon">⚙</span> Django Admin Avanzado ↗
+          <span class="nav-icon">▪</span> Django Admin Técnico ↗
         </a>
       </nav>
 
@@ -150,7 +153,7 @@
         <form action="{% url 'logout' %}" method="post" style="margin: 0; width: 100%;">
           {% csrf_token %}
           <button type="submit" class="logout" style="background:none; border:none; width: 100%; text-align: left; cursor: pointer; color: inherit; font: inherit;">
-            <span class="nav-icon">↪</span> Cerrar Sesión
+            <span class="nav-icon">▪</span> Cerrar Sesión
           </button>
         </form>
 
@@ -173,7 +176,7 @@
       <!-- Barra superior con saludo al usuario y buscador rápido -->
       <header class="topbar">
         <div class="greeting">
-          <h1>Hola, {{ request.user.username|capfirst }} 👋</h1>
+          <h1>Hola, {{ request.user.username|capfirst }}</h1>
           <span class="date">» &nbsp; El Paso Frutería • Panel de Control Integral</span>
         </div>
 
@@ -219,7 +222,7 @@
               <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
             </div>
             <div class="dash-card">
-              <h5>🔥 Ofertas Activas</h5>
+              <h5>Ofertas Activas</h5>
               <h3 style="color: #e11d48;">{{ total_ofertas }}</h3>
               <span class="kpi-subtext">Precios promocionales vigentes</span>
             </div>
@@ -246,13 +249,13 @@
               </div>
               <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
                 <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProducto()">
-                  <span>＋</span> Nuevo Producto
+                  <span>+</span> Nuevo Producto
                 </button>
                 <button type="button" class="btn-secondary-dash" onclick="abrirModalNuevaCategoria()">
-                  <span>🏷</span> Nueva Categoría
+                  <span>+</span> Nueva Categoría
                 </button>
                 <a href="/admin/principal/producto/" target="_blank" class="btn-secondary-dash" title="Abrir Django Admin">
-                  ⚙ Admin Técnico ↗
+                  Admin Técnico ↗
                 </a>
               </div>
             </div>
@@ -276,7 +279,7 @@
                 <tr class="fila-producto" data-busqueda="{{ producto.nombre|lower }} {{ producto.categoria.nombre|lower }} {{ producto.estado|lower }}">
                   <td>
                     <div class="table-prod-info">
-                      <span class="table-prod-icon">{{ producto.icono_emoji|default:"🍎" }}</span>
+                      <span class="table-prod-icon">{{ producto.nombre|slice:":1"|upper }}</span>
                       <div>
                         <strong>{{ producto.nombre }}</strong>
                         <div style="font-size: 0.75rem; color: #94a3b8;">{{ producto.origen|truncatechars:35 }}</div>
@@ -302,7 +305,7 @@
                   </td>
                   <td>
                     {% if producto.en_oferta %}
-                      <span class="badge-oferta">🔥 -{{ producto.porcentaje_descuento|floatformat:0 }}%</span>
+                      <span class="badge-oferta">-{{ producto.porcentaje_descuento|floatformat:0 }}%</span>
                     {% else %}
                       <span style="color: #94a3b8; font-size: 0.8rem;">Normal</span>
                     {% endif %}
@@ -327,17 +330,16 @@
                       data-stock-min="{{ producto.stock_minimo }}"
                       data-unidad="{{ producto.unidad_medida }}"
                       data-origen="{{ producto.origen }}"
-                      data-emoji="{{ producto.icono_emoji }}"
                       data-imagen="{{ producto.imagen_url|default:'' }}"
                       data-estado="{{ producto.estado }}"
                       onclick="abrirModalEditar(this)">
-                      ✏ Editar
+                      Editar
                     </button>
                     <button type="button" class="btn-action-delete"
                       data-id="{{ producto.id_producto }}"
                       data-nombre="{{ producto.nombre }}"
                       onclick="abrirModalEliminar(this)">
-                      🗑
+                      Eliminar
                     </button>
                   </td>
                 </tr>
@@ -359,7 +361,7 @@
           <!-- Panel: Rentabilidad & Valoración de Inventario -->
           <div class="finanzas-card">
             <div class="finanzas-header">
-              <h3>📊 Rentabilidad & Finanzas</h3>
+              <h3>Rentabilidad y Finanzas</h3>
               <span style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #f0fdf4; padding: 4px 8px; border-radius: 6px;">
                 Margen Promedio: {{ margen_promedio|floatformat:1 }}%
               </span>
@@ -383,16 +385,16 @@
               </div>
             </div>
             <div style="margin-top: 1rem; padding: 0.85rem; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; color: #475569;">
-              💡 <em>Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
+              <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
             </div>
           </div>
 
           <!-- Panel: Gestión de Categorías del Catálogo -->
           <div class="finanzas-card">
             <div class="finanzas-header">
-              <h3>🏷 Categorías del Catálogo ({{ categorias.count }})</h3>
+              <h3>Categorías del Catálogo ({{ categorias.count }})</h3>
               <button type="button" class="btn-primary-dash" style="padding: 4px 10px; font-size: 0.78rem;" onclick="abrirModalNuevaCategoria()">
-                ＋ Crear
+                + Crear
               </button>
             </div>
             <div style="max-height: 250px; overflow-y: auto;">
@@ -407,7 +409,7 @@
                     <form action="{% url 'dashboard_eliminar_categoria' cat.id_categoria %}" method="post" style="margin: 0;" onsubmit="return confirm('¿Eliminar la categoría {{ cat.nombre }}?');">
                       {% csrf_token %}
                       <button type="submit" class="btn-action-delete" style="padding: 3px 8px; font-size: 0.75rem;" title="Eliminar categoría vacía">
-                        🗑 Borrar
+                        Borrar
                       </button>
                     </form>
                   {% else %}
@@ -433,7 +435,7 @@
   <div class="dash-modal-overlay" id="modalNuevoProducto">
     <div class="dash-modal">
       <div class="dash-modal-header">
-        <h3>＋ Registrar Nuevo Producto</h3>
+        <h3>Registrar Nuevo Producto</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalNuevoProducto()">✕</button>
       </div>
       <form action="{% url 'dashboard_crear_producto' %}" method="post">
@@ -444,19 +446,13 @@
             <input type="text" id="nuevo_nombre" name="nombre" class="form-input" placeholder="Ej: Manzana Royal Gala" required>
           </div>
 
-          <div class="form-row-2">
-            <div class="form-group">
-              <label for="nuevo_categoria">Categoría *</label>
-              <select id="nuevo_categoria" name="categoria_id" class="form-select" required>
-                {% for cat in categorias %}
-                  <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="nuevo_emoji">Icono / Emoji</label>
-              <input type="text" id="nuevo_emoji" name="icono_emoji" class="form-input" placeholder="🍎" value="🍎">
-            </div>
+          <div class="form-group">
+            <label for="nuevo_categoria">Categoría *</label>
+            <select id="nuevo_categoria" name="categoria_id" class="form-select" required>
+              {% for cat in categorias %}
+                <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
+              {% endfor %}
+            </select>
           </div>
 
           <div class="form-row-2">
@@ -472,14 +468,14 @@
 
           <!-- Caja de cálculo automático del margen -->
           <div class="margin-calc-box" id="calcBoxNuevo">
-            <span class="label">📈 Margen Bruto Proyectado:</span>
+            <span class="label">Margen Bruto Proyectado:</span>
             <span class="value" id="calcValNuevo">$0 COP (0%)</span>
           </div>
 
           <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
             <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
               <input type="checkbox" id="nuevo_en_oferta" name="en_oferta" onchange="toggleOfertaNuevo()">
-              🔥 Activar Precio de Oferta / Promoción
+              Activar Precio de Oferta / Promoción
             </label>
             <div id="wrapOfertaNuevo" style="display: none; margin-top: 0.6rem;">
               <label for="nuevo_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de Oferta ($ COP)</label>
@@ -522,7 +518,7 @@
 
           <div class="form-group">
             <label for="nuevo_origen">Origen / Cosecha</label>
-            <input type="text" id="nuevo_origen" name="origen" class="form-input" placeholder="🌱 Cosecha: Boyacá • Finca El Campo" value="🌱 Cosecha: Hace 1 día • Finca El Campo">
+            <input type="text" id="nuevo_origen" name="origen" class="form-input" placeholder="Cosecha: Boyacá • Finca El Campo" value="Cosecha: Hace 1 día • Finca El Campo">
           </div>
 
           <div class="form-group">
@@ -532,7 +528,7 @@
         </div>
         <div class="dash-modal-footer">
           <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevoProducto()">Cancelar</button>
-          <button type="submit" class="btn-primary-dash">✓ Guardar Producto</button>
+          <button type="submit" class="btn-primary-dash">Guardar Producto</button>
         </div>
       </form>
     </div>
@@ -544,7 +540,7 @@
   <div class="dash-modal-overlay" id="modalEditarProducto">
     <div class="dash-modal">
       <div class="dash-modal-header">
-        <h3>✏ Modificar Producto</h3>
+        <h3>Modificar Producto</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalEditar()">✕</button>
       </div>
       <form id="formEditarProducto" method="post" action="">
@@ -555,19 +551,13 @@
             <input type="text" id="edit_nombre" name="nombre" class="form-input" required>
           </div>
 
-          <div class="form-row-2">
-            <div class="form-group">
-              <label for="edit_categoria">Categoría *</label>
-              <select id="edit_categoria" name="categoria_id" class="form-select" required>
-                {% for cat in categorias %}
-                  <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="edit_emoji">Icono / Emoji</label>
-              <input type="text" id="edit_emoji" name="icono_emoji" class="form-input">
-            </div>
+          <div class="form-group">
+            <label for="edit_categoria">Categoría *</label>
+            <select id="edit_categoria" name="categoria_id" class="form-select" required>
+              {% for cat in categorias %}
+                <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
+              {% endfor %}
+            </select>
           </div>
 
           <div class="form-row-2">
@@ -583,14 +573,14 @@
 
           <!-- Caja de cálculo dinámico para el modal de edición -->
           <div class="margin-calc-box" id="calcBoxEditar">
-            <span class="label">📈 Margen Bruto Resultante:</span>
+            <span class="label">Margen Bruto Resultante:</span>
             <span class="value" id="calcValEditar">$0 COP (0%)</span>
           </div>
 
           <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
             <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
               <input type="checkbox" id="edit_en_oferta" name="en_oferta" onchange="toggleOfertaEditar()">
-              🔥 Activar Precio de Oferta / Promoción
+              Activar Precio de Oferta / Promoción
             </label>
             <div id="wrapOfertaEditar" style="display: none; margin-top: 0.6rem;">
               <label for="edit_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de Oferta ($ COP)</label>
@@ -643,7 +633,7 @@
         </div>
         <div class="dash-modal-footer">
           <button type="button" class="btn-secondary-dash" onclick="cerrarModalEditar()">Cancelar</button>
-          <button type="submit" class="btn-primary-dash">✓ Guardar Cambios</button>
+          <button type="submit" class="btn-primary-dash">Guardar Cambios</button>
         </div>
       </form>
     </div>
@@ -655,13 +645,12 @@
   <div class="dash-modal-overlay" id="modalEliminarProducto">
     <div class="dash-modal" style="max-width: 440px;">
       <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
-        <h3 style="color: #991b1b;">⚠️ Eliminar Producto</h3>
+        <h3 style="color: #991b1b;">Eliminar Producto</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalEliminar()">✕</button>
       </div>
       <form id="formEliminarProducto" method="post" action="">
         {% csrf_token %}
         <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
-          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🗑</div>
           <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
             ¿Estás seguro de que deseas eliminar permanentemente el producto
           </p>
@@ -684,7 +673,7 @@
   <div class="dash-modal-overlay" id="modalNuevaCategoria">
     <div class="dash-modal" style="max-width: 480px;">
       <div class="dash-modal-header">
-        <h3>🏷 Registrar Nueva Categoría</h3>
+        <h3>Registrar Nueva Categoría</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalNuevaCategoria()">✕</button>
       </div>
       <form action="{% url 'dashboard_crear_categoria' %}" method="post">
@@ -701,7 +690,7 @@
         </div>
         <div class="dash-modal-footer">
           <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevaCategoria()">Cancelar</button>
-          <button type="submit" class="btn-primary-dash">✓ Crear Categoría</button>
+          <button type="submit" class="btn-primary-dash">Crear Categoría</button>
         </div>
       </form>
     </div>
@@ -756,7 +745,6 @@
       const stockMin = btn.getAttribute('data-stock-min');
       const unidad = btn.getAttribute('data-unidad');
       const origen = btn.getAttribute('data-origen');
-      const emoji = btn.getAttribute('data-emoji');
       const imagen = btn.getAttribute('data-imagen');
       const estado = btn.getAttribute('data-estado');
 
@@ -772,7 +760,6 @@
       document.getElementById('edit_stock_min').value = stockMin || '';
       document.getElementById('edit_unidad').value = unidad || 'kg';
       document.getElementById('edit_origen').value = origen || '';
-      document.getElementById('edit_emoji').value = emoji || '🍎';
       document.getElementById('edit_imagen').value = imagen || '';
       document.getElementById('edit_estado').value = estado || 'Disponible';
 

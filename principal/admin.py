@@ -22,7 +22,6 @@ from django.utils.html import format_html
 class ProductoAdmin(admin.ModelAdmin):
     list_display = (
         'id_producto',
-        'icono_emoji',
         'nombre',
         'categoria',
         'costo_compra',
@@ -39,7 +38,7 @@ class ProductoAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Información General del Producto', {
-            'fields': ('nombre', 'categoria', 'icono_emoji', 'imagen_url', 'origen', 'unidad_medida', 'brix_minimo')
+            'fields': ('nombre', 'categoria', 'imagen_url', 'origen', 'unidad_medida', 'brix_minimo')
         }),
         ('Estructura de Precios, Costos y Ofertas (Margen de Ganancia)', {
             'fields': ('costo_compra', 'precio_venta_unitario', 'en_oferta', 'precio_oferta'),

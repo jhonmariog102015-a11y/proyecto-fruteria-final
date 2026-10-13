@@ -87,9 +87,9 @@ class Producto(models.Model):
     )
 
     nombre = models.CharField(max_length=100, verbose_name="Nombre del Producto")
-    icono_emoji = models.CharField(max_length=10, default="🍎", verbose_name="Icono / Emoji")
+    icono_emoji = models.CharField(max_length=10, default="", blank=True, verbose_name="Icono / Identificador")
     imagen_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="URL de Imagen")
-    origen = models.CharField(max_length=150, default="🌱 Cosecha: Hace 1 día • Finca El Campo", verbose_name="Origen / Cosecha")
+    origen = models.CharField(max_length=150, default="Cosecha: Hace 1 día • Finca El Campo", verbose_name="Origen / Cosecha")
     unidad_medida = models.CharField(max_length=20, default="kg", verbose_name="Unidad de Medida")
 
     # Parámetros Agroindustriales y de Calidad

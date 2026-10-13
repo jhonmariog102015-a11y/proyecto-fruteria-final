@@ -3,9 +3,12 @@
 # Gestiona la lógica de negocio, consultas al ORM y renderizado de plantillas.
 # ==============================================================================
 
+from decimal import Decimal
+from django.contrib import messages
+from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.shortcuts import redirect, render
+from django.db.models import Count
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import Producto, Categoria
 
 
@@ -19,35 +22,16 @@ def inicio(request):
     3. Obtiene todas las categorías disponibles para alimentar las tarjetas y carrusel.
     4. Envía los datos al contexto para que 'index.html' dibuje dinámicamente las tarjetas.
     """
-    # Consulta optimizada con JOIN a la tabla categorias
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
 
-    # Paquete de datos que viaja hacia el template
     context = {
         'titulo': 'El Paso Frutería — Mercado Campesino',
         'productos': productos,
         'categorias': categorias,
-        'total_productos': productos.count(),  # Cuenta el total para las insignias
-    }
-    return render(request, 'principal/index.html', context)
-
-
-def tienda_view(request):
-    """
-    VISTA DE TIENDA ALTERNATIVA ('/tienda/')
-    ----------------------------------------
-    Provee una vista complementaria con diseño de vitrina comercial para los productos.
-    """
-    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
-    categorias = Categoria.objects.all()
-    context = {
-        'titulo': 'El Paso Frutería — Tienda Oficial',
-        'productos': productos,
-        'categorias': categorias,
         'total_productos': productos.count(),
     }
-    return render(request, 'fruteria/tienda.html', context)
+    return render(request, 'principal/index.html', context)
 
 
 def catalogo_frutas_view(request):
@@ -55,7 +39,7 @@ def catalogo_frutas_view(request):
     CATÁLOGO INTERACTIVO DE FRUTAS ('/catalogo-frutas/')
     ----------------------------------------------------
     Renderiza la vitrina especializada de frutas donde el usuario puede
-    interactuar con filtros reactivos en vivo, ver grados Brix (°Brix), origen y precios.
+    interactuar con filtros reactivos en vivo, grados Brix (°Brix), origen y precios.
     """
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
@@ -66,15 +50,6 @@ def catalogo_frutas_view(request):
         'total_productos': productos.count(),
     }
     return render(request, 'fruteria/catalogo_frutas.html', context)
-
-
-from decimal import Decimal
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.db.models import Count
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import Producto, Categoria
 
 
 @login_required
@@ -88,7 +63,6 @@ def dashboard_view(request):
     - Inventario con edición y creación directa sin salir del dashboard.
     - Categorización del catálogo en vivo.
     """
-    from django.contrib.auth import get_user_model
     User = get_user_model()
 
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
