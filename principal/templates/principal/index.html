@@ -1,382 +1,193 @@
-{% load static  %}
-<!DOCTYPE html>
-<html lang="es">
+{% extends 'principal/base.html' %}
+{% load static %}
 
-<head>
-    <!-- Configuración básica de codificación y renderizado responsivo para celulares y PC -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>El Paso Frutería — Mercado Campesino</title>
-    <meta name="description" content="El Paso Frutería — Frutas y verduras frescas directas del campo a tu mesa.">
-    
-    <!-- Preconexión a Google Fonts para acelerar la descarga de tipografías -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Tipografías seleccionadas: 'Syne' para titulares modernos y 'DM Sans' para textos de lectura -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
-        rel="stylesheet">
-        
-    <!-- Hoja de estilos principal con el sistema de diseño visual de la tienda -->
-    <link rel="stylesheet" href="{% static 'index.css' %}?v=2.0">
+{% block title %}El Paso Frutería — Mercado Campesino{% endblock %}
+{% block meta_description %}El Paso Frutería — Frutas y verduras frescas directas del campo a tu mesa.{% endblock %}
 
-    <style>
-        /* ─── BOTÓN FLOTANTE PERSISTENTE DE WHATSAPP ─── */
-        .whatsapp-floating-btn {
-            position: fixed !important;
-            bottom: 28px !important;
-            right: 28px !important;
-            z-index: 99999 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            width: 60px !important;
-            height: 60px !important;
-            border-radius: 50% !important;
-            background: #25D366 !important;
-            color: #FFFFFF !important;
-            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45) !important;
-            text-decoration: none !important;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        }
-        .whatsapp-floating-btn:hover {
-            transform: scale(1.1) translateY(-3px) !important;
-            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.65) !important;
-            background: #20BA5A !important;
-            color: #FFFFFF !important;
-        }
-        .whatsapp-floating-btn svg {
-            width: 32px !important;
-            height: 32px !important;
-            fill: #FFFFFF !important;
-            color: #FFFFFF !important;
-        }
-        .whatsapp-floating-btn .floating-tooltip {
-            position: absolute !important;
-            right: 74px !important;
-            background: #1A3A26 !important;
-            color: #FFFFFF !important;
-            font-family: 'DM Sans', sans-serif !important;
-            font-size: 0.82rem !important;
-            font-weight: 600 !important;
-            white-space: nowrap !important;
-            padding: 0.5rem 0.95rem !important;
-            border-radius: 8px !important;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
-            pointer-events: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            transform: translateX(8px) !important;
-            transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s !important;
-        }
-        .whatsapp-floating-btn .floating-tooltip::after {
-            content: '' !important;
-            position: absolute !important;
-            top: 50% !important;
-            right: -6px !important;
-            transform: translateY(-50%) !important;
-            border-width: 6px 0 6px 6px !important;
-            border-style: solid !important;
-            border-color: transparent transparent transparent #1A3A26 !important;
-        }
-        .whatsapp-floating-btn:hover .floating-tooltip {
-            opacity: 1 !important;
-            visibility: visible !important;
-            transform: translateX(0) !important;
-        }
-        .whatsapp-floating-btn::before {
-            content: '' !important;
-            position: absolute !important;
-            inset: -4px !important;
-            border-radius: 50% !important;
-            background: rgba(37, 211, 102, 0.35) !important;
-            z-index: -1 !important;
-            animation: waPulse 2.4s infinite !important;
-        }
-        @keyframes waPulse {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            70% { transform: scale(1.3); opacity: 0; }
-            100% { transform: scale(1.3); opacity: 0; }
-        }
-        @media (max-width: 768px) {
-            .whatsapp-floating-btn {
-                bottom: 20px !important;
-                right: 20px !important;
-                width: 54px !important;
-                height: 54px !important;
-            }
-            .whatsapp-floating-btn svg {
-                width: 28px !important;
-                height: 28px !important;
-            }
-            .whatsapp-floating-btn .floating-tooltip {
-                display: none !important;
-            }
-        }
-    </style>
-</head>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}?v=2.2">
+{% endblock %}
 
-<body>
-
-    <!-- ====================================================================== -->
-    <!-- 1. BARRA SUPERIOR DE ANUNCIOS (Announcement Bar)                      -->
-    <!-- Franja verde superior con lemas de calidad y propuestas de valor       -->
-    <!-- ====================================================================== -->
-    <div class="announcement-bar">
-        <p>Frescura que marca la diferencia &nbsp;|&nbsp; Calidad, frescura y precios bajos</p>
+{% block content %}
+<!-- ====================================================================== -->
+<!-- 1. SECCIÓN HERO / PORTADA PRINCIPAL                                   -->
+<!-- ====================================================================== -->
+<section class="hero">
+    <div class="hero-image-container">
+        <img src="{% static 'img/team/header.avif' %}" alt="Mercado de frutas y verduras">
+        <div class="hero-overlay"></div>
     </div>
 
-    <!-- ====================================================================== -->
-    <!-- 2. BARRA DE NAVEGACIÓN PRINCIPAL (Header & Navbar)                    -->
-    <!-- Contiene el logo, enlaces de navegación, auth dinámico y WhatsApp     -->
-    <!-- ====================================================================== -->
-    <header class="navbar">
-        <!-- Logotipo transparente de la frutería -->
-        <a class="nav-brand" href="{% url 'index' %}" aria-label="El Paso Frutería, inicio">
-            <img class="navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="El Paso Frutería">
+    <div class="hero-content">
+        <!-- Logo oficial transparente de El Paso Frutería -->
+        <div class="masthead-logo-container">
+            <!-- NOTA PARA EL EQUIPO: Usar el nombre exacto 'logo_Transparente.png' tal como está guardado en static/assets -->
+            <img src="{% static 'assets/logo_Transparente.png' %}" alt="El Paso Frutería" class="masthead-logo">
+        </div>
+        <p class="hero-eyebrow">Frescura que marca la diferencia</p>
+        <p class="hero-desc">Frutas y verduras de temporada, seleccionadas cada mañana en las mejores fincas de la región.</p>
+        
+        <!-- Botones de conversión principales -->
+        <div class="hero-cta">
+            <a href="{% url 'catalogo_frutas' %}" class="btn-main">Ver Catálogo</a>
+            <a href="#carrusel-frutas" class="btn-secondary">Frutas Frescas ↓</a>
+        </div>
+        
+        <!-- Insignias de confianza que avalan el origen campesino -->
+        <div class="hero-badges">
+            <span>✓ 100% Natural</span>
+            <span>✓ Cosecha diaria</span>
+            <span>✓ Sin intermediarios</span>
+        </div>
+    </div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- 2. TABLERO DE CATEGORÍAS ("LO QUE TENEMOS")                          -->
+<!-- ====================================================================== -->
+<section class="categories" id="lo-que-tenemos">
+    <div class="section-header">
+        <p class="section-label">LO QUE TENEMOS</p>
+        <h2>Categorías de<br>Productos</h2>
+    </div>
+
+    <div class="cat-grid">
+        <!-- Tarjeta 1: Frutas -->
+        <a href="{% url 'catalogo_frutas' %}" class="cat-card cat-frutas">
+            <div class="cat-img">
+                <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop" alt="Frutas">
+            </div>
+            <div class="cat-info">
+                <h3>Frutas</h3>
+                <p>Ver productos</p>
+            </div>
         </a>
-
-        <!-- Enlaces de navegación con scroll suave y rutas oficiales de Django -->
-        <nav class="nav-links">
-            <a href="{% url 'index' %}" class="nav-link active">Inicio</a>
-            <a href="#lo-que-tenemos" class="nav-link">Categorías</a>
-            <a href="#carrusel-frutas" class="nav-link">Temporada</a>
-            <a href="{% url 'catalogo_frutas' %}" class="nav-link">Catálogo</a>
-            <a href="#nosotros" class="nav-link">Nosotros</a>
-            <a href="#horarios" class="nav-link">Horarios</a>
-        </nav>
- 
-        <!-- Acciones de usuario y autenticación -->
-        <div class="nav-actions">
-            <!-- Renderizado Condicional: Si el usuario inició sesión, ve el Dashboard y Salir -->
-            {% if user.is_authenticated %}
-                <a class="btn-admin" href="{% url 'dashboard' %}">Panel Admin</a>
-                <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-logout">Salir</button>
-                </form>
-            <!-- Si es un cliente no autenticado, ve el botón de Ingresar al Login -->
-            {% else %}
-                <a class="btn-login" href="{% url 'login' %}">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <span>Ingresar</span>
-                </a>
-            {% endif %}
-
-            <!-- Botón Hamburguesa móvil para desplegar el menú en celulares -->
-            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </header>
- 
-    <!-- ====================================================================== -->
-    <!-- 3. SECCIÓN HERO / PORTADA PRINCIPAL                                   -->
-    <!-- Imagen de fondo con overlay, isotipo y llamadas a la acción (CTAs)    -->
-    <!-- ====================================================================== -->
-    <section class="hero">
-        <div class="hero-image-container">
-            <img src="{% static 'img/team/header.avif' %}" alt="Mercado de frutas y verduras">
-            <div class="hero-overlay"></div>
-        </div>
-
-        <div class="hero-content">
-            <!-- Logo oficial transparente de El Paso Frutería -->
-            <div class="masthead-logo-container">
-                <!-- NOTA PARA EL EQUIPO: Usar el nombre exacto 'logo_Transparente.png' tal como está guardado en static/assets -->
-                <img src="{% static 'assets/logo_Transparente.png' %}" alt="El Paso Frutería" class="masthead-logo">
+        <!-- Tarjeta 2: Verduras -->
+        <a href="#carrusel-frutas" class="cat-card cat-verduras">
+            <div class="cat-img">
+                <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop" alt="Verduras">
             </div>
-            <p class="hero-eyebrow">Frescura que marca la diferencia</p>
-            <p class="hero-desc">Frutas y verduras de temporada, seleccionadas cada mañana en las mejores fincas de la
-                región.</p>
-            <!-- Botones de conversión principales -->
-            <div class="hero-cta">
-                <a href="{% url 'catalogo_frutas' %}" class="btn-main">Ver Catálogo</a>
-                <a href="#carrusel-frutas" class="btn-secondary">Frutas Frescas ↓</a>
+            <div class="cat-info">
+                <h3>Verduras</h3>
+                <p>Ver productos</p>
             </div>
-            <!-- Insignias de confianza que avalan el origen campesino -->
-            <div class="hero-badges">
-                <span>✓ 100% Natural</span>
-                <span>✓ Cosecha diaria</span>
-                <span>✓ Sin intermediarios</span>
+        </a>
+        <!-- Tarjeta 3: Tubérculos -->
+        <a href="#carrusel-frutas" class="cat-card cat-tuberculos">
+            <div class="cat-img">
+                <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=600&auto=format&fit=crop" alt="Tubérculos">
             </div>
-        </div>
-    </section>
-
-    <!-- ====================================================================== -->
-    <!-- 4. TABLERO DE CATEGORÍAS ("LO QUE TENEMOS")                          -->
-    <!-- Cuadrícula con las 4 familias de alimentos que ofrece la frutería      -->
-    <!-- ====================================================================== -->
-    <section class="categories" id="lo-que-tenemos">
-        <div class="section-header">
-            <p class="section-label">LO QUE TENEMOS</p>
-            <h2>Categorías de<br>Productos</h2>
-        </div>
-
-        <div class="cat-grid">
-            <!-- Tarjeta 1: Frutas (enlaza al catálogo reactivo) -->
-            <a href="{% url 'catalogo_frutas' %}" class="cat-card cat-frutas">
-                <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop"
-                        alt="Frutas">
-                </div>
-                <div class="cat-info">
-                    <h3>Frutas</h3>
-                    <p>Ver productos</p>
-                </div>
-            </a>
-            <!-- Tarjeta 2: Verduras -->
-            <a href="#carrusel-frutas" class="cat-card cat-verduras">
-                <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop"
-                        alt="Verduras">
-                </div>
-                <div class="cat-info">
-                    <h3>Verduras</h3>
-                    <p>Ver productos</p>
-                </div>
-            </a>
-            <!-- Tarjeta 3: Tubérculos -->
-            <a href="#carrusel-frutas" class="cat-card cat-tuberculos">
-                <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=600&auto=format&fit=crop"
-                        alt="Tubérculos">
-                </div>
-                <div class="cat-info">
-                    <h3>Tubérculos</h3>
-                    <p>Ver productos</p>
-                </div>
-            </a>
-            <!-- Tarjeta 4: Hortalizas -->
-            <a href="#carrusel-frutas" class="cat-card cat-hortalizas">
-                <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1498579397066-22750a3cb424?q=80&w=600&auto=format&fit=crop"
-                        alt="Hortalizas">
-                </div>
-                <div class="cat-info">
-                    <h3>Hortalizas</h3>
-                    <p>Ver productos</p>
-                </div>
-            </a>
-        </div>
-    </section>
-
-
-    <!-- ====================================================================== -->
-    <!-- 5. SECCIÓN CARRUSEL DE FRUTAS CON FILTRADO REACTIVO                   -->
-    <!-- Muestra los productos traídos desde la base de datos por Django        -->
-    <!-- Permite filtrar por categorías y deslizar tarjetas con touch o flechas -->
-    <!-- ====================================================================== -->
-    <section class="fruits-carousel-section" id="carrusel-frutas">
-        <!-- Encabezado del carrusel: Título a la izquierda y enlace al catálogo completo a la derecha -->
-        <div class="carousel-header-wrap">
-            <div class="carousel-header-left">
-                <span class="section-label">SELECCIÓN DEL DÍA</span>
-                <h2>Frutas Frescas de <span>Temporada</span></h2>
+            <div class="cat-info">
+                <h3>Tubérculos</h3>
+                <p>Ver productos</p>
             </div>
-            <!-- Botón que muestra dinámicamente el número total de referencias registradas -->
-            <a href="{% url 'catalogo_frutas' %}" class="btn-view-all-fruits">
-                Ver catálogo completo ({{ total_productos }} referencias) →
-            </a>
-        </div>
+        </a>
+        <!-- Tarjeta 4: Hierbas y Aromáticas -->
+        <a href="#carrusel-frutas" class="cat-card cat-hierbas">
+            <div class="cat-img">
+                <img src="https://images.unsplash.com/photo-1628556270448-4d4e4148e1b1?q=80&w=600&auto=format&fit=crop" alt="Hierbas">
+            </div>
+            <div class="cat-info">
+                <h3>Hierbas</h3>
+                <p>Ver productos</p>
+            </div>
+        </a>
+    </div>
+</section>
 
-        <!-- Pestañas de filtrado (Tabs): carrusel.js detecta 'data-filter' para mostrar/ocultar tarjetas -->
-        <div class="carousel-tabs-bar" role="tablist">
-            <button class="carousel-tab active" data-filter="all" role="tab">Todas</button>
-            <button class="carousel-tab" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">En Oferta</button>
-            <button class="carousel-tab" data-filter="citricos" role="tab">Cítricos</button>
-            <button class="carousel-tab" data-filter="tropicales" role="tab">Tropicales</button>
-            <button class="carousel-tab" data-filter="berries" role="tab">Berries</button>
-            <button class="carousel-tab" data-filter="importadas" role="tab">Importadas</button>
-            <button class="carousel-tab" data-filter="exoticas" role="tab">Exóticas</button>
-        </div>
+<!-- ====================================================================== -->
+<!-- 3. CARRUSEL DE FRUTAS DE TEMPORADA CON FILTRADO REACTIVO              -->
+<!-- ====================================================================== -->
+<section class="fruits-carousel-section" id="carrusel-frutas">
+    <div class="section-header">
+        <p class="section-label">COSECHA FRESCA DE TEMPORADA</p>
+        <h2>Nuestras Frutas Destacadas</h2>
+        <p class="section-subtitle">Seleccionadas cada mañana de productores locales. Desliza para explorar la cosecha viva.</p>
+    </div>
 
-        <!-- Contenedor exterior del carrusel con flechas de navegación previa y siguiente -->
-        <div class="carousel-outer">
-            <!-- Flechas de navegación para scroll suave -->
-            <button class="carousel-nav-btn carousel-prev" id="carouselPrev" aria-label="Anterior">‹</button>
-            <button class="carousel-nav-btn carousel-next" id="carouselNext" aria-label="Siguiente">›</button>
+    <!-- Pestañas de filtrado reactivo del carrusel -->
+    <div class="carousel-tabs-bar">
+        <button class="carousel-tab active" data-filter="all">Todas las Frutas</button>
+        <button class="carousel-tab" data-filter="citricos">Cítricos</button>
+        <button class="carousel-tab" data-filter="tropicales">Tropicales</button>
+        <button class="carousel-tab" data-filter="berries">Berries</button>
+        <button class="carousel-tab" data-filter="importadas">Importadas</button>
+        <button class="carousel-tab" data-filter="exoticas">Exóticas</button>
+    </div>
 
-            <!-- Riel deslizante donde se disponen horizontalmente las tarjetas de productos -->
-            <div class="carousel-track" id="fruitCarouselTrack">
+    <!-- Contenedor del carrusel con flechas de navegación y track deslizante -->
+    <div class="carousel-outer-wrapper">
+        <button class="carousel-nav-btn prev" id="carouselPrev" aria-label="Fruta anterior">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
 
-                <!-- Ciclo Django Template: Itera sobre la lista 'productos' enviada desde views.py -->
-                {% for producto in productos %}
-                <!-- Tarjeta con etiqueta data-categoria computada dinámicamente para el filtrado en JS (incluye 'ofertas' si aplica) -->
-                <div class="carousel-card" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
-                    <div>
-                        <!-- Envoltura de imagen con badge de 'Fresco' y etiqueta de 'Oferta' si aplica -->
-                        <div class="card-img-wrap">
-                            <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
-                            <span class="badge-tag-fresh"><span class="dot"></span>Fresco</span>
-                            {% if producto.en_oferta and producto.precio_oferta %}
-                                <span class="badge-tag-oferta">-{{ producto.porcentaje_descuento }}%</span>
-                            {% endif %}
-                        </div>
-                        <!-- Metadatos del producto: Nombre de categoría, nombre de fruta y procedencia -->
-                        <span class="carousel-card-cat">{{ producto.categoria.nombre }}</span>
-                        <h3>{{ producto.nombre }}</h3>
-                        <p class="carousel-card-origin">{{ producto.origen }}</p>
-                    </div>
-                    <!-- Pie de tarjeta: Precio de oferta resaltado o regular, y botón rápido para añadir -->
-                    <div class="carousel-card-footer">
-                        <div class="carousel-price-box">
+        <div class="carousel-track-container" id="fruitCarouselTrack">
+            {% for producto in productos %}
+            <div class="carousel-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}">
+                <div class="carousel-card-img-wrap">
+                    <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
+                    <span class="badge-frescura"><span class="dot-live"></span>Fresco</span>
+                    {% if producto.en_oferta and producto.precio_oferta %}
+                    <span class="badge-tag-oferta">-{{ producto.porcentaje_descuento }}%</span>
+                    {% endif %}
+                </div>
+                <div class="carousel-card-body">
+                    <span class="card-category-label">{{ producto.categoria.nombre }}</span>
+                    <h3 class="card-fruit-title">{{ producto.nombre }}</h3>
+                    <p class="card-origin-text">{{ producto.origen }}</p>
+                    <div class="card-pricing-row">
+                        <div>
                             {% if producto.en_oferta and producto.precio_oferta %}
                                 <div style="display:flex; align-items:baseline; gap:6px;">
-                                    <span class="carousel-price" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
-                                    <del class="old-price">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
+                                    <span class="card-price-value" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
+                                    <span class="old-price">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
                                 </div>
                             {% else %}
-                                <span class="carousel-price">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                                <span class="card-price-value">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
                             {% endif %}
-                            <span class="carousel-unit">desde / {{ producto.unidad_medida }}</span>
+                            <span class="card-price-unit">/ {{ producto.unidad_medida }}</span>
                         </div>
-                        <!-- Botón interactivo que dispara el mensaje Toast 'Producto agregado' -->
-                        <button class="btn-add-fruit" data-nombre="{{ producto.nombre }}" title="Añadir a mi compra">＋</button>
+                        <button class="btn-add-fruit" data-id="{{ producto.id_producto }}" data-nombre="{{ producto.nombre }}" aria-label="Añadir {{ producto.nombre }}">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
+                        </button>
                     </div>
                 </div>
-                <!-- Bloque vacío si no hubiera productos registrados en la base de datos -->
-                {% empty %}
-                <div style="padding: 40px; color: #666; text-align: center; width: 100%;">
-                    No hay productos registrados en la base de datos.
-                </div>
-                {% endfor %}
-
             </div>
+            {% endfor %}
         </div>
 
-        <!-- Contenedor donde carrusel.js inyecta los puntos indicadores de navegación (dots) -->
-        <div class="carousel-dots-wrap" id="carouselDots"></div>
-    </section>
+        <button class="carousel-nav-btn next" id="carouselNext" aria-label="Siguiente fruta">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+    </div>
 
-    <!-- ====================================================================== -->
-    <!-- 6. BLOQUE "NUESTRA HISTORIA" (About Strip)                            -->
-    <!-- Imagen campesina con badge flotante (+30 años) y métricas de impacto  -->
-    <!-- ====================================================================== -->
-    <section class="about-strip" id="nosotros">
-        <!-- Columna izquierda: Imagen de la finca campesina con insignia destacada -->
-        <div class="about-image">
-            <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=800&auto=format&fit=crop"
-                alt="Finca productora">
-            <div class="about-years-badge">+30<br><span>años</span></div>
+    <!-- Indicadores de puntos dinámicos (dots) y llamada a la acción -->
+    <div class="carousel-dots-wrapper" id="carouselDots"></div>
+    <div class="carousel-footer-cta">
+        <a href="{% url 'catalogo_frutas' %}" class="btn-view-all-fruits">Ver todas las frutas en el Catálogo Completo &rarr;</a>
+    </div>
+</section>
+
+<!-- ====================================================================== -->
+<!-- 4. SECCIÓN NOSOTROS / HISTORIA Y PROPUESTA CAMPESINA                   -->
+<!-- ====================================================================== -->
+<section class="about" id="nosotros">
+    <div class="about-grid">
+        <div class="about-img">
+            <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=800&auto=format&fit=crop" alt="Finca campesina">
         </div>
-        <!-- Columna derecha: Narrativa del negocio familiar y cifras clave -->
         <div class="about-content">
             <p class="section-label">NUESTRA HISTORIA</p>
-            <h2>Una familia,<br>una promesa.</h2>
-            <p>Desde 1989 somos la frutería de referencia del barrio. No somos un supermercado: somos vecinos que
-                conocen el nombre de los agricultores que cultivan lo que llevas a tu casa.</p>
-            <!-- Cuadrícula con 3 estadísticas clave -->
-            <div class="about-stats">
+            <h2>Del Campo a tu Mesa, Sin Intermediarios</h2>
+            <p>En El Paso Frutería creemos en el valor del trabajo campesino. Trabajamos directamente con más de 20 familias productoras de Boyacá y Cundinamarca, garantizando precios justos para ellos y la máxima frescura para ti.</p>
+            <p>Cada fruta y verdura llega a nuestra tienda en menos de 24 horas después de ser cosechada.</p>
+            <div class="stats-grid">
                 <div class="stat">
-                    <strong>+50</strong>
-                    <span>Fincas aliadas</span>
+                    <strong>+20</strong>
+                    <span>Familias campesinas</span>
                 </div>
                 <div class="stat">
-                    <strong>6am</strong>
+                    <strong>&lt;24h</strong>
                     <span>Hora de cosecha</span>
                 </div>
                 <div class="stat">
@@ -385,95 +196,35 @@
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- ====================================================================== -->
-    <!-- 7. HORARIOS DE ATENCIÓN Y CONTACTO DIRECTO                            -->
-    <!-- Cuadro con jornada laboral semanal y botón para llamadas telefónicas  -->
-    <!-- ====================================================================== -->
-    <section class="schedule" id="horarios">
-        <div class="schedule-bg">
-            <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=1600&auto=format&fit=crop"
-                alt="Fondo mercado">
-            <div class="schedule-overlay"></div>
-        </div>
-        <div class="schedule-content">
-            <h2>Horario de Atención</h2>
-            <div class="schedule-grid">
-                <div class="schedule-item">
-                    <strong>Lunes — Sábado</strong>
-                    <p>6:30 AM — 6:00 PM</p>
-                </div>
-                <div class="divider">|</div>
-                <div class="schedule-item">
-                    <strong>Domingo</strong>
-                    <p>7:00 AM — 1:00 PM</p>
-                </div>
+<!-- ====================================================================== -->
+<!-- 5. HORARIOS DE ATENCIÓN Y CONTACTO DIRECTO                            -->
+<!-- ====================================================================== -->
+<section class="schedule" id="horarios">
+    <div class="schedule-bg">
+        <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=1600&auto=format&fit=crop" alt="Fondo mercado">
+        <div class="schedule-overlay"></div>
+    </div>
+    <div class="schedule-content">
+        <h2>Horario de Atención</h2>
+        <div class="schedule-grid">
+            <div class="schedule-item">
+                <strong>Lunes — Sábado</strong>
+                <p>6:30 AM — 6:00 PM</p>
             </div>
-            <!-- Enlace tel: directo para discado en teléfonos móviles -->
-            <a href="tel:+573001234567" class="schedule-phone">Llámanos: 300 123 4567</a>
-        </div>
-    </section>
-
-    <!-- ====================================================================== -->
-    <!-- 8. PIE DE PÁGINA (Footer)                                             -->
-    <!-- Logotipo institucional y derechos reservados de autor                 -->
-    <!-- ====================================================================== -->
-    <footer class="footer">
-        <div class="footer-brand">
-            <div class="brand-icon">EP</div>
-            <div>
-                <div class="brand-name">El Paso</div>
-                <div class="brand-tagline">Frutería</div>
+            <div class="divider">|</div>
+            <div class="schedule-item">
+                <strong>Domingo</strong>
+                <p>7:00 AM — 1:00 PM</p>
             </div>
         </div>
-        <p class="footer-copy">© 2026 El Paso Frutería. Todos los derechos reservados.</p>
-    </footer>
+        <a href="tel:+573001234567" class="schedule-phone">Llámanos: 300 123 4567</a>
+    </div>
+</section>
+{% endblock %}
 
-    <!-- ====================================================================== -->
-    <!-- 9. SCRIPTS DE INTERACCIÓN                                             -->
-    <!-- 1. Menú responsivo hamburguesa para pantallas móviles                  -->
-    <!-- 2. Carrusel reactivo de frutas con soporte táctil y toast             -->
-    <!-- ====================================================================== -->
-    <script>
-        // Lógica de apertura y cierre del menú hamburguesa en celulares
-        const hamburgerBtn = document.getElementById('hamburgerBtn');
-        const navLinks = document.querySelector('.nav-links');
-
-        if (hamburgerBtn && navLinks) {
-            hamburgerBtn.addEventListener('click', () => {
-                const isOpen = hamburgerBtn.classList.toggle('open');
-                navLinks.classList.toggle('active-menu', isOpen);
-                hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
-            });
-
-            // Cierra el menú móvil automáticamente al hacer clic en cualquier enlace
-            document.querySelectorAll('.nav-link').forEach((link) => {
-                link.addEventListener('click', () => {
-                    hamburgerBtn.classList.remove('open');
-                    navLinks.classList.remove('active-menu');
-                    hamburgerBtn.setAttribute('aria-expanded', 'false');
-                });
-            });
-        }
-    </script>
-    <!-- Script modular para el carrusel de productos -->
-    <script src="{% static 'js/carrusel.js' %}"></script>
-
-    <!-- ====================================================================== -->
-    <!-- BOTÓN FLOTANTE PERSISTENTE DE WHATSAPP (Acompaña el scroll)           -->
-    <!-- ====================================================================== -->
-    <a href="https://wa.me/573001234567?text=Hola%20El%20Paso%20Fruter%C3%ADa,%20quisiera%20hacer%20un%20pedido"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="whatsapp-floating-btn"
-       aria-label="Pedir por WhatsApp"
-       style="position: fixed; bottom: 28px; right: 28px; z-index: 99999; display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; background: #25D366; color: #FFFFFF; box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45); text-decoration: none;">
-        <svg width="32" height="32" viewBox="0 0 24 24" style="width: 32px; height: 32px; fill: #FFFFFF; color: #FFFFFF;">
-            <path fill="#FFFFFF" d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-        </svg>
-        <span class="floating-tooltip">¿Deseas pedir? Escríbenos</span>
-    </a>
-</body>
-
-</html>
+{% block extra_js %}
+<script src="{% static 'js/carrusel.js' %}"></script>
+{% endblock %}
