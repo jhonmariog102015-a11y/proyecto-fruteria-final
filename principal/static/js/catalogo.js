@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cardTitle = (card.querySelector('h3')?.textContent || '').toLowerCase();
             const cardOrigin = (card.querySelector('.fruit-origin')?.textContent || '').toLowerCase();
 
-            const matchesCategory = (activeFilter === 'all' || cardCat === activeFilter);
+            const matchesCategory = (activeFilter === 'all' || cardCat.split(/\s+/).includes(activeFilter) || cardCat === activeFilter);
             const matchesSearch = searchQuery === '' || 
                                   cardTitle.includes(searchQuery) || 
                                   cardOrigin.includes(searchQuery);
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cart.push({ ...fruit, qty: 1 });
         }
         saveCart();
-        showToast(`🧺 Agregado: <b>${fruit.name}</b> a tu canasta`);
+        showToast(`Agregado: <b>${fruit.name}</b> a tu canasta`);
     }
 
     function updateQty(id, change) {
@@ -191,7 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cartItemsContainer.innerHTML = cart.map(item => `
             <div class="cart-item" data-id="${item.id}">
-                <div class="cart-item-emoji">${item.emoji}</div>
                 <div class="cart-item-details">
                     <div class="cart-item-title">${item.name}</div>
                     <div class="cart-item-unit">${item.priceStr} • ${item.unit}</div>
@@ -229,10 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = card.querySelector('h3')?.textContent.trim() || 'Fruta';
             const priceStr = card.querySelector('.price-val')?.textContent.trim() || '$0';
             const unit = card.querySelector('.price-unit')?.textContent.trim() || '';
-            const emoji = card.querySelector('.fruit-card-emoji')?.textContent.trim() || '🍊';
             const priceNum = parsePrice(priceStr);
 
-            addToCart({ id, name, priceStr, unit, emoji, priceNum });
+            addToCart({ id, name, priceStr, unit, priceNum });
 
             // Micro-animación en botón
             addBtn.classList.add('added');
@@ -266,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSendWhatsapp.addEventListener('click', (e) => {
             if (cart.length === 0) {
                 e.preventDefault();
-                showToast('⚠️ Tu canasta está vacía. Selecciona frutas primero.');
+                showToast('Tu canasta está vacía. Selecciona frutas primero.');
                 return;
             }
 
@@ -275,11 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cart.forEach((item, index) => {
                 const sub = (item.priceNum * item.qty).toLocaleString('es-CO');
-                message += `${index + 1}. ${item.emoji} *${item.name}* x ${item.qty} ${item.unit} — $${sub}\n`;
+                message += `${index + 1}. *${item.name}* x ${item.qty} ${item.unit} — $${sub}\n`;
             });
 
             message += `\n*TOTAL ESTIMADO:* $${totalPrice.toLocaleString('es-CO')}\n`;
-            message += `📍 *Ciudad:* Sogamoso, Boyacá\n`;
+            message += `*Ciudad:* Sogamoso, Boyacá\n`;
             message += `_Pedido generado desde el catálogo online de frutas de El Paso Frutería._`;
 
             const encoded = encodeURIComponent(message);

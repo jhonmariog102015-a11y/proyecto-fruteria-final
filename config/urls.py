@@ -7,9 +7,13 @@ from django.contrib import admin
 from django.urls import path, include
 from principal.views import (
     inicio,
-    tienda_view,
     catalogo_frutas_view,
     dashboard_view,
+    crear_producto_dashboard,
+    editar_producto_dashboard,
+    eliminar_producto_dashboard,
+    crear_categoria_dashboard,
+    eliminar_categoria_dashboard,
     logout_view,
     admin_preview,
     admin_productos_preview,
@@ -32,29 +36,34 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 2. VISTAS PÚBLICAS DE LA TIENDA WEB (FRONTEND CLIENTES)
     # -------------------------------------------------------------------------
-    # Ruta raíz ('/') y alias ('/inicio/'): Carga la página de aterrizaje con carrusel
+    # Ruta raíz ('/') y alias ('/inicio/', '/tienda/'): Carga la tienda principal
     path('', inicio, name='index'),
     path('inicio/', inicio, name='inicio'),
-
-    # Tienda alternativa del proyecto formativo
-    path('tienda/', tienda_view, name='tienda'),
+    path('tienda/', inicio, name='tienda'),
 
     # Catálogo especializado de frutas con filtrado reactivo por categorías
     path('catalogo-frutas/', catalogo_frutas_view, name='catalogo_frutas'),
+    path('catalogo/', catalogo_frutas_view, name='catalogo'),
 
     # -------------------------------------------------------------------------
-    # 3. PANEL DE CONTROL INTERNO (DASHBOARD)
+    # 3. PANEL DE CONTROL INTERNO (DASHBOARD Y GESTIÓN TOTAL)
     # -------------------------------------------------------------------------
-    # Panel privado con métricas en tiempo real de inventario y usuarios
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('dashboard/producto/crear/', crear_producto_dashboard, name='dashboard_crear_producto'),
+    path('dashboard/producto/<int:id_producto>/editar/', editar_producto_dashboard, name='dashboard_editar_producto'),
+    path('dashboard/producto/<int:id_producto>/eliminar/', eliminar_producto_dashboard, name='dashboard_eliminar_producto'),
+    path('dashboard/categoria/crear/', crear_categoria_dashboard, name='dashboard_crear_categoria'),
+    path('dashboard/categoria/<int:id_categoria>/eliminar/', eliminar_categoria_dashboard, name='dashboard_eliminar_categoria'),
 
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
     # -------------------------------------------------------------------------
-    # Login oficial de Django usando la plantilla personalizada login.html
+    # Soporta tanto /login/ como /accounts/login/
+    path('login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login_direct'),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),
 
     # Cierre de sesión seguro y redirección a la página principal
+    path('logout/', logout_view, name='logout_direct'),
     path('accounts/logout/', logout_view, name='logout'),
 ]
 

@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Oculta o muestra tarjetas aplicando animación CSS 'fadeInUp'
             cards.forEach(card => {
-                const cardCat = card.dataset.categoria;
-                const match = activeFilter === 'all' || cardCat === activeFilter;
+                const cardCat = (card.dataset.categoria || '').trim();
+                const match = activeFilter === 'all' || cardCat.split(/\s+/).includes(activeFilter) || cardCat === activeFilter;
                 
                 if (match) {
                     card.classList.remove('hidden-carousel-card');
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const fruitName = btn.dataset.nombre || 'Fruta fresca';
             btn.classList.add('added');
             
-            showToast(`🛒 "${fruitName}" agregado a tu lista de compra`);
+            showToast(`"${fruitName}" agregado a tu lista de compra`);
             
             setTimeout(() => {
                 btn.classList.remove('added');

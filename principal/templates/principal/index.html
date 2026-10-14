@@ -29,7 +29,7 @@
     <!-- Franja verde superior con lemas de calidad y propuestas de valor       -->
     <!-- ====================================================================== -->
     <div class="announcement-bar">
-        <p>🌿 Frescura que marca la diferencia &nbsp;|&nbsp; 📦 Calidad frescura y precios bajos</p>
+        <p>Frescura que marca la diferencia &nbsp;|&nbsp; Calidad, frescura y precios bajos</p>
     </div>
 
     <!-- ====================================================================== -->
@@ -45,10 +45,11 @@
         <!-- Enlaces de navegación con scroll suave y rutas oficiales de Django -->
         <nav class="nav-links">
             <a href="{% url 'index' %}" class="nav-link active">Inicio</a>
-            <a href="#carrusel-frutas" class="nav-link">Frutas de Temporada</a>
-            <a href="{% url 'catalogo_frutas' %}" class="nav-link">Catálogo Completo</a>
             <a href="#lo-que-tenemos" class="nav-link">Categorías</a>
+            <a href="#carrusel-frutas" class="nav-link">Temporada</a>
+            <a href="{% url 'catalogo_frutas' %}" class="nav-link">Catálogo</a>
             <a href="#nosotros" class="nav-link">Nosotros</a>
+            <a href="#horarios" class="nav-link">Horarios</a>
         </nav>
  
         <!-- Acciones de usuario y autenticación -->
@@ -63,7 +64,6 @@
             <!-- Si es un cliente no autenticado, ve el botón de Ingresar al Login -->
             {% else %}
                 <a class="btn-login" href="{% url 'login' %}">
-                    <span class="btn-login-icon" aria-hidden="true">👤</span>
                     <span>Ingresar</span>
                 </a>
             {% endif %}
@@ -133,7 +133,6 @@
                         alt="Frutas">
                 </div>
                 <div class="cat-info">
-                    <span class="cat-icon">🍊</span>
                     <h3>Frutas</h3>
                     <p>Ver productos</p>
                 </div>
@@ -145,7 +144,6 @@
                         alt="Verduras">
                 </div>
                 <div class="cat-info">
-                    <span class="cat-icon">🥦</span>
                     <h3>Verduras</h3>
                     <p>Ver productos</p>
                 </div>
@@ -157,7 +155,6 @@
                         alt="Tubérculos">
                 </div>
                 <div class="cat-info">
-                    <span class="cat-icon">🥔</span>
                     <h3>Tubérculos</h3>
                     <p>Ver productos</p>
                 </div>
@@ -169,7 +166,6 @@
                         alt="Hortalizas">
                 </div>
                 <div class="cat-info">
-                    <span class="cat-icon">🌿</span>
                     <h3>Hortalizas</h3>
                     <p>Ver productos</p>
                 </div>
@@ -198,12 +194,13 @@
 
         <!-- Pestañas de filtrado (Tabs): carrusel.js detecta 'data-filter' para mostrar/ocultar tarjetas -->
         <div class="carousel-tabs-bar" role="tablist">
-            <button class="carousel-tab active" data-filter="all" role="tab">✨ Todas las Frutas</button>
-            <button class="carousel-tab" data-filter="citricos" role="tab">🍊 Cítricos</button>
-            <button class="carousel-tab" data-filter="tropicales" role="tab">🥑 Tropicales</button>
-            <button class="carousel-tab" data-filter="berries" role="tab">🍓 Berries</button>
-            <button class="carousel-tab" data-filter="importadas" role="tab">🥝 Importadas</button>
-            <button class="carousel-tab" data-filter="exoticas" role="tab">🐉 Exóticas</button>
+            <button class="carousel-tab active" data-filter="all" role="tab">Todas</button>
+            <button class="carousel-tab" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">En Oferta</button>
+            <button class="carousel-tab" data-filter="citricos" role="tab">Cítricos</button>
+            <button class="carousel-tab" data-filter="tropicales" role="tab">Tropicales</button>
+            <button class="carousel-tab" data-filter="berries" role="tab">Berries</button>
+            <button class="carousel-tab" data-filter="importadas" role="tab">Importadas</button>
+            <button class="carousel-tab" data-filter="exoticas" role="tab">Exóticas</button>
         </div>
 
         <!-- Contenedor exterior del carrusel con flechas de navegación previa y siguiente -->
@@ -217,24 +214,33 @@
 
                 <!-- Ciclo Django Template: Itera sobre la lista 'productos' enviada desde views.py -->
                 {% for producto in productos %}
-                <!-- Tarjeta con etiqueta data-categoria computada dinámicamente para el filtrado en JS -->
-                <div class="carousel-card" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}">
+                <!-- Tarjeta con etiqueta data-categoria computada dinámicamente para el filtrado en JS (incluye 'ofertas' si aplica) -->
+                <div class="carousel-card" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
                     <div>
-                        <!-- Envoltura de imagen con badge de 'Fresco' y emoji característico -->
+                        <!-- Envoltura de imagen con badge de 'Fresco' y etiqueta de 'Oferta' si aplica -->
                         <div class="card-img-wrap">
                             <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
                             <span class="badge-tag-fresh"><span class="dot"></span>Fresco</span>
-                            <span class="card-badge-emoji">{{ producto.icono_emoji }}</span>
+                            {% if producto.en_oferta and producto.precio_oferta %}
+                                <span class="badge-tag-oferta">-{{ producto.porcentaje_descuento }}%</span>
+                            {% endif %}
                         </div>
                         <!-- Metadatos del producto: Nombre de categoría, nombre de fruta y procedencia -->
                         <span class="carousel-card-cat">{{ producto.categoria.nombre }}</span>
                         <h3>{{ producto.nombre }}</h3>
                         <p class="carousel-card-origin">{{ producto.origen }}</p>
                     </div>
-                    <!-- Pie de tarjeta: Precio formateado sin decimales y botón rápido para añadir -->
+                    <!-- Pie de tarjeta: Precio de oferta resaltado o regular, y botón rápido para añadir -->
                     <div class="carousel-card-footer">
                         <div class="carousel-price-box">
-                            <span class="carousel-price">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                            {% if producto.en_oferta and producto.precio_oferta %}
+                                <div style="display:flex; align-items:baseline; gap:6px;">
+                                    <span class="carousel-price" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
+                                    <del class="old-price">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
+                                </div>
+                            {% else %}
+                                <span class="carousel-price">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                            {% endif %}
                             <span class="carousel-unit">desde / {{ producto.unidad_medida }}</span>
                         </div>
                         <!-- Botón interactivo que dispara el mensaje Toast 'Producto agregado' -->
@@ -294,7 +300,7 @@
     <!-- 7. HORARIOS DE ATENCIÓN Y CONTACTO DIRECTO                            -->
     <!-- Cuadro con jornada laboral semanal y botón para llamadas telefónicas  -->
     <!-- ====================================================================== -->
-    <section class="schedule">
+    <section class="schedule" id="horarios">
         <div class="schedule-bg">
             <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=1600&auto=format&fit=crop"
                 alt="Fondo mercado">
@@ -314,7 +320,7 @@
                 </div>
             </div>
             <!-- Enlace tel: directo para discado en teléfonos móviles -->
-            <a href="tel:+573001234567" class="schedule-phone">📞 Llámanos: 300 123 4567</a>
+            <a href="tel:+573001234567" class="schedule-phone">Llámanos: 300 123 4567</a>
         </div>
     </section>
 
@@ -324,13 +330,13 @@
     <!-- ====================================================================== -->
     <footer class="footer">
         <div class="footer-brand">
-            <div class="brand-icon">AL</div>
+            <div class="brand-icon">EP</div>
             <div>
-                <div class="brand-name">Al Paso</div>
+                <div class="brand-name">El Paso</div>
                 <div class="brand-tagline">Frutería</div>
             </div>
         </div>
-        <p class="footer-copy">© 2026 Al Paso Frutería. Todos los derechos reservados.</p>
+        <p class="footer-copy">© 2026 El Paso Frutería. Todos los derechos reservados.</p>
     </footer>
 
     <!-- ====================================================================== -->
@@ -364,4 +370,4 @@
     <script src="{% static 'js/carrusel.js' %}"></script>
 </body>
 
-</html>
+</html>
