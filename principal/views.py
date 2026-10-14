@@ -24,11 +24,14 @@ def inicio(request):
     """
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
+    # Producto destacado para el Hero dinámico asimétrico
+    producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
 
     context = {
         'titulo': 'El Paso Frutería — Mercado Campesino',
         'productos': productos,
         'categorias': categorias,
+        'producto_destacado': producto_destacado,
         'total_productos': productos.count(),
     }
     return render(request, 'principal/index.html', context)
