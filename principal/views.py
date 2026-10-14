@@ -110,8 +110,8 @@ def crear_producto_dashboard(request):
             stock_actual = Decimal(request.POST.get('stock_actual', '0').replace(',', '.'))
             stock_minimo = Decimal(request.POST.get('stock_minimo', '5').replace(',', '.'))
             unidad_medida = request.POST.get('unidad_medida', 'kg').strip()
-            origen = request.POST.get('origen', '').strip() or '🌱 Cosecha: Hace 1 día • Finca El Campo'
-            icono_emoji = request.POST.get('icono_emoji', '🍎').strip() or '🍎'
+            origen = request.POST.get('origen', '').strip() or 'Cosecha: Hace 1 día • Finca El Campo'
+            icono_emoji = request.POST.get('icono_emoji', '').strip()
             imagen_url = request.POST.get('imagen_url', '').strip() or 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop'
             estado = request.POST.get('estado', 'Disponible').strip()
 

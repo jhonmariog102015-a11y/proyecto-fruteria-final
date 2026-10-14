@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Categoria, Proveedor, Producto, Cliente
 
 
@@ -13,9 +14,6 @@ class ProveedorAdmin(admin.ModelAdmin):
     list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')
     search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')
     list_filter = ('estado',)
-
-
-from django.utils.html import format_html
 
 
 @admin.register(Producto)

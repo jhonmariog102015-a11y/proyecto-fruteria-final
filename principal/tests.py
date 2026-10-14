@@ -80,7 +80,7 @@ class DashboardCrudTestCase(TestCase):
             'stock_minimo': '10',
             'unidad_medida': 'kg',
             'estado': 'Disponible',
-            'icono_emoji': '🍋',
+            'icono_emoji': '',
         })
         self.assertRedirects(response, reverse('dashboard'))
         prod = Producto.objects.get(nombre='Limón Tahití')
@@ -107,7 +107,7 @@ class DashboardCrudTestCase(TestCase):
             'stock_minimo': '5',
             'unidad_medida': 'kg',
             'estado': 'Disponible',
-            'icono_emoji': '🍊',
+            'icono_emoji': '',
         })
         self.assertRedirects(response, reverse('dashboard'))
         prod.refresh_from_db()
