@@ -5,22 +5,18 @@
 
 from decimal import Decimal
 from django.contrib import messages
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model, logout, login as auth_login
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Producto, Categoria
+from .models import Producto, Categoria, PerfilUsuario
 
 
 def inicio(request):
     """
     VISTA PRINCIPAL / LANDING PAGE ('/' y '/inicio/')
     -------------------------------------------------
-    1. Consulta la base de datos para obtener todos los productos ordenados por su ID.
-    2. Utiliza 'select_related('categoria')' para optimizar la consulta SQL (JOIN)
-       y evitar problemas de rendimiento (N+1 queries).
-    3. Obtiene todas las categorías disponibles para alimentar las tarjetas y carrusel.
-    4. Envía los datos al contexto para que 'index.html' dibuje dinámicamente las tarjetas.
     """
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
@@ -38,8 +34,6 @@ def catalogo_frutas_view(request):
     """
     CATÁLOGO INTERACTIVO DE FRUTAS ('/catalogo-frutas/')
     ----------------------------------------------------
-    Renderiza la vitrina especializada de frutas donde el usuario puede
-    interactuar con filtros reactivos en vivo, grados Brix (°Brix), origen y precios.
     """
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
@@ -57,11 +51,6 @@ def dashboard_view(request):
     """
     PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')
     --------------------------------------------
-    Gestión integral del negocio:
-    - Métricas en tiempo real (productos, ofertas, usuarios, categorías).
-    - Métricas financieras (inversión total, valor comercial, margen estimado).
-    - Inventario con edición y creación directa sin salir del dashboard.
-    - Categorización del catálogo en vivo.
     """
     User = get_user_model()
 
@@ -238,8 +227,6 @@ def eliminar_categoria_dashboard(request, id_categoria):
 def logout_view(request):
     """
     CIERRE DE SESIÓN SEGURO ('/accounts/logout/')
-    ---------------------------------------------
-    Destruye la sesión activa del usuario y lo redirige limpiamente a la portada.
     """
     logout(request)
     return redirect('index')
@@ -248,10 +235,8 @@ def logout_view(request):
 def admin_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: PANEL GENERAL
-    Permite generar reportes técnicos y capturas del estado del admin.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
     user = User.objects.filter(username='admin').first()
     if user:
         request.user = user
@@ -261,10 +246,8 @@ def admin_preview(request):
 def admin_productos_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: APP PRINCIPAL
-    Carga el índice de modelos de la app 'principal' en el panel de Django.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
     user = User.objects.filter(username='admin').first()
     if user:
         request.user = user
@@ -274,12 +257,70 @@ def admin_productos_preview(request):
 def admin_producto_list_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: LISTADO DE PRODUCTOS
-    Genera la vista de tabla tabular de productos en el admin de Django.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
     user = User.objects.filter(username='admin').first()
     if user:
         request.user = user
-    from .models import Producto
-    return admin.site._registry[Producto].changelist_view(request)
+    return admin.site._registry[Producto].changelist_view(request)
+
+
+def registro_view(request):
+    """
+    REGISTRO PÚBLICO DE USUARIOS Y ASIGNACIÓN DE PERFIL ('/registro/')
+    Almacena: username, email, contraseña, teléfono, rol, estado ('activo')
+    y fecha de creación automática vía ORM.
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        rol = request.POST.get('rol', 'cliente').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        # Validaciones de integridad
+        if not username or not email or not password:
+            messages.error(request, 'Por favor completa todos los campos obligatorios.')
+            return render(request, 'principal/registro.html')
+
+        if password != confirm_password:
+            messages.error(request, 'Las contraseñas ingresadas no coinciden.')
+            return render(request, 'principal/registro.html')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'El nombre de usuario ya se encuentra registrado.')
+            return render(request, 'principal/registro.html')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'El correo electrónico ya está en uso.')
+            return render(request, 'principal/registro.html')
+
+        # 1. Crear el usuario base de autenticación
+        nuevo_usuario = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        # 2. Crear su perfil vinculado (estado 'activo' por defecto y fecha_creacion automática)
+        PerfilUsuario.objects.create(
+            usuario=nuevo_usuario,
+            telefono=telefono,
+            rol=rol,
+            estado='activo'
+        )
+
+        # 3. Autenticar e iniciar sesión de inmediato
+        auth_login(request, nuevo_usuario)
+        messages.success(request, f'¡Bienvenido a El Paso Frutería, {username}!')
+
+        # Redirigir según el rol asignado
+        if rol in ['admin', 'cajero']:
+            return redirect('dashboard')
+        return redirect('index')
+
+    return render(request, 'principal/registro.html')

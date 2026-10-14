@@ -5,6 +5,7 @@
 # ==============================================================================
 
 from django.db import models
+from django.contrib.auth.models import User
 
 
 # ==============================================================================
@@ -202,3 +203,53 @@ class Cliente(models.Model):
     def __str__(self):
         return f"Cliente #{self.id_cliente} ({self.tipo_cliente})"
 
+class RegistroLogin(models.Model):
+    ESTADOS_LOGIN = [
+        ('exitoso', 'Exitoso'),
+        ('fallido', 'Credenciales Incorrectas'),
+        ('inactivo', 'Usuario Inactivo / Pendiente'),
+    ]
+
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='historial_logins')
+    identificador = models.CharField(max_length=150, verbose_name="Usuario / Email ingresado")
+    telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono")
+    rol = models.CharField(max_length=30, blank=True, null=True, verbose_name="Rol en el sistema")
+    estado = models.CharField(max_length=20, choices=ESTADOS_LOGIN, verbose_name="Estado del Acceso")
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y Hora de Acceso")
+    ip_origen = models.GenericIPAddressField(null=True, blank=True, verbose_name="Dirección IP")
+
+    class Meta:
+        verbose_name = "Registro de Login"
+        verbose_name_plural = "Registros de Login"
+        ordering = ['-fecha_creacion']
+        db_table = "registros_login"
+
+    def __str__(self):
+        return f"{self.identificador} - {self.get_estado_display()} ({self.fecha_creacion.strftime('%d/%m/%Y %H:%M')})"
+
+
+class PerfilUsuario(models.Model):
+    ROLES = [
+        ('admin', 'Administrador'),
+        ('cajero', 'Cajero'),
+        ('cliente', 'Cliente'),
+    ]
+    ESTADOS = [
+        ('activo', 'Activo'),
+        ('inactivo', 'Inactivo'),
+    ]
+
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil', verbose_name="Usuario")
+    telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono")
+    rol = models.CharField(max_length=30, choices=ROLES, default='cliente', verbose_name="Rol en el sistema")
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='activo', verbose_name="Estado de la cuenta")
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
+
+    class Meta:
+        verbose_name = "Perfil de Usuario"
+        verbose_name_plural = "Perfiles de Usuario"
+        ordering = ['-fecha_creacion']
+        db_table = "perfiles_usuario"
+
+    def __str__(self):
+        return f"{self.usuario.username} ({self.get_rol_display()}) - {self.get_estado_display()}"

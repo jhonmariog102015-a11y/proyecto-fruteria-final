@@ -41,6 +41,14 @@
         "documentation": {}
     },
     {
+        "label": "messages",
+        "importPath": "django.contrib",
+        "description": "django.contrib",
+        "isExtraImport": true,
+        "detail": "django.contrib",
+        "documentation": {}
+    },
+    {
         "label": "path",
         "importPath": "django.urls",
         "description": "django.urls",
@@ -57,15 +65,15 @@
         "documentation": {}
     },
     {
-        "label": "inicio",
-        "importPath": "principal.views",
-        "description": "principal.views",
+        "label": "reverse",
+        "importPath": "django.urls",
+        "description": "django.urls",
         "isExtraImport": true,
-        "detail": "principal.views",
+        "detail": "django.urls",
         "documentation": {}
     },
     {
-        "label": "tienda_view",
+        "label": "inicio",
         "importPath": "principal.views",
         "description": "principal.views",
         "isExtraImport": true,
@@ -82,6 +90,46 @@
     },
     {
         "label": "dashboard_view",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "crear_producto_dashboard",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "editar_producto_dashboard",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "eliminar_producto_dashboard",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "crear_categoria_dashboard",
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "isExtraImport": true,
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "eliminar_categoria_dashboard",
         "importPath": "principal.views",
         "description": "principal.views",
         "isExtraImport": true,
@@ -122,6 +170,22 @@
     },
     {
         "label": "views",
+        "importPath": "django.contrib.auth",
+        "description": "django.contrib.auth",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_model",
+        "importPath": "django.contrib.auth",
+        "description": "django.contrib.auth",
+        "isExtraImport": true,
+        "detail": "django.contrib.auth",
+        "documentation": {}
+    },
+    {
+        "label": "get_user_model",
         "importPath": "django.contrib.auth",
         "description": "django.contrib.auth",
         "isExtraImport": true,
@@ -202,11 +266,51 @@
         "documentation": {}
     },
     {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
         "label": "models",
         "importPath": "django.db",
         "description": "django.db",
         "isExtraImport": true,
         "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "format_html",
+        "importPath": "django.utils.html",
+        "description": "django.utils.html",
+        "isExtraImport": true,
+        "detail": "django.utils.html",
         "documentation": {}
     },
     {
@@ -218,6 +322,22 @@
         "documentation": {}
     },
     {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
+        "label": "Decimal",
+        "importPath": "decimal",
+        "description": "decimal",
+        "isExtraImport": true,
+        "detail": "decimal",
+        "documentation": {}
+    },
+    {
         "label": "TestCase",
         "importPath": "django.test",
         "description": "django.test",
@@ -226,11 +346,43 @@
         "documentation": {}
     },
     {
+        "label": "Categoria",
+        "importPath": "principal.models",
+        "description": "principal.models",
+        "isExtraImport": true,
+        "detail": "principal.models",
+        "documentation": {}
+    },
+    {
+        "label": "Producto",
+        "importPath": "principal.models",
+        "description": "principal.models",
+        "isExtraImport": true,
+        "detail": "principal.models",
+        "documentation": {}
+    },
+    {
         "label": "login_required",
         "importPath": "django.contrib.auth.decorators",
         "description": "django.contrib.auth.decorators",
         "isExtraImport": true,
         "detail": "django.contrib.auth.decorators",
+        "documentation": {}
+    },
+    {
+        "label": "Count",
+        "importPath": "django.db.models",
+        "description": "django.db.models",
+        "isExtraImport": true,
+        "detail": "django.db.models",
+        "documentation": {}
+    },
+    {
+        "label": "get_object_or_404",
+        "importPath": "django.shortcuts",
+        "description": "django.shortcuts",
+        "isExtraImport": true,
+        "detail": "django.shortcuts",
         "documentation": {}
     },
     {
@@ -484,11 +636,29 @@
         "documentation": {}
     },
     {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "principal.migrations.0004_producto_costo_compra_producto_en_oferta_and_more",
+        "description": "principal.migrations.0004_producto_costo_compra_producto_en_oferta_and_more",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        ('principal', '0003_producto_imagen_url'),\n    ]\n    operations = [\n        migrations.RunSQL(\n            sql=\"DROP VIEW IF EXISTS principal_producto\",\n            reverse_sql=(\n                \"CREATE VIEW principal_producto AS \"\n                \"SELECT id_producto AS id, nombre, \"",
+        "detail": "principal.migrations.0004_producto_costo_compra_producto_en_oferta_and_more",
+        "documentation": {}
+    },
+    {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "principal.migrations.0005_alter_producto_icono_emoji_alter_producto_origen",
+        "description": "principal.migrations.0005_alter_producto_icono_emoji_alter_producto_origen",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        ('principal', '0004_producto_costo_compra_producto_en_oferta_and_more'),\n    ]\n    operations = [\n        migrations.RunSQL(\n            sql=\"DROP VIEW IF EXISTS principal_producto\",\n            reverse_sql=(\n                \"CREATE VIEW principal_producto AS \"\n                \"SELECT id_producto AS id, nombre, \"",
+        "detail": "principal.migrations.0005_alter_producto_icono_emoji_alter_producto_origen",
+        "documentation": {}
+    },
+    {
         "label": "CategoriaAdmin",
         "kind": 6,
         "importPath": "principal.admin",
         "description": "principal.admin",
-        "peekOfCode": "class CategoriaAdmin(admin.ModelAdmin):\n    list_display = ('id_categoria', 'nombre', 'descripcion')\n    search_fields = ('nombre',)\n@admin.register(Proveedor)\nclass ProveedorAdmin(admin.ModelAdmin):\n    list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')\n    search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')\n    list_filter = ('estado',)\n@admin.register(Producto)\nclass ProductoAdmin(admin.ModelAdmin):",
+        "peekOfCode": "class CategoriaAdmin(admin.ModelAdmin):\n    list_display = ('id_categoria', 'nombre', 'descripcion')\n    search_fields = ('nombre',)\n@admin.register(Proveedor)\nclass ProveedorAdmin(admin.ModelAdmin):\n    list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')\n    search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')\n    list_filter = ('estado',)\nfrom django.utils.html import format_html\n@admin.register(Producto)",
         "detail": "principal.admin",
         "documentation": {}
     },
@@ -497,7 +667,7 @@
         "kind": 6,
         "importPath": "principal.admin",
         "description": "principal.admin",
-        "peekOfCode": "class ProveedorAdmin(admin.ModelAdmin):\n    list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')\n    search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')\n    list_filter = ('estado',)\n@admin.register(Producto)\nclass ProductoAdmin(admin.ModelAdmin):\n    list_display = ('id_producto', 'icono_emoji', 'nombre', 'categoria', 'precio_venta_unitario', 'stock_actual', 'unidad_medida', 'brix_minimo', 'estado')\n    search_fields = ('nombre', 'categoria__nombre', 'origen')\n    list_filter = ('categoria', 'estado', 'unidad_medida')\n    list_editable = ('precio_venta_unitario', 'stock_actual', 'estado')",
+        "peekOfCode": "class ProveedorAdmin(admin.ModelAdmin):\n    list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')\n    search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')\n    list_filter = ('estado',)\nfrom django.utils.html import format_html\n@admin.register(Producto)\nclass ProductoAdmin(admin.ModelAdmin):\n    list_display = (\n        'id_producto',\n        'nombre',",
         "detail": "principal.admin",
         "documentation": {}
     },
@@ -506,7 +676,7 @@
         "kind": 6,
         "importPath": "principal.admin",
         "description": "principal.admin",
-        "peekOfCode": "class ProductoAdmin(admin.ModelAdmin):\n    list_display = ('id_producto', 'icono_emoji', 'nombre', 'categoria', 'precio_venta_unitario', 'stock_actual', 'unidad_medida', 'brix_minimo', 'estado')\n    search_fields = ('nombre', 'categoria__nombre', 'origen')\n    list_filter = ('categoria', 'estado', 'unidad_medida')\n    list_editable = ('precio_venta_unitario', 'stock_actual', 'estado')\n@admin.register(Cliente)\nclass ClienteAdmin(admin.ModelAdmin):\n    list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')\n    list_filter = ('tipo_cliente',)",
+        "peekOfCode": "class ProductoAdmin(admin.ModelAdmin):\n    list_display = (\n        'id_producto',\n        'nombre',\n        'categoria',\n        'costo_compra',\n        'precio_venta_unitario',\n        'en_oferta',\n        'precio_oferta',\n        'mostrar_margen',",
         "detail": "principal.admin",
         "documentation": {}
     },
@@ -565,6 +735,24 @@
         "documentation": {}
     },
     {
+        "label": "ProductoMargenOfertaTestCase",
+        "kind": 6,
+        "importPath": "principal.tests",
+        "description": "principal.tests",
+        "peekOfCode": "class ProductoMargenOfertaTestCase(TestCase):\n    def setUp(self):\n        self.categoria = Categoria.objects.create(\n            nombre=\"Frutas Frescas\",\n            descripcion=\"Frutas de temporada\"\n        )\n        self.producto_normal = Producto.objects.create(\n            nombre=\"Manzana Roja\",\n            categoria=self.categoria,\n            costo_compra=Decimal('2000.00'),",
+        "detail": "principal.tests",
+        "documentation": {}
+    },
+    {
+        "label": "DashboardCrudTestCase",
+        "kind": 6,
+        "importPath": "principal.tests",
+        "description": "principal.tests",
+        "peekOfCode": "class DashboardCrudTestCase(TestCase):\n    def setUp(self):\n        User = get_user_model()\n        self.user = User.objects.create_user(username='admin_test', password='password123')\n        self.client.login(username='admin_test', password='password123')\n        self.categoria = Categoria.objects.create(nombre=\"Cítricos\", descripcion=\"Frutas ácidas\")\n    def test_dashboard_view_acceso(self):\n        response = self.client.get(reverse('dashboard'))\n        self.assertEqual(response.status_code, 200)\n        self.assertContains(response, \"Catálogo e Inventario en Tiempo Real\")",
+        "detail": "principal.tests",
+        "documentation": {}
+    },
+    {
         "label": "inicio",
         "kind": 2,
         "importPath": "principal.views",
@@ -574,20 +762,11 @@
         "documentation": {}
     },
     {
-        "label": "tienda_view",
-        "kind": 2,
-        "importPath": "principal.views",
-        "description": "principal.views",
-        "peekOfCode": "def tienda_view(request):\n    \"\"\"\n    VISTA DE TIENDA ALTERNATIVA ('/tienda/')\n    ----------------------------------------\n    Provee una vista complementaria con diseño de vitrina comercial para los productos.\n    \"\"\"\n    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')\n    categorias = Categoria.objects.all()\n    context = {\n        'titulo': 'El Paso Frutería — Tienda Oficial',",
-        "detail": "principal.views",
-        "documentation": {}
-    },
-    {
         "label": "catalogo_frutas_view",
         "kind": 2,
         "importPath": "principal.views",
         "description": "principal.views",
-        "peekOfCode": "def catalogo_frutas_view(request):\n    \"\"\"\n    CATÁLOGO INTERACTIVO DE FRUTAS ('/catalogo-frutas/')\n    ----------------------------------------------------\n    Renderiza la vitrina especializada de frutas donde el usuario puede\n    interactuar con filtros reactivos en vivo, ver grados Brix (°Brix), origen y precios.\n    \"\"\"\n    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')\n    categorias = Categoria.objects.all()\n    context = {",
+        "peekOfCode": "def catalogo_frutas_view(request):\n    \"\"\"\n    CATÁLOGO INTERACTIVO DE FRUTAS ('/catalogo-frutas/')\n    ----------------------------------------------------\n    Renderiza la vitrina especializada de frutas donde el usuario puede\n    interactuar con filtros reactivos en vivo, grados Brix (°Brix), origen y precios.\n    \"\"\"\n    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')\n    categorias = Categoria.objects.all()\n    context = {",
         "detail": "principal.views",
         "documentation": {}
     },
@@ -596,7 +775,52 @@
         "kind": 2,
         "importPath": "principal.views",
         "description": "principal.views",
-        "peekOfCode": "def dashboard_view(request):\n    \"\"\"\n    PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')\n    --------------------------------------------\n    - Protegido por el decorador '@login_required': sólo usuarios autenticados pueden entrar.\n    - Calcula estadísticas en tiempo real:\n      * Conteo total de productos en inventario.\n      * Conteo de usuarios registrados en el sistema.\n      * Listado de productos para la tabla de gestión de stock.\n    \"\"\"",
+        "peekOfCode": "def dashboard_view(request):\n    \"\"\"\n    PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')\n    --------------------------------------------\n    Gestión integral del negocio:\n    - Métricas en tiempo real (productos, ofertas, usuarios, categorías).\n    - Métricas financieras (inversión total, valor comercial, margen estimado).\n    - Inventario con edición y creación directa sin salir del dashboard.\n    - Categorización del catálogo en vivo.\n    \"\"\"",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "crear_producto_dashboard",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def crear_producto_dashboard(request):\n    \"\"\"\n    CREACIÓN DIRECTA DE PRODUCTOS DESDE EL DASHBOARD\n    \"\"\"\n    if request.method == 'POST':\n        try:\n            nombre = request.POST.get('nombre', '').strip()\n            categoria_id = request.POST.get('categoria_id')\n            costo_compra = Decimal(request.POST.get('costo_compra', '0').replace(',', '.'))\n            precio_venta_unitario = Decimal(request.POST.get('precio_venta_unitario', '0').replace(',', '.'))",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "editar_producto_dashboard",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def editar_producto_dashboard(request, id_producto):\n    \"\"\"\n    EDICIÓN RÁPIDA DE PRECIOS, COSTOS, OFERTAS Y STOCK DESDE EL DASHBOARD\n    \"\"\"\n    if request.method == 'POST':\n        producto = get_object_or_404(Producto, pk=id_producto)\n        try:\n            producto.nombre = request.POST.get('nombre', producto.nombre).strip()\n            categoria_id = request.POST.get('categoria_id')\n            if categoria_id:",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "eliminar_producto_dashboard",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def eliminar_producto_dashboard(request, id_producto):\n    \"\"\"\n    ELIMINACIÓN DE PRODUCTO DESDE EL DASHBOARD\n    \"\"\"\n    if request.method == 'POST':\n        producto = get_object_or_404(Producto, pk=id_producto)\n        nombre = producto.nombre\n        producto.delete()\n        messages.success(request, f\"El producto '{nombre}' fue eliminado del catálogo.\")\n    return redirect('dashboard')",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "crear_categoria_dashboard",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def crear_categoria_dashboard(request):\n    \"\"\"\n    CREACIÓN DE CATEGORÍA DESDE EL DASHBOARD\n    \"\"\"\n    if request.method == 'POST':\n        nombre = request.POST.get('nombre', '').strip()\n        descripcion = request.POST.get('descripcion', '').strip()\n        if nombre:\n            Categoria.objects.create(nombre=nombre, descripcion=descripcion)\n            messages.success(request, f\"¡Categoría '{nombre}' creada exitosamente!\")",
+        "detail": "principal.views",
+        "documentation": {}
+    },
+    {
+        "label": "eliminar_categoria_dashboard",
+        "kind": 2,
+        "importPath": "principal.views",
+        "description": "principal.views",
+        "peekOfCode": "def eliminar_categoria_dashboard(request, id_categoria):\n    \"\"\"\n    ELIMINACIÓN DE CATEGORÍA DESDE EL DASHBOARD\n    \"\"\"\n    if request.method == 'POST':\n        categoria = get_object_or_404(Categoria, pk=id_categoria)\n        if categoria.productos.exists():\n            messages.warning(request, f\"No se puede eliminar '{categoria.nombre}' porque contiene productos asociados.\")\n        else:\n            nombre = categoria.nombre",
         "detail": "principal.views",
         "documentation": {}
     },
