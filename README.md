@@ -53,10 +53,9 @@ ProyectoFinalSenaFruteria/
 │   ├── models.py               # Modelos relacionales: Categoria, Producto, etc.
 │   ├── views.py                # Controladores: inicio, dashboard, catálogo
 │   ├── admin.py                # Parametrización del panel de control
-│   ├── templates/              # Plantillas HTML con motor DTL
-│   │   ├── principal/          # index.html (Inicio), dashboard.html, login.html
-│   │   └── fruteria/           # catalogo_frutas.html, tienda.html
-│   └── static/                 # Estilos CSS (panel.css, index.css) y scripts JS
+│   ├── templates/              # Plantillas HTML con motor DTL (Unificadas)
+│   │   └── principal/          # index.html (Inicio), catalogo_frutas.html, dashboard.html, login.html
+│   └── static/                 # Estilos CSS (panel.css, index.css, frutas.css) y scripts JS
 │
 ├── evidencia/                  # Entregables oficiales de la Guía G-03
 │   ├── Informe_Tecnico_Modelo_Datos_Fruteria_APA7.pdf  # Informe oficial APA 7
