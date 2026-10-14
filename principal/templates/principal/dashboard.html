@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js para analítica interactiva y gráficos financieros del catálogo -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <style>
     /* Estilos específicos para la gestión interactiva del dashboard */
     body {
@@ -117,6 +119,107 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    /* Gráficos y Analítica Visual */
+    .dash-charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 992px) {
+      .dash-charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .dash-chart-card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 1.25rem 1.4rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+      border: 1px solid #eef2f6;
+      display: flex;
+      flex-direction: column;
+    }
+    .dash-chart-header {
+      margin-bottom: 0.85rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.6rem;
+    }
+    .dash-chart-header h4 {
+      margin: 0;
+      font-size: 0.98rem;
+      color: #1e293b;
+      font-weight: 700;
+    }
+    .dash-chart-sub {
+      font-size: 0.78rem;
+      color: #64748b;
+      display: block;
+      margin-top: 2px;
+    }
+    .dash-chart-canvas-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Filtros Rápidos de Inventario */
+    .quick-filters-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .quick-filters-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 0.25rem;
+    }
+    .quick-filter-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .quick-filter-btn:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    .quick-filter-btn.active {
+      background: #1e3a29;
+      color: #ffffff;
+      border-color: #1e3a29;
+      box-shadow: 0 2px 8px rgba(30, 58, 41, 0.25);
+    }
+    .quick-filter-btn .pill-count {
+      background: rgba(0,0,0,0.06);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+    }
+    .quick-filter-btn.active .pill-count {
+      background: rgba(255,255,255,0.22);
+      color: #ffffff;
     }
   </style>
 </head>
@@ -239,6 +342,30 @@
           </div>
 
           <!-- ================================================================ -->
+          <!-- 3.1. ANALÍTICA VISUAL Y GRÁFICOS EJECUTIVOS (Chart.js)             -->
+          <!-- ================================================================ -->
+          <div class="dash-charts-grid">
+            <div class="dash-chart-card">
+              <div class="dash-chart-header">
+                <h4>Distribución por Categorías</h4>
+                <span class="dash-chart-sub">Volumen de productos clasificados por grupo taxonómico</span>
+              </div>
+              <div class="dash-chart-canvas-wrap">
+                <canvas id="chartCategorias"></canvas>
+              </div>
+            </div>
+            <div class="dash-chart-card">
+              <div class="dash-chart-header">
+                <h4>Rentabilidad y Márgenes de Ganancia</h4>
+                <span class="dash-chart-sub">Comparativa Costo de Compra vs Precio de Venta ($ COP)</span>
+              </div>
+              <div class="dash-chart-canvas-wrap">
+                <canvas id="chartMargenes"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================================ -->
           <!-- 4. TABLA DE INVENTARIO Y GESTIÓN CRUD EN TIEMPO REAL              -->
           <!-- ================================================================ -->
           <div class="products-table-container">
@@ -260,6 +387,23 @@
               </div>
             </div>
 
+            <!-- Filtros Rápidos de Inventario -->
+            <div class="quick-filters-row">
+              <span class="quick-filters-label">Filtro rápido:</span>
+              <button type="button" class="quick-filter-btn active" data-filter="todos" onclick="filtrarPorEstado('todos', this)">
+                Todos <span class="pill-count">{{ total_productos }}</span>
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="oferta" onclick="filtrarPorEstado('oferta', this)">
+                En Oferta <span class="pill-count">{{ total_ofertas }}</span>
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="bajo_stock" onclick="filtrarPorEstado('bajo_stock', this)">
+                Bajo Stock <span class="pill-count">{{ total_bajo_stock }}</span>
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="agotado" onclick="filtrarPorEstado('agotado', this)">
+                Agotados <span class="pill-count">{{ total_agotados }}</span>
+              </button>
+            </div>
+
             <table>
               <thead>
                 <tr>
@@ -276,7 +420,11 @@
               </thead>
               <tbody id="tablaProductosBody">
                 {% for producto in productos %}
-                <tr class="fila-producto" data-busqueda="{{ producto.nombre|lower }} {{ producto.categoria.nombre|lower }} {{ producto.estado|lower }}">
+                <tr class="fila-producto"
+                    data-busqueda="{{ producto.nombre|lower }} {{ producto.categoria.nombre|lower }} {{ producto.estado|lower }}"
+                    data-oferta="{% if producto.en_oferta %}1{% else %}0{% endif %}"
+                    data-bajo-stock="{% if producto.stock_actual <= producto.stock_minimo %}1{% else %}0{% endif %}"
+                    data-agotado="{% if producto.stock_actual <= 0 or producto.estado == 'Agotado' %}1{% else %}0{% endif %}">
                   <td>
                     <div class="table-prod-info">
                       <span class="table-prod-icon">{{ producto.nombre|slice:":1"|upper }}</span>
@@ -697,6 +845,16 @@
   </div>
 
   <!-- ====================================================================== -->
+  <!-- DATOS SEGUROS PARA ANALÍTICA Y GRÁFICOS (JSON Script Django)            -->
+  <!-- ====================================================================== -->
+  {{ chart_cat_labels|json_script:"data-cat-labels" }}
+  {{ chart_cat_data|json_script:"data-cat-data" }}
+  {{ chart_prod_labels|json_script:"data-prod-labels" }}
+  {{ chart_prod_costos|json_script:"data-prod-costos" }}
+  {{ chart_prod_precios|json_script:"data-prod-precios" }}
+  {{ chart_prod_margenes|json_script:"data-prod-margenes" }}
+
+  <!-- ====================================================================== -->
   <!-- JAVASCRIPT: CONTROLADORES DE MODALES, CÁLCULO DE MÁRGENES Y BÚSQUEDA    -->
   <!-- ====================================================================== -->
   <script>
@@ -819,14 +977,38 @@
       document.getElementById('modalNuevaCategoria').classList.remove('open');
     }
 
-    // 5. Filtro de búsqueda instantáneo en la tabla
+    // 5. Filtros combinados (Búsqueda por texto + Filtro rápido por estado)
+    let filtroEstadoActual = 'todos';
+
+    function filtrarPorEstado(tipo, btn) {
+      filtroEstadoActual = tipo;
+      document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      aplicarFiltrosCombinados();
+    }
+
     function filtrarTablaProductos() {
-      const termino = document.getElementById('inputBuscarProducto').value.toLowerCase().trim();
+      aplicarFiltrosCombinados();
+    }
+
+    function aplicarFiltrosCombinados() {
+      const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
       const filas = document.querySelectorAll('#tablaProductosBody tr.fila-producto');
 
       filas.forEach(fila => {
         const busquedaTexto = fila.getAttribute('data-busqueda') || '';
-        if (busquedaTexto.includes(termino)) {
+        const coincideTexto = busquedaTexto.includes(termino);
+
+        let coincideEstado = true;
+        if (filtroEstadoActual === 'oferta') {
+          coincideEstado = fila.getAttribute('data-oferta') === '1';
+        } else if (filtroEstadoActual === 'bajo_stock') {
+          coincideEstado = fila.getAttribute('data-bajo-stock') === '1';
+        } else if (filtroEstadoActual === 'agotado') {
+          coincideEstado = fila.getAttribute('data-agotado') === '1';
+        }
+
+        if (coincideTexto && coincideEstado) {
           fila.style.display = '';
         } else {
           fila.style.display = 'none';
@@ -850,6 +1032,138 @@
           this.classList.remove('open');
         }
       });
+    });
+
+    // 7. Inicialización de Gráficos Ejecutivos con Chart.js
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        const parseJsonSafe = (id, fallback) => {
+          const el = document.getElementById(id);
+          if (!el) return fallback;
+          try { return JSON.parse(el.textContent); } catch (e) { return fallback; }
+        };
+
+        const catLabels = parseJsonSafe('data-cat-labels', []);
+        const catData = parseJsonSafe('data-cat-data', []);
+        const prodLabels = parseJsonSafe('data-prod-labels', []);
+        const prodCostos = parseJsonSafe('data-prod-costos', []);
+        const prodPrecios = parseJsonSafe('data-prod-precios', []);
+        const prodMargenes = parseJsonSafe('data-prod-margenes', []);
+
+        // Paleta moderna, vibrante y limpia
+        const coloresCategorias = [
+          '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
+        ];
+
+        // Gráfico 1: Doughnut Categorías
+        const ctxCat = document.getElementById('chartCategorias');
+        if (ctxCat && catLabels.length > 0 && typeof Chart !== 'undefined') {
+          new Chart(ctxCat, {
+            type: 'doughnut',
+            data: {
+              labels: catLabels,
+              datasets: [{
+                data: catData,
+                backgroundColor: coloresCategorias.slice(0, catLabels.length),
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                hoverOffset: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    boxWidth: 12,
+                    font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
+                    padding: 8
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return ` ${context.label}: ${context.raw} productos`;
+                    }
+                  }
+                }
+              },
+              cutout: '62%'
+            }
+          });
+        }
+
+        // Gráfico 2: Barras Rentabilidad y Precios
+        const ctxMargenes = document.getElementById('chartMargenes');
+        if (ctxMargenes && prodLabels.length > 0 && typeof Chart !== 'undefined') {
+          new Chart(ctxMargenes, {
+            type: 'bar',
+            data: {
+              labels: prodLabels,
+              datasets: [
+                {
+                  label: 'Costo Compra',
+                  data: prodCostos,
+                  backgroundColor: '#94a3b8',
+                  borderRadius: 6
+                },
+                {
+                  label: 'Precio Venta',
+                  data: prodPrecios,
+                  backgroundColor: '#10b981',
+                  borderRadius: 6
+                },
+                {
+                  label: 'Margen Bruto',
+                  data: prodMargenes,
+                  backgroundColor: '#0284c7',
+                  borderRadius: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    boxWidth: 12,
+                    font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
+                    padding: 10
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return ` ${context.dataset.label}: $${Number(context.raw).toLocaleString('es-CO')} COP`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: { font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
+                },
+                y: {
+                  grid: { color: '#f1f5f9' },
+                  ticks: {
+                    font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+                    callback: function(value) {
+                      return '$' + Number(value).toLocaleString('es-CO');
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error al inicializar Chart.js:', err);
+      }
     });
   </script>
 </body>
