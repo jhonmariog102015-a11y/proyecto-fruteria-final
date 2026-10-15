@@ -66,6 +66,27 @@ def dashboard_view(request):
     total_productos = productos.count()
     total_ofertas = productos.filter(en_oferta=True).count()
     total_usuarios = User.objects.count()
+    # Sincronización automática de integridad: garantizar que todo usuario cuente con su perfil
+    for u in User.objects.filter(perfil__isnull=True):
+        PerfilUsuario.objects.get_or_create(
+            usuario=u,
+            defaults={'rol': 'admin', 'estado': 'activo', 'telefono': '3001234567'}
+        )
+
+    # Convertir perfiles antiguos de 'cliente' a 'admin' y asegurar permisos de staff
+    PerfilUsuario.objects.filter(rol='cliente').update(rol='admin')
+    User.objects.filter(perfil__rol='admin', is_staff=False).update(is_staff=True)
+
+    # Filtrar única y exclusivamente los ADMINISTRADORES del sistema (sin clientes)
+    perfiles_usuarios = PerfilUsuario.objects.select_related('usuario').filter(
+        rol='admin'
+    ).order_by('-fecha_creacion')
+
+    # Métricas específicas del equipo de administradores
+    total_admins = perfiles_usuarios.count()
+    total_admins_activos = perfiles_usuarios.filter(estado='activo').count()
+    total_superadmins = perfiles_usuarios.filter(usuario__is_superuser=True).count()
+    total_staff = perfiles_usuarios.filter(usuario__is_staff=True).count()
 
     # Métricas financieras del catálogo
     inversion_total = sum(p.costo_compra * p.stock_actual for p in productos)
@@ -76,9 +97,13 @@ def dashboard_view(request):
     return render(request, 'principal/dashboard.html', {
         'productos': productos,
         'categorias': categorias,
+        'perfiles_usuarios': perfiles_usuarios,
         'total_productos': total_productos,
         'total_ofertas': total_ofertas,
-        'total_usuarios': total_usuarios,
+        'total_admins': total_admins,
+        'total_admins_activos': total_admins_activos,
+        'total_superadmins': total_superadmins,
+        'total_staff': total_staff,
         'inversion_total': inversion_total,
         'valor_venta_potencial': valor_venta_potencial,
         'ganancia_potencial': ganancia_potencial,
@@ -289,35 +314,40 @@ def registro_view(request):
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         telefono = request.POST.get('telefono', '').strip()
-        rol = request.POST.get('rol', 'cliente').strip()
+        rol = request.POST.get('rol', 'admin').strip().lower()
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
 
         # Validaciones de integridad
         if not username or not email or not password:
             messages.error(request, 'Por favor completa todos los campos obligatorios.')
-            return render(request, 'principal/registro.html')
+            return render(request, 'principal/Registro.html')
 
         if password != confirm_password:
             messages.error(request, 'Las contraseñas ingresadas no coinciden.')
-            return render(request, 'principal/registro.html')
+            return render(request, 'principal/Registro.html')
 
         if User.objects.filter(username=username).exists():
             messages.error(request, 'El nombre de usuario ya se encuentra registrado.')
-            return render(request, 'principal/registro.html')
+            return render(request, 'principal/Registro.html')
 
         if User.objects.filter(email=email).exists():
             messages.error(request, 'El correo electrónico ya está en uso.')
-            return render(request, 'principal/registro.html')
+            return render(request, 'principal/Registro.html')
 
-        # 1. Crear el usuario base de autenticación
+        # Control estricto: NUNCA guardar clientes. Asignar rol de Administrador por defecto
+        if rol not in ['admin', 'cajero', 'bodeguero'] or rol == 'cliente':
+            rol = 'admin'
+
+        # 1. Crear el usuario base de autenticación con acceso administrativo (is_staff)
         nuevo_usuario = User.objects.create_user(
             username=username,
             email=email,
-            password=password
+            password=password,
+            is_staff=True
         )
 
-        # 2. Crear su perfil vinculado (estado 'activo' por defecto y fecha_creacion automática)
+        # 2. Crear su perfil vinculado exclusivo como Administrador
         PerfilUsuario.objects.create(
             usuario=nuevo_usuario,
             telefono=telefono,
@@ -327,11 +357,9 @@ def registro_view(request):
 
         # 3. Autenticar e iniciar sesión de inmediato
         auth_login(request, nuevo_usuario)
-        messages.success(request, f'¡Bienvenido a El Paso Frutería, {username}!')
+        messages.success(request, f'¡Bienvenido al sistema, {username}! Tu cuenta ha sido registrada con permisos de Administrador.')
 
-        # Redirigir según el rol asignado
-        if rol in ['admin', 'cajero']:
-            return redirect('dashboard')
-        return redirect('index')
+        # Redirigir directamente al panel administrativo
+        return redirect('dashboard')
 
-    return render(request, 'principal/registro.html')
+    return render(request, 'principal/Registro.html')

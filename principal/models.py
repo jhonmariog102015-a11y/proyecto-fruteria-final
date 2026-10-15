@@ -233,7 +233,8 @@ class PerfilUsuario(models.Model):
     ROLES = [
         ('admin', 'Administrador'),
         ('cajero', 'Cajero'),
-        ('cliente', 'Cliente'),
+        ('bodeguero', 'Bodeguero'),
+    
     ]
     ESTADOS = [
         ('activo', 'Activo'),
@@ -242,7 +243,7 @@ class PerfilUsuario(models.Model):
 
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil', verbose_name="Usuario")
     telefono = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono")
-    rol = models.CharField(max_length=30, choices=ROLES, default='cliente', verbose_name="Rol en el sistema")
+    rol = models.CharField(max_length=30, choices=ROLES, default='admin', verbose_name="Rol en el sistema")
     estado = models.CharField(max_length=20, choices=ESTADOS, default='activo', verbose_name="Estado de la cuenta")
     fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Creación")
 

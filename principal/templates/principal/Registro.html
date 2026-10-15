@@ -63,13 +63,29 @@
                     </div>
 
                     <!-- Teléfono -->
-                    <div class="col-12 mb-2">
-                        <label class="form-label small fw-bold" for="telefono">Teléfono (Opcional)</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-telephone text-muted"></i></span>
-                            <input type="tel" name="telefono" id="telefono" class="form-control border-start-0" placeholder="Ej. 3101234567">
-                        </div>
-                    </div>
+    <div class="col-12 mb-2">
+        <label class="form-label small fw-bold" for="telefono">Teléfono (Opcional)</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+            <input type="tel" name="telefono" id="telefono" class="form-control border-start-0" placeholder="Ej. 3101234567">
+        </div>
+    </div>
+
+    <!-- Selector de Rol de Usuario -->
+    <div class="col-12 mb-2">
+        <label class="form-label small fw-bold" for="rol">Rol en el Sistema *</label>
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-shield-check text-success"></i></span>
+            <select name="rol" id="rol" class="form-select border-start-0" required>
+                <option value="admin" selected>Administrador (Acceso y Gestión del Sistema)</option>
+                <option value="cajero">Cajero</option>
+                <option value="bodeguero">Bodeguero</option>
+            </select>
+        </div>
+        <div class="form-text text-muted" style="font-size: 0.76rem;">
+            Las cuentas registradas acceden al panel con perfil de Administrador.
+        </div>
+    </div>
 
                     <!-- Contraseña -->
                     <div class="col-md-6 mb-2">
