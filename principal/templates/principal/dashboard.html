@@ -28,10 +28,13 @@
 
       <!-- Menú principal de enlaces del administrador -->
       <nav class="navigation" aria-label="Main navigation">
-        <a class="active" href="#overview" aria-current="page">
+        <a class="active" onclick="mostrarSeccion('inventario', this)" data-section="inventario" id="nav-inventario" aria-current="page">
           <span class="nav-icon">▪</span> Resumen e Inventario
         </a>
-        <a href="#proveedores">
+        <a onclick="mostrarSeccion('usuarios', this)" data-section="usuarios" id="nav-usuarios">
+          <span class="nav-icon">▪</span> Administradores
+        </a>
+        <a onclick="mostrarSeccion('proveedores', this)" data-section="proveedores" id="nav-proveedores">
           <span class="nav-icon">▪</span> Proveedores Aliados
         </a>
         <a href="{% url 'catalogo_frutas' %}" target="_blank">
@@ -74,7 +77,7 @@
       <header class="topbar">
         <div class="greeting">
           <h1>Hola, {{ request.user.username|capfirst }}</h1>
-          <span class="date">» &nbsp; Al Paso Frutería • Panel de Control Integral</span>
+          <span class="date" id="topbarBreadcrumb">» &nbsp; Al Paso Frutería • Panel de Control Integral</span>
         </div>
 
         <div class="header-actions">
@@ -84,7 +87,7 @@
               id="inputBuscarProducto"
               placeholder="Buscar producto o categoría..."
               aria-label="Buscar en el catálogo"
-              onkeyup="filtrarTablaProductos()"
+              onkeyup="ejecutarBusquedaActiva()"
             >
             <span aria-hidden="true">⌕</span>
           </label>
@@ -107,6 +110,7 @@
           </div>
         {% endif %}
 
+        <div id="seccion-inventario" class="dashboard-section active">
         <!-- ================================================================== -->
         <!-- 3. MÉTRICAS CLAVE (KPI Cards)                                      -->
         <!-- Conteo dinámico y rentabilidad global en tiempo real              -->
@@ -448,8 +452,219 @@
                 </tbody>
               </table>
             </div>
+        </div> <!-- Fin #seccion-inventario -->
+
+        <!-- ================================================================== -->
+        <!-- SECCIÓN DE ADMINISTRADORES DEL SISTEMA (CÓDIGO DE GUTIÉRREZ)       -->
+        <!-- ================================================================== -->
+<div id="seccion-usuarios" class="dashboard-section" style="display: none;">
+          <!-- MÉTRICAS CLAVE ESPECÍFICAS DE ADMINISTRADORES -->
+          <div class="stats-row">
+            <!-- 1. Total Administradores -->
+            <div class="dash-card" style="--card-accent: #dc2626;">
+              <div class="dash-card-header">
+                <h5>Total Administradores</h5>
+                <span class="dash-card-icon" style="background: #fee2e2; color: #dc2626;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #dc2626;">{{ total_admins }}</h3>
+                <span class="kpi-badge kpi-badge-red"><span class="kpi-dot"></span> Equipo</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Cuentas administradoras oficiales</span>
+                <span style="font-weight: 700; color: #dc2626; font-size: 0.75rem;">100%</span>
+              </div>
+            </div>
+
+            <!-- 2. Administradores Activos -->
+            <div class="dash-card" style="--card-accent: #059669;">
+              <div class="dash-card-header">
+                <h5>Cuentas Activas</h5>
+                <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #059669;">{{ total_admins_activos }}</h3>
+                <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Operativo</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Acceso vigente a la plataforma</span>
+                <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">Habilitado</span>
+              </div>
+            </div>
+
+            <!-- 3. Superadministradores -->
+            <div class="dash-card" style="--card-accent: #7c3aed;">
+              <div class="dash-card-header">
+                <h5>Superadministradores</h5>
+                <span class="dash-card-icon" style="background: #ede9fe; color: #7c3aed;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-6 6 7 7-4 4-7-7m-4-4a5 5 0 1 1 7-7 5 5 0 0 1-7 7Z"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #7c3aed;">{{ total_superadmins }}</h3>
+                <span class="kpi-badge kpi-badge-purple">Control Total</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Acceso maestro y Django Admin</span>
+                <span style="font-weight: 700; color: #7c3aed; font-size: 0.75rem;">Root</span>
+              </div>
+            </div>
+
+            <!-- 4. Staff Técnico -->
+            <div class="dash-card" style="--card-accent: #0284c7;">
+              <div class="dash-card-header">
+                <h5>Staff Técnico</h5>
+                <span class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #0284c7;">{{ total_staff }}</h3>
+                <span class="kpi-badge kpi-badge-blue">Staff Django</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Gestión de catálogo y auditoría</span>
+                <span style="font-weight: 700; color: #0284c7; font-size: 0.75rem;">Activo</span>
+              </div>
+            </div>
           </div>
 
+          <!-- TABLA COMPLETA DE ADMINISTRADORES -->
+          <section class="dashboard-products" style="margin-top: 0;">
+            <div class="products-table-container">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                  <h2 style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; color: #dc2626;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </span>
+                    Administradores del Sistema
+                  </h2>
+                  <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">
+                    Control exclusivo de cuentas con permisos de administración, gestión de catálogo y configuración general (sin clientes).
+                  </p>
+                </div>
+                <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                  <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
+                    <input type="search" id="inputBuscarUsuario" placeholder="Buscar administrador o email..."
+                      aria-label="Buscar administrador" onkeyup="filtrarTablaUsuarios()" style="font-size: 0.85rem;">
+                    <span aria-hidden="true">⌕</span>
+                  </label>
+                  <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">
+                    Total: {{ total_admins }} administradores
+                  </span>
+                  <a href="/admin/auth/user/" target="_blank" class="btn-secondary-dash" title="Gestionar en Django Admin">
+                    Django Admin ↗
+                  </a>
+                </div>
+              </div>
+
+              <!-- Pestañas de filtrado rápido por estado y privilegios -->
+              <div style="display: flex; gap: 8px; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center;">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Filtrar:</span>
+                <button type="button" class="btn-role-tab active" onclick="filtrarPorRol('todos', this)">Todos ({{ total_admins }})</button>
+                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('activo', this)">Activos ({{ total_admins_activos }})</button>
+                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('superadmin', this)">Superadmin ({{ total_superadmins }})</button>
+                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('staff', this)">Staff Técnico ({{ total_staff }})</button>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Administrador</th>
+                    <th scope="col">Correo Electrónico</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">Rol Asignado</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha de Registro</th>
+                    <th scope="col" style="text-align: center;">Nivel de Acceso</th>
+                    <th scope="col" style="text-align: center;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaUsuariosBody">
+                  {% for perfil in perfiles_usuarios %}
+                  <tr class="fila-usuario"
+                    data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} admin {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }} {% if perfil.usuario.is_superuser %}superadmin{% endif %} {% if perfil.usuario.is_staff %}staff{% endif %}">
+                    <td>
+                      <div class="table-prod-info">
+                        <span class="table-prod-icon" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">
+                          {{ perfil.usuario.username|slice:":2"|upper }}
+                        </span>
+                        <div>
+                          <strong style="color: #1e293b;">{{ perfil.usuario.username }}</strong>
+                          <div style="font-size: 0.75rem; color: #64748b;">
+                            {% if perfil.usuario.first_name %}
+                              {{ perfil.usuario.first_name }} {{ perfil.usuario.last_name }}
+                            {% else %}
+                              Administrador del Sistema
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {% if perfil.usuario.email %}
+                      <span style="color: #334155; font-size: 0.88rem;">{{ perfil.usuario.email }}</span>
+                      {% else %}
+                      <span style="color: #94a3b8; font-style: italic; font-size: 0.82rem;">No registrado</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if perfil.telefono %}
+                      <span style="font-weight: 500; color: #047857; font-size: 0.85rem;">
+                        {{ perfil.telefono }}
+                      </span>
+                      {% else %}
+                      <span style="color: #94a3b8; font-size: 0.82rem;">—</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span class="badge-oferta" style="background: #fee2e2; color: #b91c1c; border-color: #fca5a5; font-weight: 700;">
+                        Administrador
+                      </span>
+                    </td>
+                    <td>
+                      {% if perfil.estado == 'activo' %}
+                      <span class="badge-status">Activo</span>
+                      {% else %}
+                      <span class="badge-oferta">Inactivo</span>
+                      {% endif %}
+                    </td>
+                    <td style="color: #64748b; font-size: 0.82rem;">
+                      {{ perfil.fecha_creacion|date:"d/m/Y H:i" }}
+                    </td>
+                    <td style="text-align: center;">
+                      {% if perfil.usuario.is_superuser %}
+                      <span style="font-size: 0.75rem; font-weight: 700; color: #b91c1c; background: #fff1f2; padding: 3px 8px; border-radius: 6px; border: 1px solid #fecdd3;">Superadmin</span>
+                      {% elif perfil.usuario.is_staff %}
+                      <span style="font-size: 0.75rem; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 3px 8px; border-radius: 6px; border: 1px solid #bfdbfe;">Staff / Admin</span>
+                      {% else %}
+                      <span style="font-size: 0.75rem; font-weight: 600; color: #047857; background: #ecfdf5; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">Administrador</span>
+                      {% endif %}
+                    </td>
+                    <td style="text-align: center; white-space: nowrap;">
+                      <a href="/admin/auth/user/{{ perfil.usuario.id }}/change/" target="_blank"
+                         class="btn-action-edit" title="Gestionar cuenta en Django Admin">
+                        Gestionar ↗
+                      </a>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td class="empty-products" colspan="8">
+                      No hay cuentas de administradores registradas en el sistema.
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
 
       </div>
@@ -1049,6 +1264,127 @@
       if (btn) btn.classList.add('active');
       aplicarFiltrosCombinados();
     }
+
+    // Control de Secciones SPA en el Dashboard
+    function mostrarSeccion(seccionId, navEl) {
+      const secKey = seccionId.replace('seccion-', '');
+
+      if (secKey === 'proveedores') {
+        mostrarSeccion('inventario');
+        setTimeout(() => {
+          const el = document.getElementById('proveedores');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 120);
+
+        document.querySelectorAll('.navigation a[data-section]').forEach(link => {
+          link.classList.remove('active');
+          link.removeAttribute('aria-current');
+        });
+        const navActivo = navEl || document.querySelector('.navigation a[data-section="proveedores"]');
+        if (navActivo) {
+          navActivo.classList.add('active');
+          navActivo.setAttribute('aria-current', 'page');
+        }
+        return;
+      }
+
+      document.querySelectorAll('.dashboard-section').forEach(sec => {
+        sec.classList.remove('active');
+        sec.style.display = 'none';
+      });
+
+      const secDestino = document.getElementById('seccion-' + secKey);
+      if (secDestino) {
+        secDestino.classList.add('active');
+        secDestino.style.display = 'block';
+      }
+
+      document.querySelectorAll('.navigation a[data-section]').forEach(link => {
+        link.classList.remove('active');
+        link.removeAttribute('aria-current');
+      });
+
+      const navActivo = navEl || document.querySelector(`.navigation a[data-section="${secKey}"]`);
+      if (navActivo) {
+        navActivo.classList.add('active');
+        navActivo.setAttribute('aria-current', 'page');
+      }
+
+      const breadcrumb = document.getElementById('topbarBreadcrumb');
+      const inputBuscar = document.getElementById('inputBuscarProducto');
+      if (breadcrumb) {
+        if (secKey === 'usuarios') {
+          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Administradores del Sistema</strong>';
+          if (inputBuscar) inputBuscar.placeholder = 'Buscar administrador o email...';
+        } else if (secKey === 'proveedores') {
+          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Productores y Proveedores Aliados</strong>';
+          if (inputBuscar) inputBuscar.placeholder = 'Buscar proveedor, contacto o NIT...';
+        } else {
+          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Resumen e Inventario de Frutas</strong>';
+          if (inputBuscar) inputBuscar.placeholder = 'Buscar producto o categoría...';
+        }
+      }
+
+      if (history.replaceState) {
+        history.replaceState(null, null, '#' + secKey);
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function ejecutarBusquedaActiva() {
+      const secUsuarios = document.getElementById('seccion-usuarios');
+      const esUsuarios = secUsuarios && secUsuarios.classList.contains('active');
+      const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
+
+      if (esUsuarios) {
+        const inputUsu = document.getElementById('inputBuscarUsuario');
+        if (inputUsu) inputUsu.value = termino;
+        filtrarTablaUsuarios(termino);
+      } else {
+        filtrarTablaProductos();
+      }
+    }
+
+    function filtrarTablaUsuarios(terminoDirecto) {
+      const input = document.getElementById('inputBuscarUsuario');
+      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
+      const filas = document.querySelectorAll('#tablaUsuariosBody tr.fila-usuario');
+
+      filas.forEach(fila => {
+        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
+        fila.style.display = busquedaTexto.includes(termino) ? '' : 'none';
+      });
+    }
+
+    function filtrarPorRol(filtro, btn) {
+      document.querySelectorAll('.btn-role-tab').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const filas = document.querySelectorAll('#tablaUsuariosBody tr.fila-usuario');
+      filas.forEach(fila => {
+        const busquedaTexto = (fila.getAttribute('data-busqueda') || '').toLowerCase();
+        if (filtro === 'todos') {
+          fila.style.display = '';
+        } else {
+          fila.style.display = busquedaTexto.includes(filtro.toLowerCase()) ? '' : 'none';
+        }
+      });
+    }
+
+    function sincronizarSeccionUrl() {
+      const hash = (window.location.hash || '').replace('#', '');
+      if (hash === 'usuarios') {
+        mostrarSeccion('usuarios');
+      } else if (hash === 'proveedores') {
+        mostrarSeccion('proveedores');
+      } else {
+        mostrarSeccion('inventario');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', sincronizarSeccionUrl);
+    window.addEventListener('hashchange', sincronizarSeccionUrl);
 
     function filtrarTablaProductos() {
       aplicarFiltrosCombinados();

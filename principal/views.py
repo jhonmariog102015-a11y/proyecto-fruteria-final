@@ -111,16 +111,39 @@ def dashboard_view(request):
     proveedores = Proveedor.objects.all().order_by('razon_social')
     total_proveedores = proveedores.count()
 
+    # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
+    # Sincronización de perfiles administrativos y métricas del equipo de gestión
+    for u in User.objects.filter(perfil__isnull=True):
+        PerfilUsuario.objects.get_or_create(
+            usuario=u,
+            defaults={'rol': 'admin' if u.is_staff else 'cliente', 'estado': 'activo', 'telefono': '3001234567'}
+        )
+
+    # Listado de usuarios administrativos del sistema (admin, cajero, bodeguero)
+    perfiles_usuarios = PerfilUsuario.objects.select_related('usuario').filter(
+        rol__in=['admin', 'cajero', 'bodeguero']
+    ).order_by('-fecha_creacion')
+
+    total_admins = perfiles_usuarios.filter(rol='admin').count()
+    total_admins_activos = perfiles_usuarios.filter(estado='activo').count()
+    total_superadmins = perfiles_usuarios.filter(usuario__is_superuser=True).count()
+    total_staff = perfiles_usuarios.filter(usuario__is_staff=True).count()
+
     return render(request, 'principal/dashboard.html', {
         'productos': productos,
         'categorias': categorias,
         'proveedores': proveedores,
+        'perfiles_usuarios': perfiles_usuarios,
         'total_productos': total_productos,
         'total_ofertas': total_ofertas,
         'total_bajo_stock': total_bajo_stock,
         'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,
+        'total_admins': total_admins,
+        'total_admins_activos': total_admins_activos,
+        'total_superadmins': total_superadmins,
+        'total_staff': total_staff,
         'inversion_total': inversion_total,
         'valor_venta_potencial': valor_venta_potencial,
         'ganancia_potencial': ganancia_potencial,

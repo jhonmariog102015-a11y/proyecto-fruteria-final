@@ -1804,3 +1804,93 @@ button {
       padding: 0.55rem 1.25rem !important;
       font-size: 0.85rem !important;
     }
+
+/* ==============================================================================
+   SECCIÓN DE ADMINISTRADORES Y NAVEGACIÓN SPA (INTEGRACIÓN CÓDIGO GUTIÉRREZ)
+   Centralizado en static/css/panel.css según lineamientos de buenas prácticas
+   ============================================================================== */
+.dashboard-section {
+  display: none;
+  animation: fadeInSection 0.22s ease-in-out;
+}
+.dashboard-section.active {
+  display: block;
+}
+@keyframes fadeInSection {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.navigation a {
+  cursor: pointer;
+  user-select: none;
+}
+.btn-role-tab {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-role-tab:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.btn-role-tab.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+}
+
+.kpi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.kpi-badge-red {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.kpi-badge-green {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.kpi-badge-purple {
+  background: #faf5ff;
+  color: #7e22ce;
+  border: 1px solid #e9d5ff;
+}
+.kpi-badge-blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+.kpi-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
