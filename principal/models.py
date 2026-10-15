@@ -254,3 +254,67 @@ class PerfilUsuario(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} ({self.get_rol_display()}) - {self.get_estado_display()}"
+
+
+# ==============================================================================
+# SEÑALES DE INTEGRIDAD Y AUDITORÍA AUTOMÁTICA
+# ==============================================================================
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.signals import user_logged_in, user_login_failed
+
+
+@receiver(post_save, sender=User)
+def garantizar_perfil_usuario(sender, instance, created, **kwargs):
+    """
+    Garantiza que todo usuario en el sistema disponga de un PerfilUsuario vinculado.
+    Asigna rol 'admin' a superusuarios, 'cajero' a staff y 'cliente' a usuarios estándar.
+    """
+    if created:
+        rol_default = 'admin' if instance.is_superuser else ('cajero' if instance.is_staff else 'cliente')
+        PerfilUsuario.objects.get_or_create(
+            usuario=instance,
+            defaults={
+                'rol': rol_default,
+                'estado': 'activo',
+            }
+        )
+
+
+@receiver(user_logged_in)
+def registrar_acceso_exitoso(sender, request, user, **kwargs):
+    """Registra automáticamente en RegistroLogin los accesos exitosos para auditoría."""
+    try:
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '127.0.0.1')) if request else '127.0.0.1'
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+        perfil = getattr(user, 'perfil', None)
+        RegistroLogin.objects.create(
+            usuario=user,
+            identificador=user.username,
+            telefono=perfil.telefono if perfil else None,
+            rol=perfil.rol if perfil else ('admin' if user.is_staff else 'cliente'),
+            estado='exitoso',
+            ip_origen=ip[:45] if ip else '127.0.0.1'
+        )
+    except Exception:
+        pass
+
+
+@receiver(user_login_failed)
+def registrar_acceso_fallido(sender, credentials, request, **kwargs):
+    """Registra automáticamente en RegistroLogin los intentos fallidos de autenticación."""
+    try:
+        identificador = credentials.get('username', 'desconocido') if credentials else 'desconocido'
+        ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', '127.0.0.1')) if request else '127.0.0.1'
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+        RegistroLogin.objects.create(
+            usuario=None,
+            identificador=identificador,
+            estado='fallido',
+            ip_origen=ip[:45] if ip else '127.0.0.1'
+        )
+    except Exception:
+        pass
+

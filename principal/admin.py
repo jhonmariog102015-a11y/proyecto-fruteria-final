@@ -98,3 +98,59 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'rol', 'telefono', 'estado', 'fecha_creacion')
     list_filter = ('rol', 'estado', 'fecha_creacion')
     search_fields = ('usuario__username', 'usuario__email', 'telefono')
+
+
+# ==============================================================================
+# INTEGRACIÓN DE PERFIL INSTITUCIONAL EN EL ADMINISTRADOR DE USUARIOS DE DJANGO
+# ==============================================================================
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+
+
+class PerfilUsuarioInline(admin.StackedInline):
+    """Permite ver y editar el rol y contacto directamente desde la ficha del usuario en admin."""
+    model = PerfilUsuario
+    can_delete = False
+    verbose_name = 'Perfil Institucional'
+    verbose_name_plural = 'Perfil Institucional y Rol'
+    fk_name = 'usuario'
+
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+
+
+@admin.register(User)
+class CustomUserAdmin(BaseUserAdmin):
+    """
+    Administrador extendido de usuarios que incluye perfil, roles (admin/cajero/cliente),
+    estado de cuenta y filtros avanzados de auditoría.
+    """
+    inlines = (PerfilUsuarioInline,)
+    list_display = (
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'get_rol',
+        'get_estado',
+        'is_staff',
+        'is_superuser'
+    )
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'perfil__rol', 'perfil__estado')
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'perfil__telefono')
+
+    @admin.display(description="Rol Institucional")
+    def get_rol(self, obj):
+        if hasattr(obj, 'perfil') and obj.perfil:
+            return obj.perfil.get_rol_display()
+        return "Sin perfil"
+
+    @admin.display(description="Estado Cuenta")
+    def get_estado(self, obj):
+        if hasattr(obj, 'perfil') and obj.perfil:
+            return obj.perfil.get_estado_display()
+        return "Activo"
+

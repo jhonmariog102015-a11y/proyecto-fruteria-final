@@ -434,16 +434,23 @@ def registro_view(request):
             password=password
         )
 
-        # 2. Crear su perfil vinculado (estado 'activo' por defecto y fecha_creacion automática)
-        PerfilUsuario.objects.create(
-            usuario=nuevo_usuario,
-            telefono=telefono,
-            rol=rol,
-            estado='activo'
-        )
+        # 2. Configurar perfil vinculado y permisos acordes al rol
+        perfil, _ = PerfilUsuario.objects.get_or_create(usuario=nuevo_usuario)
+        perfil.telefono = telefono
+        perfil.rol = rol
+        perfil.estado = 'activo'
+        perfil.save()
+
+        if rol == 'admin':
+            nuevo_usuario.is_staff = True
+            nuevo_usuario.is_superuser = True
+            nuevo_usuario.save()
+        elif rol == 'cajero':
+            nuevo_usuario.is_staff = True
+            nuevo_usuario.save()
 
         # 3. Autenticar e iniciar sesión de inmediato
-        auth_login(request, nuevo_usuario)
+        auth_login(request, nuevo_usuario, backend='principal.backends.EmailOrUsernameModelBackend')
         messages.success(request, f'¡Bienvenido a Al Paso Frutería, {username}!')
 
         # Redirigir según el rol asignado

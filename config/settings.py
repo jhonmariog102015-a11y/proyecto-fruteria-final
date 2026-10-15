@@ -82,6 +82,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Backends de autenticación (soporta inicio de sesión por nombre de usuario o correo electrónico)
+AUTHENTICATION_BACKENDS = [
+    'principal.backends.EmailOrUsernameModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # Seguridad de sesiones para empleados y administradores
 SESSION_COOKIE_AGE = 86400  # 24 horas de vigencia máxima de sesión
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Cierre automático de sesión al cerrar el navegador

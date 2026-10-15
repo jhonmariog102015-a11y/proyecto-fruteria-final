@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.test import TestCase
 from principal.models import Categoria, Producto
+from django.contrib.auth import authenticate
 
 
 class ProductoMargenOfertaTestCase(TestCase):
@@ -292,6 +293,31 @@ class RegistroViewTestCase(TestCase):
         self.assertRedirects(response, reverse('index'))
         User = get_user_model()
         self.assertTrue(User.objects.filter(username='nuevo_cliente').exists())
+        nuevo = User.objects.get(username='nuevo_cliente')
+        self.assertTrue(hasattr(nuevo, 'perfil'))
+        self.assertEqual(nuevo.perfil.rol, 'cliente')
+
+    def test_creacion_usuario_crea_perfil_automaticamente(self):
+        User = get_user_model()
+        u = User.objects.create_user(username='auto_perfil_user', email='auto@fruteria.com', password='Password123!')
+        self.assertTrue(hasattr(u, 'perfil'))
+        self.assertEqual(u.perfil.rol, 'cliente')
+        self.assertEqual(u.perfil.estado, 'activo')
+
+    def test_autenticacion_por_email_y_username(self):
+        User = get_user_model()
+        User.objects.create_user(username='test_auth_user', email='test_auth@fruteria.com', password='PasswordSeguro123!')
+        
+        # Probar autenticación por nombre de usuario
+        auth_by_user = authenticate(username='test_auth_user', password='PasswordSeguro123!')
+        self.assertIsNotNone(auth_by_user)
+        self.assertEqual(auth_by_user.username, 'test_auth_user')
+
+        # Probar autenticación por correo electrónico
+        auth_by_email = authenticate(username='test_auth@fruteria.com', password='PasswordSeguro123!')
+        self.assertIsNotNone(auth_by_email)
+        self.assertEqual(auth_by_email.username, 'test_auth_user')
+
 
 
 
