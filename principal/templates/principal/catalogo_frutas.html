@@ -5,103 +5,104 @@
 {% block meta_description %}Catálogo completo de frutas frescas cultivadas directamente en el campo. Variedades cítricas, tropicales, berries, importadas y exóticas.{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/frutas.css' %}?v=2.1">
+<link rel="stylesheet" href="{% static 'css/frutas.css' %}?v=2.2">
 {% endblock %}
-
-
 
 {% block content %}
 <!-- ====================================================================== -->
-<!-- CABECERA DEL CATÁLOGO CON BUSCADOR Y CHIPS DE FILTRADO                 -->
+<!-- CABECERA DEL CATÁLOGO                                                  -->
 <!-- ====================================================================== -->
 <main class="catalog-hero">
-    <div class="hero-content">
-        <span class="eyebrow-tag">COSECHA DIRECTA DEL CAMPO</span>
-        <h1>Catálogo de Frutas Frescas</h1>
-        <p>Explora nuestras variedades recién cosechadas por campesinos boyacenses y productores aliados. Calidad seleccionada a mano y dulzor natural garantizado.</p>
-        
-        <!-- BUSCADOR REACTIVO EN VIVO -->
-        <div class="search-box">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="fruitSearch" placeholder="Buscar por fruta, variedad u origen (ej. Mango, Boyacá)..." autocomplete="off">
-            <button class="clear-search-btn" id="clearSearch" aria-label="Limpiar búsqueda" style="display:none;">&times;</button>
+    <div class="catalog-breadcrumb">
+        <a href="{% url 'index' %}">Inicio</a>
+        <span>/</span>
+        <span>Catálogo de Frutas</span>
+    </div>
+
+    <div class="catalog-header-grid">
+        <div>
+            <span class="catalog-eyebrow">
+                <span class="pulse-dot"></span> Cosecha Directa • Sogamoso &amp; Región
+            </span>
+            <h1 class="catalog-title">Nuestras <span>Frutas</span></h1>
+            <p class="catalog-desc">Seleccionadas cada mañana de nuestros productores locales en su punto óptimo de maduración. Directo del campo a tu hogar.</p>
         </div>
 
-        <!-- FILTROS POR CATEGORÍA -->
-        <div class="category-chips" id="categoryChips">
-            <button class="filter-chip active" data-filter="all">Todas las Frutas</button>
-            <button class="filter-chip" data-filter="citricos">Cítricos</button>
-            <button class="filter-chip" data-filter="tropicales">Tropicales</button>
-            <button class="filter-chip" data-filter="berries">Berries</button>
-            <button class="filter-chip" data-filter="importadas">Importadas</button>
-            <button class="filter-chip" data-filter="exoticas">Exóticas</button>
-            <button class="filter-chip chip-ofertas" data-filter="ofertas">En Promoción</button>
+        <!-- Buscador en tiempo real -->
+        <div class="search-box-wrapper">
+            <input type="text" id="fruitSearch" class="search-input" placeholder="Buscar fruta o finca de origen..." autocomplete="off">
+            <button id="clearSearch" class="clear-search-btn" title="Limpiar búsqueda" style="display:none;">✕</button>
         </div>
     </div>
 
-    <!-- CONTENEDOR DE LA CUADRÍCULA DE FRUTAS -->
-    <div class="catalog-container">
-        <!-- CONTADOR DE REFERENCIAS -->
-        <div class="grid-header">
-            <h2>Frutas Disponibles</h2>
-            <span class="counter-text" id="contadorReferencias">MOSTRANDO {{ total_productos }} DE {{ total_productos }} REFERENCIAS</span>
-        </div>
+    <!-- FILTROS POR PESTAÑAS (CHIPS) SIN EMOJIS -->
+    <div class="filters-bar" role="tablist">
+        <span class="filter-label">Filtrar:</span>
+        <button class="filter-chip active" data-filter="all" role="tab">Todas</button>
+        <button class="filter-chip" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">Ofertas</button>
+        <button class="filter-chip" data-filter="citricos" role="tab">Cítricos</button>
+        <button class="filter-chip" data-filter="tropicales" role="tab">Tropicales</button>
+        <button class="filter-chip" data-filter="berries" role="tab">Berries</button>
+        <button class="filter-chip" data-filter="importadas" role="tab">Importadas</button>
+        <button class="filter-chip" data-filter="exoticas" role="tab">Exóticas</button>
+    </div>
 
-        <!-- CUADRÍCULA DE TARJETAS DE FRUTAS -->
-        <div class="fruits-grid" id="fruitsGrid">
+    <!-- CONTADOR DE REFERENCIAS -->
+    <div class="grid-header">
+        <h2>Frutas Disponibles</h2>
+        <span class="counter-text" id="contadorReferencias">MOSTRANDO {{ total_productos }} DE {{ total_productos }} REFERENCIAS</span>
+    </div>
 
-            {% for producto in productos %}
-            <article class="fruit-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
-                <div>
-                    <div class="card-top">
-                        <div class="fruit-visual">
-                            <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
-                        </div>
-                        <span class="badge-fresco"><span class="dot"></span>fresco</span>
-                        {% if producto.en_oferta and producto.precio_oferta %}
-                        <span class="badge-fresco" style="background:#d32f2f; color:#fff; font-weight:700; margin-left:6px;">-{{ producto.porcentaje_descuento }}%</span>
-                        {% endif %}
+    <!-- CUADRÍCULA DE TARJETAS DE FRUTAS -->
+    <div class="fruits-grid" id="fruitsGrid">
+
+        {% for producto in productos %}
+        <article class="fruit-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
+            <div>
+                <div class="card-top">
+                    <div class="fruit-visual">
+                        <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
                     </div>
-                    <span class="fruit-category">{{ producto.categoria.nombre }}</span>
-                    <h3>{{ producto.nombre }}</h3>
-                    <p class="fruit-origin">{{ producto.origen }}</p>
+                    <span class="badge-fresco"><span class="dot"></span>fresco</span>
+                    {% if producto.en_oferta and producto.precio_oferta %}
+                    <span class="badge-fresco" style="background:#d32f2f; color:#fff; font-weight:700; margin-left:6px;">-{{ producto.porcentaje_descuento }}%</span>
+                    {% endif %}
                 </div>
-                <div class="fruit-price-row">
-                    <div class="price-container">
-                        {% if producto.en_oferta and producto.precio_oferta %}
-                            <div style="display:flex; align-items:baseline; gap:5px;">
-                                <span class="price-val" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
-                                <del style="font-size:0.8rem; color:#888;">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
-                            </div>
-                        {% else %}
-                            <span class="price-val">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
-                        {% endif %}
-                        <span class="price-unit">desde / {{ producto.unidad_medida }}</span>
-                    </div>
-                    <button class="add-btn" aria-label="Añadir {{ producto.nombre }}">＋</button>
-                </div>
-            </article>
-            {% endfor %}
-
-            <!-- Mensaje si no se encuentran frutas -->
-            <div id="noResultsMsg" class="no-results" style="display:none;">
-                <div class="no-results-icon" style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem;">
-                    <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="M21 21l-4.35-4.35"></path>
-                    </svg>
-                </div>
-                <h3>No se encontraron frutas</h3>
-                <p>Intenta con otro término de búsqueda o selecciona otra categoría.</p>
+                <span class="fruit-category">{{ producto.categoria.nombre }}</span>
+                <h3>{{ producto.nombre }}</h3>
+                <p class="fruit-origin">{{ producto.origen }}</p>
             </div>
+            <div class="fruit-price-row">
+                <div class="price-container">
+                    {% if producto.en_oferta and producto.precio_oferta %}
+                        <div style="display:flex; align-items:baseline; gap:5px;">
+                            <span class="price-val" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
+                            <del style="font-size:0.8rem; color:#888;">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
+                        </div>
+                    {% else %}
+                        <span class="price-val">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                    {% endif %}
+                    <span class="price-unit">desde / {{ producto.unidad_medida }}</span>
+                </div>
+                <button class="add-btn" aria-label="Añadir {{ producto.nombre }}">＋</button>
+            </div>
+        </article>
+        {% endfor %}
 
+        <!-- Mensaje si no se encuentran frutas -->
+        <div id="noResultsMsg" class="no-results" style="display:none;">
+            <div class="no-results-icon" style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="M21 21l-4.35-4.35"></path>
+                </svg>
+            </div>
+            <h3>No se encontraron frutas</h3>
+            <p>Intenta con otro término de búsqueda o selecciona otra categoría.</p>
         </div>
+
     </div>
 </main>
-
 {% endblock %}
 
 {% block extra_js %}

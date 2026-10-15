@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Categoria, Proveedor, Producto, Cliente
+from .models import Categoria, Proveedor, Producto, Cliente, RegistroLogin, PerfilUsuario
 
 
 @admin.register(Categoria)
@@ -80,3 +80,21 @@ class ProductoAdmin(admin.ModelAdmin):
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')
     list_filter = ('tipo_cliente',)
+
+
+@admin.register(RegistroLogin)
+class RegistroLoginAdmin(admin.ModelAdmin):
+    list_display = ('fecha_creacion', 'identificador', 'rol', 'telefono', 'estado', 'ip_origen')
+    list_filter = ('estado', 'rol', 'fecha_creacion')
+    search_fields = ('identificador', 'telefono', 'ip_origen')
+    readonly_fields = ('fecha_creacion', 'identificador', 'usuario', 'telefono', 'rol', 'estado', 'ip_origen')
+
+    def has_add_permission(self, request):
+        return False  # Los registros son automáticos, no se crean a mano
+
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'rol', 'telefono', 'estado', 'fecha_creacion')
+    list_filter = ('rol', 'estado', 'fecha_creacion')
+    search_fields = ('usuario__username', 'usuario__email', 'telefono')

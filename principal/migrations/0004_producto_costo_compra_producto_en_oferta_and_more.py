@@ -10,6 +10,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(
+            sql="DROP VIEW IF EXISTS principal_producto",
+            reverse_sql=(
+                "CREATE VIEW principal_producto AS "
+                "SELECT id_producto AS id, nombre, "
+                "precio_venta_unitario AS precio, "
+                "CAST(stock_actual AS INTEGER) AS stock, categoria_id, "
+                "CURRENT_TIMESTAMP AS fecha_registro FROM productos"
+            ),
+        ),
         migrations.AddField(
             model_name='producto',
             name='costo_compra',
@@ -24,5 +34,15 @@ class Migration(migrations.Migration):
             model_name='producto',
             name='precio_oferta',
             field=models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='Precio de Oferta'),
+        ),
+        migrations.RunSQL(
+            sql=(
+                "CREATE VIEW principal_producto AS "
+                "SELECT id_producto AS id, nombre, "
+                "precio_venta_unitario AS precio, "
+                "CAST(stock_actual AS INTEGER) AS stock, categoria_id, "
+                "CURRENT_TIMESTAMP AS fecha_registro FROM productos"
+            ),
+            reverse_sql="DROP VIEW IF EXISTS principal_producto",
         ),
     ]

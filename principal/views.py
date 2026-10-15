@@ -6,13 +6,14 @@
 import csv
 from decimal import Decimal
 from django.contrib import messages
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model, logout, login as auth_login
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from .models import Producto, Categoria, Proveedor
+from .models import Producto, Categoria, Proveedor, PerfilUsuario
 from .forms import ProductoForm, CategoriaForm, ProveedorForm
 
 
@@ -389,4 +390,66 @@ def admin_producto_list_preview(request):
     if user:
         request.user = user
     from .models import Producto
-    return admin.site._registry[Producto].changelist_view(request)
+    return admin.site._registry[Producto].changelist_view(request)
+
+
+def registro_view(request):
+    """
+    REGISTRO PÚBLICO DE USUARIOS Y ASIGNACIÓN DE PERFIL ('/registro/')
+    Almacena: username, email, contraseña, teléfono, rol, estado ('activo')
+    y fecha de creación automática vía ORM.
+    """
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        rol = request.POST.get('rol', 'cliente').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        # Validaciones de integridad
+        if not username or not email or not password:
+            messages.error(request, 'Por favor completa todos los campos obligatorios.')
+            return render(request, 'principal/Registro.html')
+
+        if password != confirm_password:
+            messages.error(request, 'Las contraseñas ingresadas no coinciden.')
+            return render(request, 'principal/Registro.html')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'El nombre de usuario ya se encuentra registrado.')
+            return render(request, 'principal/Registro.html')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'El correo electrónico ya está en uso.')
+            return render(request, 'principal/Registro.html')
+
+        # 1. Crear el usuario base de autenticación
+        nuevo_usuario = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password
+        )
+
+        # 2. Crear su perfil vinculado (estado 'activo' por defecto y fecha_creacion automática)
+        PerfilUsuario.objects.create(
+            usuario=nuevo_usuario,
+            telefono=telefono,
+            rol=rol,
+            estado='activo'
+        )
+
+        # 3. Autenticar e iniciar sesión de inmediato
+        auth_login(request, nuevo_usuario)
+        messages.success(request, f'¡Bienvenido a El Paso Frutería, {username}!')
+
+        # Redirigir según el rol asignado
+        if rol in ['admin', 'cajero']:
+            return redirect('dashboard')
+        return redirect('index')
+
+    return render(request, 'principal/Registro.html')
+

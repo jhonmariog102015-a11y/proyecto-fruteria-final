@@ -25,7 +25,8 @@ from principal.views import (
     logout_view,
     admin_preview,
     admin_productos_preview,
-    admin_producto_list_preview
+    admin_producto_list_preview,
+    registro_view
 )
 from django.contrib.auth import views as auth_views
 
@@ -74,6 +75,7 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     path('login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login_direct'),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),
+    path('registro/', registro_view, name='registro'),
 
     path('logout/', logout_view, name='logout_direct'),
     path('accounts/logout/', logout_view, name='logout'),

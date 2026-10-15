@@ -275,4 +275,24 @@ class ErrorPagesViewsTestCase(TestCase):
         self.assertContains(response, 'Interrupción en la cosecha', status_code=500)
 
 
+class RegistroViewTestCase(TestCase):
+    def test_registro_view_get(self):
+        response = self.client.get('/registro/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_registro_view_post_exitoso(self):
+        response = self.client.post('/registro/', {
+            'username': 'nuevo_cliente',
+            'email': 'nuevo@example.com',
+            'telefono': '3109998877',
+            'rol': 'cliente',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!'
+        })
+        self.assertRedirects(response, reverse('index'))
+        User = get_user_model()
+        self.assertTrue(User.objects.filter(username='nuevo_cliente').exists())
+
+
+
 
