@@ -240,6 +240,9 @@
         <a class="active" href="#overview" aria-current="page">
           <span class="nav-icon">▪</span> Resumen e Inventario
         </a>
+        <a href="#proveedores">
+          <span class="nav-icon">▪</span> Proveedores Aliados
+        </a>
         <a href="{% url 'catalogo_frutas' %}" target="_blank">
           <span class="nav-icon">▪</span> Catálogo de Frutas ↗
         </a>
@@ -381,6 +384,9 @@
                 <button type="button" class="btn-secondary-dash" onclick="abrirModalNuevaCategoria()">
                   <span>+</span> Nueva Categoría
                 </button>
+                <a href="{% url 'dashboard_exportar_inventario_csv' %}" class="btn-secondary-dash" title="Descargar inventario compatible con Excel (CSV)">
+                  <span>↓</span> Exportar CSV
+                </a>
                 <a href="/admin/principal/producto/" target="_blank" class="btn-secondary-dash" title="Abrir Django Admin">
                   Admin Técnico ↗
                 </a>
@@ -568,6 +574,88 @@
               {% empty %}
                 <p style="font-size: 0.85rem; color: #94a3b8;">No hay categorías registradas.</p>
               {% endfor %}
+            </div>
+          </div>
+
+          <!-- Panel: Gestión de Proveedores Agrícolas y Fincas Productoras -->
+          <div class="finanzas-card" id="proveedores" style="grid-column: 1 / -1;">
+            <div class="finanzas-header">
+              <div>
+                <h3 style="font-size: 1.15rem; color: #1e293b;">Proveedores y Fincas Productoras ({{ total_proveedores }})</h3>
+                <span class="dash-chart-sub">Directorio de productores campesinos aliados de Boyacá y Cundinamarca</span>
+              </div>
+              <button type="button" class="btn-primary-dash" style="padding: 6px 14px; font-size: 0.85rem;" onclick="abrirModalNuevoProveedor()">
+                <span>+</span> Registrar Proveedor
+              </button>
+            </div>
+            
+            <div style="overflow-x: auto;">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Finca / Razón Social</th>
+                    <th scope="col">NIT / RUT</th>
+                    <th scope="col">Contacto</th>
+                    <th scope="col">Teléfono / Pedido Rápido</th>
+                    <th scope="col">Calificación</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col" style="text-align: center;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for prov in proveedores %}
+                  <tr>
+                    <td>
+                      <strong style="color: #0f172a;">{{ prov.razon_social }}</strong>
+                      {% if prov.email %}<div style="font-size: 0.75rem; color: #64748b;">{{ prov.email }}</div>{% endif %}
+                    </td>
+                    <td><code style="font-size: 0.8rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ prov.nit_rut }}</code></td>
+                    <td>{{ prov.contacto_nombre|default:"Sin asignar" }}</td>
+                    <td>
+                      {% if prov.telefono %}
+                        <a href="https://wa.me/57{{ prov.telefono|cut:' '|cut:'-' }}?text=Buen%20d%C3%ADa%2C%20requerimos%20pedido%20de%20reposici%C3%B3n%20para%20El%20Paso%20Fruter%C3%ADa" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; color: #15803d; font-weight: 700; text-decoration: none; font-size: 0.85rem;" title="Pedir reposición de stock por WhatsApp">
+                          {{ prov.telefono }} ↗
+                        </a>
+                      {% else %}
+                        <span style="color: #94a3b8; font-size: 0.8rem;">Sin teléfono</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span style="color: #d97706; font-weight: 700; font-size: 0.88rem;">{{ prov.calificacion_estrellas }} / 5.0</span>
+                    </td>
+                    <td>
+                      <span class="badge-status" style="background: {% if prov.estado == 'Activo' %}#dcfce7; color: #15803d;{% else %}#f1f5f9; color: #64748b;{% endif %}">
+                        {{ prov.estado }}
+                      </span>
+                    </td>
+                    <td style="text-align: center; white-space: nowrap;">
+                      <button type="button" class="btn-action-edit"
+                        data-id="{{ prov.id_proveedor }}"
+                        data-razon="{{ prov.razon_social }}"
+                        data-nit="{{ prov.nit_rut }}"
+                        data-contacto="{{ prov.contacto_nombre|default:'' }}"
+                        data-telefono="{{ prov.telefono|default:'' }}"
+                        data-email="{{ prov.email|default:'' }}"
+                        data-calificacion="{{ prov.calificacion_estrellas }}"
+                        data-estado="{{ prov.estado }}"
+                        onclick="abrirModalEditarProveedor(this)">
+                        Editar
+                      </button>
+                      <button type="button" class="btn-action-delete"
+                        data-id="{{ prov.id_proveedor }}"
+                        data-razon="{{ prov.razon_social }}"
+                        onclick="abrirModalEliminarProveedor(this)">
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="7" class="empty-products">No hay proveedores registrados aún. ¡Registra al primer productor aliado!</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -845,6 +933,156 @@
   </div>
 
   <!-- ====================================================================== -->
+  <!-- MODAL 5: REGISTRAR NUEVO PROVEEDOR AGRÍCOLA                            -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalNuevoProveedor">
+    <div class="dash-modal" style="max-width: 520px;">
+      <div class="dash-modal-header">
+        <h3>Registrar Proveedor / Finca Productora</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalNuevoProveedor()">✕</button>
+      </div>
+      <form action="{% url 'dashboard_crear_proveedor' %}" method="post">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="nuevo_prov_razon">Finca / Razón Social *</label>
+            <input type="text" id="nuevo_prov_razon" name="razon_social" class="form-input" placeholder="Ej: Finca El Recuerdo, Frutas Boyacá S.A.S." required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_prov_nit">NIT / RUT *</label>
+              <input type="text" id="nuevo_prov_nit" name="nit_rut" class="form-input" placeholder="900123456-1" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_prov_contacto">Persona de Contacto</label>
+              <input type="text" id="nuevo_prov_contacto" name="contacto_nombre" class="form-input" placeholder="Nombre del agricultor">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_prov_telefono">Teléfono (WhatsApp)</label>
+              <input type="tel" id="nuevo_prov_telefono" name="telefono" class="form-input" placeholder="3101234567">
+            </div>
+            <div class="form-group">
+              <label for="nuevo_prov_email">Correo Electrónico</label>
+              <input type="email" id="nuevo_prov_email" name="email" class="form-input" placeholder="contacto@finca.co">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_prov_calif">Calificación (1.0 a 5.0)</label>
+              <input type="number" step="0.1" min="1.0" max="5.0" id="nuevo_prov_calif" name="calificacion_estrellas" class="form-input" value="5.0" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_prov_estado">Estado</label>
+              <select id="nuevo_prov_estado" name="estado" class="form-select">
+                <option value="Activo" selected>Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevoProveedor()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Registrar Proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 6: EDITAR PROVEEDOR AGRÍCOLA                                     -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEditarProveedor">
+    <div class="dash-modal" style="max-width: 520px;">
+      <div class="dash-modal-header">
+        <h3>Modificar Proveedor Agrícola</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEditarProveedor()">✕</button>
+      </div>
+      <form id="formEditarProveedor" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="edit_prov_razon">Finca / Razón Social *</label>
+            <input type="text" id="edit_prov_razon" name="razon_social" class="form-input" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_prov_nit">NIT / RUT *</label>
+              <input type="text" id="edit_prov_nit" name="nit_rut" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_prov_contacto">Persona de Contacto</label>
+              <input type="text" id="edit_prov_contacto" name="contacto_nombre" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_prov_telefono">Teléfono (WhatsApp)</label>
+              <input type="tel" id="edit_prov_telefono" name="telefono" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="edit_prov_email">Correo Electrónico</label>
+              <input type="email" id="edit_prov_email" name="email" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_prov_calif">Calificación (1.0 a 5.0)</label>
+              <input type="number" step="0.1" min="1.0" max="5.0" id="edit_prov_calif" name="calificacion_estrellas" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_prov_estado">Estado</label>
+              <select id="edit_prov_estado" name="estado" class="form-select">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEditarProveedor()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 7: ELIMINAR PROVEEDOR AGRÍCOLA                                   -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEliminarProveedor">
+    <div class="dash-modal" style="max-width: 440px;">
+      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
+        <h3 style="color: #991b1b;">Eliminar Proveedor</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEliminarProveedor()">✕</button>
+      </div>
+      <form id="formEliminarProveedor" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
+          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+            ¿Estás seguro de que deseas eliminar permanentemente el proveedor aliado
+          </p>
+          <strong id="eliminarRazonProveedor" style="font-size: 1.1rem; color: #0f172a; display: block; margin-bottom: 0.75rem;"></strong>
+          <p style="font-size: 0.8rem; color: #dc2626; margin: 0;">
+            Esta acción no se puede deshacer. Los productos registrados anteriormente conservarán su información.
+          </p>
+        </div>
+        <div class="dash-modal-footer" style="justify-content: center;">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminarProveedor()">Cancelar</button>
+          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">Sí, Eliminar Proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
   <!-- DATOS SEGUROS PARA ANALÍTICA Y GRÁFICOS (JSON Script Django)            -->
   <!-- ====================================================================== -->
   {{ chart_cat_labels|json_script:"data-cat-labels" }}
@@ -977,7 +1215,41 @@
       document.getElementById('modalNuevaCategoria').classList.remove('open');
     }
 
-    // 5. Filtros combinados (Búsqueda por texto + Filtro rápido por estado)
+    // 5. Funciones para Modal Proveedores
+    function abrirModalNuevoProveedor() {
+      document.getElementById('modalNuevoProveedor').classList.add('open');
+      const input = document.getElementById('nuevo_prov_razon');
+      if (input) input.focus();
+    }
+    function cerrarModalNuevoProveedor() {
+      document.getElementById('modalNuevoProveedor').classList.remove('open');
+    }
+    function abrirModalEditarProveedor(btn) {
+      const id = btn.getAttribute('data-id');
+      document.getElementById('formEditarProveedor').action = `/dashboard/proveedor/${id}/editar/`;
+      document.getElementById('edit_prov_razon').value = btn.getAttribute('data-razon') || '';
+      document.getElementById('edit_prov_nit').value = btn.getAttribute('data-nit') || '';
+      document.getElementById('edit_prov_contacto').value = btn.getAttribute('data-contacto') || '';
+      document.getElementById('edit_prov_telefono').value = btn.getAttribute('data-telefono') || '';
+      document.getElementById('edit_prov_email').value = btn.getAttribute('data-email') || '';
+      document.getElementById('edit_prov_calif').value = btn.getAttribute('data-calificacion') || '5.0';
+      document.getElementById('edit_prov_estado').value = btn.getAttribute('data-estado') || 'Activo';
+      document.getElementById('modalEditarProveedor').classList.add('open');
+    }
+    function cerrarModalEditarProveedor() {
+      document.getElementById('modalEditarProveedor').classList.remove('open');
+    }
+    function abrirModalEliminarProveedor(btn) {
+      const id = btn.getAttribute('data-id');
+      document.getElementById('formEliminarProveedor').action = `/dashboard/proveedor/${id}/eliminar/`;
+      document.getElementById('eliminarRazonProveedor').textContent = `"${btn.getAttribute('data-razon')}"`;
+      document.getElementById('modalEliminarProveedor').classList.add('open');
+    }
+    function cerrarModalEliminarProveedor() {
+      document.getElementById('modalEliminarProveedor').classList.remove('open');
+    }
+
+    // 6. Filtros combinados (Búsqueda por texto + Filtro rápido por estado)
     let filtroEstadoActual = 'todos';
 
     function filtrarPorEstado(tipo, btn) {
@@ -1016,13 +1288,16 @@
       });
     }
 
-    // 6. Cerrar modales con tecla Escape o clic fuera
+    // 7. Cerrar modales con tecla Escape o clic fuera
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         cerrarModalNuevoProducto();
         cerrarModalEditar();
         cerrarModalEliminar();
         cerrarModalNuevaCategoria();
+        cerrarModalNuevoProveedor();
+        cerrarModalEditarProveedor();
+        cerrarModalEliminarProveedor();
       }
     });
 

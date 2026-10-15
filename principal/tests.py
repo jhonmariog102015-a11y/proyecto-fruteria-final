@@ -135,3 +135,144 @@ class DashboardCrudTestCase(TestCase):
         self.assertRedirects(response, reverse('dashboard'))
         self.assertTrue(Categoria.objects.filter(nombre='Tubérculos').exists())
 
+
+from principal.models import Proveedor
+from principal.forms import ProveedorForm
+
+
+class ProveedorFormTestCase(TestCase):
+    def test_proveedor_form_valido(self):
+        data = {
+            'razon_social': 'Finca Villa Diana',
+            'nit_rut': '900456789-1',
+            'contacto_nombre': 'Carlos Mendoza',
+            'telefono': '3124567890',
+            'email': 'carlos@villadiana.co',
+            'calificacion_estrellas': '4.8',
+            'estado': 'Activo'
+        }
+        form = ProveedorForm(data=data)
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_proveedor_form_requiere_razon_y_nit(self):
+        form = ProveedorForm(data={'calificacion_estrellas': '5.0'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('razon_social', form.errors)
+        self.assertIn('nit_rut', form.errors)
+
+    def test_proveedor_form_calificacion_invalida(self):
+        data = {
+            'razon_social': 'Finca La Esperanza',
+            'nit_rut': '900111222-3',
+            'calificacion_estrellas': '6.5',
+            'estado': 'Activo'
+        }
+        form = ProveedorForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('calificacion_estrellas', form.errors)
+
+
+class ProveedorDashboardCrudTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username='admin_prov', password='password123')
+        self.client.login(username='admin_prov', password='password123')
+
+    def test_crear_proveedor_dashboard(self):
+        response = self.client.post(reverse('dashboard_crear_proveedor'), {
+            'razon_social': 'Finca Santa Inés',
+            'nit_rut': '800555444-2',
+            'contacto_nombre': 'Mariana Gómez',
+            'telefono': '3157894561',
+            'email': 'santaines@frutales.co',
+            'calificacion_estrellas': '4.9',
+            'estado': 'Activo'
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertTrue(Proveedor.objects.filter(nit_rut='800555444-2').exists())
+        prov = Proveedor.objects.get(nit_rut='800555444-2')
+        self.assertEqual(prov.razon_social, 'Finca Santa Inés')
+
+    def test_editar_proveedor_dashboard(self):
+        prov = Proveedor.objects.create(
+            razon_social='Finca El Paraíso',
+            nit_rut='900333222-1',
+            telefono='3101112233',
+            calificacion_estrellas=Decimal('4.5'),
+            estado='Activo'
+        )
+        response = self.client.post(reverse('dashboard_editar_proveedor', args=[prov.id_proveedor]), {
+            'razon_social': 'Finca El Paraíso Orgánico',
+            'nit_rut': '900333222-1',
+            'contacto_nombre': 'Pedro Vargas',
+            'telefono': '3109998877',
+            'email': 'pedro@elparaiso.co',
+            'calificacion_estrellas': '5.0',
+            'estado': 'Activo'
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+        prov.refresh_from_db()
+        self.assertEqual(prov.razon_social, 'Finca El Paraíso Orgánico')
+        self.assertEqual(prov.calificacion_estrellas, Decimal('5.0'))
+        self.assertEqual(prov.telefono, '3109998877')
+
+    def test_eliminar_proveedor_dashboard(self):
+        prov = Proveedor.objects.create(
+            razon_social='Distribuidora Andina',
+            nit_rut='900777888-9',
+            calificacion_estrellas=Decimal('3.8'),
+            estado='Inactivo'
+        )
+        response = self.client.post(reverse('dashboard_eliminar_proveedor', args=[prov.id_proveedor]))
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertFalse(Proveedor.objects.filter(id_proveedor=prov.id_proveedor).exists())
+
+
+class ExportarInventarioCsvTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username='admin_csv', password='password123')
+        self.client.login(username='admin_csv', password='password123')
+        self.cat = Categoria.objects.create(nombre="Frutas Exóticas")
+        self.prod = Producto.objects.create(
+            nombre="Maracuyá Amarillo",
+            categoria=self.cat,
+            costo_compra=Decimal('2500.00'),
+            precio_venta_unitario=Decimal('4500.00'),
+            en_oferta=True,
+            precio_oferta=Decimal('4000.00'),
+            stock_actual=60,
+            stock_minimo=15,
+            unidad_medida='kg',
+            estado='Disponible',
+            origen='Boyacá'
+        )
+
+    def test_exportar_inventario_csv_respuesta(self):
+        response = self.client.get(reverse('dashboard_exportar_inventario_csv'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('text/csv', response['Content-Type'])
+        self.assertIn('charset=utf-8-sig', response['Content-Type'])
+        self.assertIn('inventario_el_paso_', response['Content-Disposition'])
+
+        content = response.content.decode('utf-8-sig')
+        self.assertIn('ID Producto;Nombre del Producto;Categoría;', content)
+        self.assertIn('Maracuyá Amarillo', content)
+        self.assertIn('Boyacá', content)
+
+
+class ErrorPagesViewsTestCase(TestCase):
+    def test_error_404_preview(self):
+        response = self.client.get('/404/')
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Error 404', status_code=404)
+        self.assertContains(response, 'Esta fruta se cayó del canasto', status_code=404)
+
+    def test_error_500_preview(self):
+        response = self.client.get('/500/')
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, 'Error 500', status_code=500)
+        self.assertContains(response, 'Interrupción en la cosecha', status_code=500)
+
+
+

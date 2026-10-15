@@ -3,14 +3,17 @@
 # Gestiona la lógica de negocio, consultas al ORM y renderizado de plantillas.
 # ==============================================================================
 
+import csv
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import Producto, Categoria
-from .forms import ProductoForm, CategoriaForm
+from django.utils import timezone
+from .models import Producto, Categoria, Proveedor
+from .forms import ProductoForm, CategoriaForm, ProveedorForm
 
 
 def inicio(request):
@@ -100,14 +103,20 @@ def dashboard_view(request):
     chart_prod_precios = [float(p.precio_efectivo) for p in top_prods]
     chart_prod_margenes = [float(p.margen_ganancia) for p in top_prods]
 
+    # Proveedores y productores aliados
+    proveedores = Proveedor.objects.all().order_by('razon_social')
+    total_proveedores = proveedores.count()
+
     return render(request, 'principal/dashboard.html', {
         'productos': productos,
         'categorias': categorias,
+        'proveedores': proveedores,
         'total_productos': total_productos,
         'total_ofertas': total_ofertas,
         'total_bajo_stock': total_bajo_stock,
         'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
+        'total_proveedores': total_proveedores,
         'inversion_total': inversion_total,
         'valor_venta_potencial': valor_venta_potencial,
         'ganancia_potencial': ganancia_potencial,
@@ -199,6 +208,138 @@ def eliminar_categoria_dashboard(request, id_categoria):
             categoria.delete()
             messages.success(request, f"Categoría '{nombre}' eliminada con éxito.")
     return redirect('dashboard')
+
+
+@login_required
+def exportar_inventario_csv(request):
+    """
+    EXPORTACIÓN DE INVENTARIO COMPATIBLE CON MICROSOFT EXCEL (UTF-8-SIG)
+    Genera un archivo CSV delimitado por punto y coma con costos, precios y existencias.
+    """
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    fecha_str = timezone.now().strftime('%Y-%m-%d')
+    response['Content-Disposition'] = f'attachment; filename="inventario_el_paso_{fecha_str}.csv"'
+
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([
+        'ID Producto',
+        'Nombre del Producto',
+        'Categoría',
+        'Costo Compra ($ COP)',
+        'Precio Venta Regular ($ COP)',
+        'En Oferta',
+        'Precio Promocional ($ COP)',
+        'Precio Efectivo ($ COP)',
+        'Margen Ganancia ($ COP)',
+        'Porcentaje Margen (%)',
+        'Stock Actual',
+        'Stock Mínimo',
+        'Unidad de Medida',
+        'Estado',
+        'Origen / Cosecha',
+        'Inversión Total Lote ($ COP)',
+        'Valor Comercial Lote ($ COP)'
+    ])
+
+    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
+    for p in productos:
+        inversion_prod = float(p.costo_compra * p.stock_actual)
+        venta_prod = float(p.precio_efectivo * p.stock_actual)
+        writer.writerow([
+            p.id_producto,
+            p.nombre,
+            p.categoria.nombre if p.categoria else 'General',
+            f"{p.costo_compra:.2f}",
+            f"{p.precio_venta_unitario:.2f}",
+            'Sí' if p.en_oferta else 'No',
+            f"{p.precio_oferta:.2f}" if p.precio_oferta else '',
+            f"{p.precio_efectivo:.2f}",
+            f"{p.margen_ganancia:.2f}",
+            f"{p.porcentaje_margen:.1f}%",
+            f"{p.stock_actual:.3f}",
+            f"{p.stock_minimo:.3f}",
+            p.unidad_medida,
+            p.estado,
+            p.origen,
+            f"{inversion_prod:.2f}",
+            f"{venta_prod:.2f}"
+        ])
+
+    return response
+
+
+@login_required
+def crear_proveedor_dashboard(request):
+    """
+    REGISTRO DE NUEVO PROVEEDOR AGRÍCOLA DESDE EL DASHBOARD
+    """
+    if request.method == 'POST':
+        form = ProveedorForm(request.POST)
+        if form.is_valid():
+            prov = form.save()
+            messages.success(request, f"¡Proveedor '{prov.razon_social}' registrado con éxito!")
+        else:
+            errores = [f"{err}" for lista in form.errors.values() for err in lista]
+            messages.error(request, f"Error al registrar el proveedor: {' '.join(errores)}")
+    return redirect('dashboard')
+
+
+@login_required
+def editar_proveedor_dashboard(request, id_proveedor):
+    """
+    EDICIÓN DE PROVEEDOR AGRÍCOLA EXISTENTE
+    """
+    if request.method == 'POST':
+        proveedor = get_object_or_404(Proveedor, pk=id_proveedor)
+        form = ProveedorForm(request.POST, instance=proveedor)
+        if form.is_valid():
+            prov = form.save()
+            messages.success(request, f"¡Proveedor '{prov.razon_social}' actualizado con éxito!")
+        else:
+            errores = [f"{err}" for lista in form.errors.values() for err in lista]
+            messages.error(request, f"Error al actualizar el proveedor: {' '.join(errores)}")
+    return redirect('dashboard')
+
+
+@login_required
+def eliminar_proveedor_dashboard(request, id_proveedor):
+    """
+    ELIMINACIÓN DE PROVEEDOR AGRÍCOLA
+    """
+    if request.method == 'POST':
+        proveedor = get_object_or_404(Proveedor, pk=id_proveedor)
+        razon = proveedor.razon_social
+        proveedor.delete()
+        messages.success(request, f"El proveedor '{razon}' fue eliminado exitosamente.")
+    return redirect('dashboard')
+
+
+def error_404_view(request, exception=None):
+    """
+    MANEJADOR DE ERROR 404 (PÁGINA NO ENCONTRADA)
+    """
+    return render(request, 'principal/404.html', status=404)
+
+
+def error_500_view(request):
+    """
+    MANEJADOR DE ERROR 500 (ERROR INTERNO DEL SERVIDOR)
+    """
+    return render(request, 'principal/500.html', status=500)
+
+
+def error_404_preview(request):
+    """
+    RUTA DE AUDITORÍA Y PREVISUALIZACIÓN DE ERROR 404
+    """
+    return render(request, 'principal/404.html', status=404)
+
+
+def error_500_preview(request):
+    """
+    RUTA DE AUDITORÍA Y PREVISUALIZACIÓN DE ERROR 500
+    """
+    return render(request, 'principal/500.html', status=500)
 
 
 def logout_view(request):

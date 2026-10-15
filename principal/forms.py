@@ -5,7 +5,7 @@
 
 from decimal import Decimal
 from django import forms
-from .models import Producto, Categoria
+from .models import Producto, Categoria, Proveedor
 
 
 class ProductoForm(forms.ModelForm):
@@ -132,3 +132,39 @@ class CategoriaForm(forms.ModelForm):
         if not nombre:
             raise forms.ValidationError("El nombre de la categoría es obligatorio.")
         return nombre
+
+
+class ProveedorForm(forms.ModelForm):
+    """
+    Formulario para el registro y actualización de productores agrícolas y proveedores aliados.
+    """
+    class Meta:
+        model = Proveedor
+        fields = [
+            'razon_social',
+            'nit_rut',
+            'contacto_nombre',
+            'telefono',
+            'email',
+            'calificacion_estrellas',
+            'estado'
+        ]
+
+    def clean_razon_social(self):
+        razon = self.cleaned_data.get('razon_social', '').strip()
+        if not razon:
+            raise forms.ValidationError("La razón social o nombre de la finca es obligatorio.")
+        return razon
+
+    def clean_nit_rut(self):
+        nit = self.cleaned_data.get('nit_rut', '').strip()
+        if not nit:
+            raise forms.ValidationError("El NIT o RUT de identificación es obligatorio.")
+        return nit
+
+    def clean_calificacion_estrellas(self):
+        calif = self.cleaned_data.get('calificacion_estrellas')
+        if calif is not None:
+            if calif < 1.0 or calif > 5.0:
+                raise forms.ValidationError("La calificación debe estar entre 1.0 y 5.0 estrellas.")
+        return calif
