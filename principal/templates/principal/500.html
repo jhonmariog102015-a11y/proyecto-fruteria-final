@@ -4,12 +4,16 @@
 {% block title %}Error interno (500) — Al Paso Frutería{% endblock %}
 {% block meta_description %}Se produjo una interrupción técnica en el servidor de Al Paso Frutería.{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/errors.css' %}">
+{% endblock %}
+
 {% block content %}
-<main style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 4rem 1.5rem; background: radial-gradient(circle at center, #fefcfb 0%, #fef3ee 100%);">
-    <div style="max-width: 580px; width: 100%; text-align: center; background: #ffffff; padding: 3rem 2.5rem; border-radius: 20px; box-shadow: 0 16px 40px rgba(180, 83, 9, 0.08); border: 1px solid #fee2e2;">
+<main class="error-page-wrapper error-500-bg">
+    <div class="error-card error-card-500">
         
         <!-- Icono vectorial de advertencia técnica -->
-        <div style="width: 84px; height: 84px; margin: 0 auto 1.5rem; background: #fff1f2; border: 2px solid #fecdd3; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #be123c;">
+        <div class="error-icon-box error-icon-500">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -17,24 +21,24 @@
             </svg>
         </div>
 
-        <span style="font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 800; color: #be123c; text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; margin-bottom: 0.5rem; background: #ffe4e6; padding: 4px 12px; border-radius: 999px;">
+        <span class="error-tag error-tag-500">
             Error 500 — Servidor no disponible
         </span>
 
-        <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: #881337; margin: 0.5rem 0 1rem; line-height: 1.15;">
+        <h1 class="error-title error-title-500">
             Interrupción en la cosecha
         </h1>
 
-        <p style="font-family: 'DM Sans', sans-serif; font-size: 1rem; color: #64748b; line-height: 1.6; margin: 0 0 2rem;">
+        <p class="error-description error-desc-500">
             Ocurrió una inconsistencia temporal en el servidor. Nuestro equipo técnico ha sido notificado para restablecer el servicio a la brevedad.
         </p>
 
         <!-- Botón de regreso -->
-        <div style="display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap;">
-            <a href="{% url 'index' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #1e3a29; color: #ffffff; text-decoration: none; padding: 0.85rem 1.6rem; border-radius: 10px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(30, 58, 41, 0.25); transition: background 0.2s ease;">
+        <div class="error-actions">
+            <a href="{% url 'index' %}" class="error-btn-primary">
                 Regresar a la Tienda
             </a>
-            <a href="https://wa.me/573001234567" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #f0fdf4; color: #166534; text-decoration: none; padding: 0.85rem 1.6rem; border-radius: 10px; font-weight: 700; font-size: 0.95rem; border: 1px solid #bbf7d0; transition: background 0.2s ease;">
+            <a href="https://wa.me/573001234567" target="_blank" rel="noopener noreferrer" class="error-btn-whatsapp">
                 Atención vía WhatsApp
             </a>
         </div>

@@ -31,7 +31,7 @@
         <!-- Buscador en tiempo real -->
         <div class="search-box-wrapper">
             <input type="text" id="fruitSearch" class="search-input" placeholder="Buscar fruta o finca de origen..." autocomplete="off">
-            <button id="clearSearch" class="clear-search-btn" title="Limpiar búsqueda" style="display:none;">✕</button>
+            <button id="clearSearch" class="clear-search-btn" title="Limpiar búsqueda">✕</button>
         </div>
     </div>
 
@@ -39,7 +39,7 @@
     <div class="filters-bar" role="tablist">
         <span class="filter-label">Filtrar:</span>
         <button class="filter-chip active" data-filter="all" role="tab">Todas</button>
-        <button class="filter-chip" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">Ofertas</button>
+        <button class="filter-chip" data-filter="ofertas" role="tab">Ofertas</button>
         <button class="filter-chip" data-filter="citricos" role="tab">Cítricos</button>
         <button class="filter-chip" data-filter="tropicales" role="tab">Tropicales</button>
         <button class="filter-chip" data-filter="berries" role="tab">Berries</button>
@@ -65,7 +65,7 @@
                     </div>
                     <span class="badge-fresco"><span class="dot"></span>fresco</span>
                     {% if producto.en_oferta and producto.precio_oferta %}
-                    <span class="badge-fresco" style="background:#d32f2f; color:#fff; font-weight:700; margin-left:6px;">-{{ producto.porcentaje_descuento }}%</span>
+                    <span class="badge-fresco badge-oferta">-{{ producto.porcentaje_descuento }}%</span>
                     {% endif %}
                 </div>
                 <span class="fruit-category">{{ producto.categoria.nombre }}</span>
@@ -75,9 +75,9 @@
             <div class="fruit-price-row">
                 <div class="price-container">
                     {% if producto.en_oferta and producto.precio_oferta %}
-                        <div style="display:flex; align-items:baseline; gap:5px;">
-                            <span class="price-val" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
-                            <del style="font-size:0.8rem; color:#888;">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
+                        <div class="price-offer-row">
+                            <span class="price-val price-val-oferta">${{ producto.precio_oferta|floatformat:0 }}</span>
+                            <del class="price-old">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
                         </div>
                     {% else %}
                         <span class="price-val">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
@@ -90,8 +90,8 @@
         {% endfor %}
 
         <!-- Mensaje si no se encuentran frutas -->
-        <div id="noResultsMsg" class="no-results" style="display:none;">
-            <div class="no-results-icon" style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem;">
+        <div id="noResultsMsg" class="no-results">
+            <div class="no-results-icon">
                 <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="M21 21l-4.35-4.35"></path>

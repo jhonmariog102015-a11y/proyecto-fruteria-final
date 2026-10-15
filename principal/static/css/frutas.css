@@ -590,6 +590,11 @@ body {
     box-shadow: 0 4px 14px rgba(26, 58, 38, 0.25);
 }
 
+.filter-chip[data-filter="ofertas"] {
+    color: #d32f2f;
+    font-weight: 700;
+}
+
 .filter-chip[data-filter="ofertas"].active {
     background: var(--red-oferta) !important;
     border-color: var(--red-oferta) !important;
@@ -717,6 +722,14 @@ body {
     box-shadow: 0 0 6px var(--green-accent);
 }
 
+.badge-fresco.badge-oferta {
+    background: #d32f2f;
+    color: #ffffff;
+    border-color: #d32f2f;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
 .fruit-category {
     font-size: 0.72rem;
     font-weight: 700;
@@ -764,6 +777,21 @@ body {
     font-weight: 800;
     color: var(--green-deep);
     letter-spacing: -0.5px;
+}
+
+.price-offer-row {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.price-val.price-val-oferta {
+    color: #d32f2f;
+}
+
+.price-old {
+    font-size: 0.8rem;
+    color: #888;
 }
 
 .price-unit {
@@ -814,8 +842,11 @@ body {
 }
 
 .no-results-icon {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
 }
 
 .no-results h3 {

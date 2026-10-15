@@ -118,7 +118,7 @@
         <!-- Pestañas de filtrado (Tabs): carrusel.js detecta 'data-filter' para mostrar/ocultar tarjetas -->
         <div class="carousel-tabs-bar" role="tablist">
             <button class="carousel-tab active" data-filter="all" role="tab">Todas</button>
-            <button class="carousel-tab" data-filter="ofertas" role="tab" style="color:#d32f2f; font-weight:700;">En Oferta</button>
+            <button class="carousel-tab tab-oferta" data-filter="ofertas" role="tab">En Oferta</button>
             <button class="carousel-tab" data-filter="citricos" role="tab">Cítricos</button>
             <button class="carousel-tab" data-filter="tropicales" role="tab">Tropicales</button>
             <button class="carousel-tab" data-filter="berries" role="tab">Berries</button>
@@ -157,8 +157,8 @@
                     <div class="carousel-card-footer">
                         <div class="carousel-price-box">
                             {% if producto.en_oferta and producto.precio_oferta %}
-                                <div style="display:flex; align-items:baseline; gap:6px;">
-                                    <span class="carousel-price" style="color:#d32f2f;">${{ producto.precio_oferta|floatformat:0 }}</span>
+                                <div class="carousel-price-offer-wrap">
+                                    <span class="carousel-price price-oferta">${{ producto.precio_oferta|floatformat:0 }}</span>
                                     <del class="old-price">${{ producto.precio_venta_unitario|floatformat:0 }}</del>
                                 </div>
                             {% else %}
@@ -172,7 +172,7 @@
                 </div>
                 <!-- Bloque vacío si no hubiera productos registrados en la base de datos -->
                 {% empty %}
-                <div style="padding: 40px; color: #666; text-align: center; width: 100%;">
+                <div class="carousel-empty-state">
                     No hay productos registrados en la base de datos.
                 </div>
                 {% endfor %}

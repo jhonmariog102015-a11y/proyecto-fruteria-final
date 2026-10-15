@@ -4,12 +4,16 @@
 {% block title %}Página no encontrada (Error 404) — Al Paso Frutería{% endblock %}
 {% block meta_description %}La página que buscas no existe o ha cambiado de lugar en Al Paso Frutería.{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/errors.css' %}">
+{% endblock %}
+
 {% block content %}
-<main style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 4rem 1.5rem; background: radial-gradient(circle at center, #fbfdfa 0%, #edf6ee 100%);">
-    <div style="max-width: 580px; width: 100%; text-align: center; background: #ffffff; padding: 3rem 2.5rem; border-radius: 20px; box-shadow: 0 16px 40px rgba(26, 58, 38, 0.08); border: 1px solid #e2ece3;">
+<main class="error-page-wrapper">
+    <div class="error-card">
         
         <!-- Icono vectorial botánico de canasta / fruta -->
-        <div style="width: 84px; height: 84px; margin: 0 auto 1.5rem; background: #e8f5e9; border: 2px solid #c8e6c9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1e3a29;">
+        <div class="error-icon-box">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2v4"></path>
                 <path d="M4.93 10.93a10 10 0 1 0 14.14 0"></path>
@@ -18,30 +22,30 @@
             </svg>
         </div>
 
-        <span style="font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 800; color: #2e7d32; text-transform: uppercase; letter-spacing: 1.5px; display: inline-block; margin-bottom: 0.5rem; background: #e8f5e9; padding: 4px 12px; border-radius: 999px;">
+        <span class="error-tag">
             Error 404 — Ruta no encontrada
         </span>
 
-        <h1 style="font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: #142a1b; margin: 0.5rem 0 1rem; line-height: 1.15;">
+        <h1 class="error-title">
             Esta fruta se cayó del canasto
         </h1>
 
-        <p style="font-family: 'DM Sans', sans-serif; font-size: 1rem; color: #526356; line-height: 1.6; margin: 0 0 2rem;">
+        <p class="error-description">
             La dirección a la que intentas acceder no existe, fue trasladada o el producto ya no se encuentra en el inventario activo de esta temporada.
         </p>
 
         <!-- Botones de navegación y rescate -->
-        <div style="display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap;">
-            <a href="{% url 'catalogo_frutas' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #1e3a29; color: #ffffff; text-decoration: none; padding: 0.85rem 1.6rem; border-radius: 10px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(30, 58, 41, 0.25); transition: background 0.2s ease;">
+        <div class="error-actions">
+            <a href="{% url 'catalogo_frutas' %}" class="error-btn-primary">
                 Explorar Catálogo de Frutas
             </a>
-            <a href="{% url 'index' %}" style="display: inline-flex; align-items: center; gap: 8px; background: #f1f6f2; color: #1e3a29; text-decoration: none; padding: 0.85rem 1.6rem; border-radius: 10px; font-weight: 700; font-size: 0.95rem; border: 1px solid #d4e3d7; transition: background 0.2s ease;">
+            <a href="{% url 'index' %}" class="error-btn-secondary">
                 Volver al Inicio
             </a>
         </div>
 
-        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #edf4ee; font-size: 0.82rem; color: #788a7c;">
-            ¿Necesitas ayuda para un pedido especial? <a href="https://wa.me/573001234567" target="_blank" style="color: #25d366; font-weight: 700; text-decoration: none;">Escríbenos por WhatsApp</a>
+        <div class="error-footer-help">
+            ¿Necesitas ayuda para un pedido especial? <a href="https://wa.me/573001234567" target="_blank" rel="noopener noreferrer" class="error-link-whatsapp">Escríbenos por WhatsApp</a>
         </div>
     </div>
 </main>

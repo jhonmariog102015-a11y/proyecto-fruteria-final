@@ -7,221 +7,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.2">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Chart.js para analítica interactiva y gráficos financieros del catálogo -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-  <style>
-    /* Estilos específicos para la gestión interactiva del dashboard */
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    }
-    .kpi-subtext {
-      font-size: 0.78rem;
-      color: #64748b;
-      margin-top: 4px;
-      display: block;
-    }
-    .table-prod-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .table-prod-icon {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #1e3a29;
-      background: #e8f5e9;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      border: 1px solid #c8e6c9;
-    }
-    .badge-cat {
-      background: #e0f2fe;
-      color: #0369a1;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .stock-badge-low {
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fecaca;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-    .finanzas-card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 1.4rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-      border: 1px solid #eef2f6;
-    }
-    .finanzas-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 0.75rem;
-    }
-    .finanzas-header h3 {
-      margin: 0;
-      font-size: 1.05rem;
-      color: #1e293b;
-      font-weight: 700;
-    }
-    .finanzas-metric-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.65rem 0;
-      border-bottom: 1px dashed #f1f5f9;
-      font-size: 0.88rem;
-    }
-    .finanzas-metric-row:last-child {
-      border-bottom: none;
-    }
-    .finanzas-metric-row .val {
-      font-weight: 700;
-      color: #0f172a;
-    }
-    .finanzas-metric-row .val.green {
-      color: #15803d;
-    }
-    .cat-item-pill {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      transition: all 0.15s ease;
-    }
-    .cat-item-pill:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-    }
-    .cat-item-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Gráficos y Analítica Visual */
-    .dash-charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1.6fr;
-      gap: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-    @media (max-width: 992px) {
-      .dash-charts-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .dash-chart-card {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 1.25rem 1.4rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-      border: 1px solid #eef2f6;
-      display: flex;
-      flex-direction: column;
-    }
-    .dash-chart-header {
-      margin-bottom: 0.85rem;
-      border-bottom: 1px solid #f1f5f9;
-      padding-bottom: 0.6rem;
-    }
-    .dash-chart-header h4 {
-      margin: 0;
-      font-size: 0.98rem;
-      color: #1e293b;
-      font-weight: 700;
-    }
-    .dash-chart-sub {
-      font-size: 0.78rem;
-      color: #64748b;
-      display: block;
-      margin-top: 2px;
-    }
-    .dash-chart-canvas-wrap {
-      position: relative;
-      flex: 1;
-      min-height: 220px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Filtros Rápidos de Inventario */
-    .quick-filters-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-      padding-bottom: 0.85rem;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .quick-filters-label {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-right: 0.25rem;
-    }
-    .quick-filter-btn {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      color: #475569;
-      padding: 5px 12px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .quick-filter-btn:hover {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-      color: #0f172a;
-    }
-    .quick-filter-btn.active {
-      background: #1e3a29;
-      color: #ffffff;
-      border-color: #1e3a29;
-      box-shadow: 0 2px 8px rgba(30, 58, 41, 0.25);
-    }
-    .quick-filter-btn .pill-count {
-      background: rgba(0,0,0,0.06);
-      padding: 1px 6px;
-      border-radius: 10px;
-      font-size: 0.72rem;
-    }
-    .quick-filter-btn.active .pill-count {
-      background: rgba(255,255,255,0.22);
-      color: #ffffff;
-    }
-  </style>
 </head>
 
 <body>
@@ -256,15 +47,15 @@
 
       <!-- Pie de la barra lateral: Botón de Logout y perfil del usuario activo -->
       <div class="sidebar-bottom">
-        <form action="{% url 'logout' %}" method="post" style="margin: 0; width: 100%;">
+        <form action="{% url 'logout' %}" method="post" class="sidebar-logout-form">
           {% csrf_token %}
-          <button type="submit" class="logout" style="background:none; border:none; width: 100%; text-align: left; cursor: pointer; color: inherit; font: inherit;">
+          <button type="submit" class="logout logout-btn">
             <span class="nav-icon">▪</span> Cerrar Sesión
           </button>
         </form>
 
         <!-- Tarjeta de perfil: Iniciales y nombre del usuario autenticado -->
-        <div class="profile" style="margin-top: 10px;">
+        <div class="profile profile-mt">
           <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
           <div>
             <strong>{{ request.user.username|capfirst }}</strong>
@@ -287,7 +78,7 @@
         </div>
 
         <div class="header-actions">
-          <label class="search" style="width: 280px;">
+          <label class="search search-w-280">
             <input
               type="search"
               id="inputBuscarProducto"
@@ -310,7 +101,7 @@
             {% for message in messages %}
               <div class="dash-alert dash-alert-{{ message.tags|default:'success' }}">
                 <span>{{ message }}</span>
-                <button type="button" onclick="this.parentElement.remove()" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:inherit; line-height:1;">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="toast-close-btn">✕</button>
               </div>
             {% endfor %}
           </div>
@@ -329,17 +120,17 @@
             </div>
             <div class="dash-card">
               <h5>Ofertas Activas</h5>
-              <h3 style="color: #e11d48;">{{ total_ofertas }}</h3>
+              <h3 class="kpi-val-rose">{{ total_ofertas }}</h3>
               <span class="kpi-subtext">Precios promocionales vigentes</span>
             </div>
             <div class="dash-card">
               <h5>Inversión en Inventario</h5>
-              <h3 style="color: #2563eb;">${{ inversion_total|floatformat:0 }}</h3>
+              <h3 class="kpi-val-blue">${{ inversion_total|floatformat:0 }}</h3>
               <span class="kpi-subtext">Costo total de compra en bodega</span>
             </div>
             <div class="dash-card">
               <h5>Ganancia Proyectada</h5>
-              <h3 style="color: #15803d;">+${{ ganancia_potencial|floatformat:0 }}</h3>
+              <h3 class="kpi-val-green">+${{ ganancia_potencial|floatformat:0 }}</h3>
               <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
             </div>
           </div>
@@ -372,12 +163,12 @@
           <!-- 4. TABLA DE INVENTARIO Y GESTIÓN CRUD EN TIEMPO REAL              -->
           <!-- ================================================================ -->
           <div class="products-table-container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div class="catalog-inv-header">
               <div>
-                <h2 id="products-heading" style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700;">Catálogo e Inventario en Tiempo Real</h2>
-                <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">Administra precios de venta, costos de compra, promociones y existencias directamente aquí.</p>
+                <h2 id="products-heading" class="catalog-inv-title">Catálogo e Inventario en Tiempo Real</h2>
+                <p class="catalog-inv-subtitle">Administra precios de venta, costos de compra, promociones y existencias directamente aquí.</p>
               </div>
-              <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+              <div class="catalog-inv-actions">
                 <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProducto()">
                   <span>+</span> Nuevo Producto
                 </button>
@@ -421,7 +212,7 @@
                   <th scope="col">Oferta</th>
                   <th scope="col">Stock Disponible</th>
                   <th scope="col">Estado</th>
-                  <th scope="col" style="text-align: center;">Acciones</th>
+                  <th scope="col" class="table-col-center">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tablaProductosBody">
@@ -436,7 +227,7 @@
                       <span class="table-prod-icon">{{ producto.nombre|slice:":1"|upper }}</span>
                       <div>
                         <strong>{{ producto.nombre }}</strong>
-                        <div style="font-size: 0.75rem; color: #94a3b8;">{{ producto.origen|truncatechars:35 }}</div>
+                        <div class="prod-origen-sub">{{ producto.origen|truncatechars:35 }}</div>
                       </div>
                     </div>
                   </td>
@@ -446,8 +237,8 @@
                   <td>${{ producto.costo_compra|floatformat:0 }}</td>
                   <td>
                     {% if producto.en_oferta and producto.precio_oferta %}
-                      <strong style="color: #e11d48;">${{ producto.precio_oferta|floatformat:0 }}</strong>
-                      <span style="font-size: 0.75rem; text-decoration: line-through; color: #94a3b8; margin-left: 4px;">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                      <strong class="prod-price-offer">${{ producto.precio_oferta|floatformat:0 }}</strong>
+                      <span class="prod-price-old">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
                     {% else %}
                       ${{ producto.precio_venta_unitario|floatformat:0 }}
                     {% endif %}
@@ -461,7 +252,7 @@
                     {% if producto.en_oferta %}
                       <span class="badge-oferta">-{{ producto.porcentaje_descuento|floatformat:0 }}%</span>
                     {% else %}
-                      <span style="color: #94a3b8; font-size: 0.8rem;">Normal</span>
+                      <span class="badge-normal">Normal</span>
                     {% endif %}
                   </td>
                   <td>
@@ -471,7 +262,7 @@
                     {% endif %}
                   </td>
                   <td><span class="badge-status">{{ producto.estado|default:"Disponible" }}</span></td>
-                  <td style="text-align: center; white-space: nowrap;">
+                  <td class="table-col-actions">
                     <button type="button" class="btn-action-edit"
                       data-id="{{ producto.id_producto }}"
                       data-nombre="{{ producto.nombre }}"
@@ -510,35 +301,35 @@
         <!-- ================================================================== -->
         <!-- 5. PANELES DE GESTIÓN Y RESUMEN FINANCIERO                        -->
         <!-- ================================================================== -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+        <div class="finanzas-grid-2">
 
           <!-- Panel: Rentabilidad & Valoración de Inventario -->
           <div class="finanzas-card">
             <div class="finanzas-header">
               <h3>Rentabilidad y Finanzas</h3>
-              <span style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #f0fdf4; padding: 4px 8px; border-radius: 6px;">
+              <span class="finanzas-badge-pill">
                 Margen Promedio: {{ margen_promedio|floatformat:1 }}%
               </span>
             </div>
             <div>
               <div class="finanzas-metric-row">
-                <span style="color: #64748b;">Inversión Total en Compras:</span>
+                <span class="finanzas-metric-label">Inversión Total en Compras:</span>
                 <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
               </div>
               <div class="finanzas-metric-row">
-                <span style="color: #64748b;">Valor Comercial de Venta:</span>
+                <span class="finanzas-metric-label">Valor Comercial de Venta:</span>
                 <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
               </div>
               <div class="finanzas-metric-row">
-                <span style="color: #64748b;">Utilidad Bruta Estimada:</span>
+                <span class="finanzas-metric-label">Utilidad Bruta Estimada:</span>
                 <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
               </div>
               <div class="finanzas-metric-row">
-                <span style="color: #64748b;">Promoción / Descuentos:</span>
-                <span class="val" style="color: #e11d48;">{{ total_ofertas }} productos rebajados</span>
+                <span class="finanzas-metric-label">Promoción / Descuentos:</span>
+                <span class="val finanzas-val-rebajados">{{ total_ofertas }} productos rebajados</span>
               </div>
             </div>
-            <div style="margin-top: 1rem; padding: 0.85rem; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; color: #475569;">
+            <div class="finanzas-note-box">
               <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
             </div>
           </div>
@@ -547,49 +338,49 @@
           <div class="finanzas-card">
             <div class="finanzas-header">
               <h3>Categorías del Catálogo ({{ categorias.count }})</h3>
-              <button type="button" class="btn-primary-dash" style="padding: 4px 10px; font-size: 0.78rem;" onclick="abrirModalNuevaCategoria()">
+              <button type="button" class="btn-primary-dash btn-cat-add" onclick="abrirModalNuevaCategoria()">
                 + Crear
               </button>
             </div>
-            <div style="max-height: 250px; overflow-y: auto;">
+            <div class="cat-scroll-container">
               {% for cat in categorias %}
               <div class="cat-item-pill">
                 <div>
-                  <strong style="color: #1e293b; font-size: 0.9rem;">{{ cat.nombre }}</strong>
-                  <span class="cat-chip-count" style="margin-left: 6px;">{{ cat.num_productos }} prod.</span>
+                  <strong class="cat-pill-title">{{ cat.nombre }}</strong>
+                  <span class="cat-chip-count cat-chip-count-ml">{{ cat.num_productos }} prod.</span>
                 </div>
                 <div class="cat-item-actions">
                   {% if cat.num_productos == 0 %}
-                    <form action="{% url 'dashboard_eliminar_categoria' cat.id_categoria %}" method="post" style="margin: 0;" onsubmit="return confirm('¿Eliminar la categoría {{ cat.nombre }}?');">
+                    <form action="{% url 'dashboard_eliminar_categoria' cat.id_categoria %}" method="post" class="cat-delete-form" onsubmit="return confirm('¿Eliminar la categoría {{ cat.nombre }}?');">
                       {% csrf_token %}
-                      <button type="submit" class="btn-action-delete" style="padding: 3px 8px; font-size: 0.75rem;" title="Eliminar categoría vacía">
+                      <button type="submit" class="btn-action-delete btn-delete-cat-sm" title="Eliminar categoría vacía">
                         Borrar
                       </button>
                     </form>
                   {% else %}
-                    <span style="font-size: 0.75rem; color: #94a3b8;">En catálogo</span>
+                    <span class="cat-active-tag">En catálogo</span>
                   {% endif %}
                 </div>
               </div>
               {% empty %}
-                <p style="font-size: 0.85rem; color: #94a3b8;">No hay categorías registradas.</p>
+                <p class="cat-empty-text">No hay categorías registradas.</p>
               {% endfor %}
             </div>
           </div>
 
           <!-- Panel: Gestión de Proveedores Agrícolas y Fincas Productoras -->
-          <div class="finanzas-card" id="proveedores" style="grid-column: 1 / -1;">
+          <div class="finanzas-card finanzas-card-full" id="proveedores">
             <div class="finanzas-header">
               <div>
-                <h3 style="font-size: 1.15rem; color: #1e293b;">Proveedores y Fincas Productoras ({{ total_proveedores }})</h3>
+                <h3 class="card-title-lg">Proveedores y Fincas Productoras ({{ total_proveedores }})</h3>
                 <span class="dash-chart-sub">Directorio de productores campesinos aliados de Boyacá y Cundinamarca</span>
               </div>
-              <button type="button" class="btn-primary-dash" style="padding: 6px 14px; font-size: 0.85rem;" onclick="abrirModalNuevoProveedor()">
+              <button type="button" class="btn-primary-dash btn-prov-add" onclick="abrirModalNuevoProveedor()">
                 <span>+</span> Registrar Proveedor
               </button>
             </div>
             
-            <div style="overflow-x: auto;">
+            <div class="table-scroll-wrap">
               <table>
                 <thead>
                   <tr>
@@ -599,36 +390,36 @@
                     <th scope="col">Teléfono / Pedido Rápido</th>
                     <th scope="col">Calificación</th>
                     <th scope="col">Estado</th>
-                    <th scope="col" style="text-align: center;">Acciones</th>
+                    <th scope="col" class="table-col-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for prov in proveedores %}
                   <tr>
                     <td>
-                      <strong style="color: #0f172a;">{{ prov.razon_social }}</strong>
-                      {% if prov.email %}<div style="font-size: 0.75rem; color: #64748b;">{{ prov.email }}</div>{% endif %}
+                      <strong class="prov-name">{{ prov.razon_social }}</strong>
+                      {% if prov.email %}<div class="prov-email">{{ prov.email }}</div>{% endif %}
                     </td>
-                    <td><code style="font-size: 0.8rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ prov.nit_rut }}</code></td>
+                    <td><code class="prov-nit">{{ prov.nit_rut }}</code></td>
                     <td>{{ prov.contacto_nombre|default:"Sin asignar" }}</td>
                     <td>
                       {% if prov.telefono %}
-                        <a href="https://wa.me/57{{ prov.telefono|cut:' '|cut:'-' }}?text=Buen%20d%C3%ADa%2C%20requerimos%20pedido%20de%20reposici%C3%B3n%20para%20El%20Paso%20Fruter%C3%ADa" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; color: #15803d; font-weight: 700; text-decoration: none; font-size: 0.85rem;" title="Pedir reposición de stock por WhatsApp">
+                        <a href="https://wa.me/57{{ prov.telefono|cut:' '|cut:'-' }}?text=Buen%20d%C3%ADa%2C%20requerimos%20pedido%20de%20reposici%C3%B3n%20para%20Al%20Paso%20Fruter%C3%ADa" target="_blank" class="prov-wa-link" title="Pedir reposición de stock por WhatsApp">
                           {{ prov.telefono }} ↗
                         </a>
                       {% else %}
-                        <span style="color: #94a3b8; font-size: 0.8rem;">Sin teléfono</span>
+                        <span class="prov-no-phone">Sin teléfono</span>
                       {% endif %}
                     </td>
                     <td>
-                      <span style="color: #d97706; font-weight: 700; font-size: 0.88rem;">{{ prov.calificacion_estrellas }} / 5.0</span>
+                      <span class="prov-rating">{{ prov.calificacion_estrellas }} / 5.0</span>
                     </td>
                     <td>
-                      <span class="badge-status" style="background: {% if prov.estado == 'Activo' %}#dcfce7; color: #15803d;{% else %}#f1f5f9; color: #64748b;{% endif %}">
+                      <span class="badge-status {% if prov.estado == 'Activo' %}badge-status-activo{% else %}badge-status-inactivo{% endif %}">
                         {{ prov.estado }}
                       </span>
                     </td>
-                    <td style="text-align: center; white-space: nowrap;">
+                    <td class="table-col-actions">
                       <button type="button" class="btn-action-edit"
                         data-id="{{ prov.id_proveedor }}"
                         data-razon="{{ prov.razon_social }}"
@@ -708,13 +499,13 @@
             <span class="value" id="calcValNuevo">$0 COP (0%)</span>
           </div>
 
-          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
-            <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
+          <div class="oferta-config-box">
+            <label class="form-check oferta-check-label">
               <input type="checkbox" id="nuevo_en_oferta" name="en_oferta" onchange="toggleOfertaNuevo()">
               Activar Precio de Oferta / Promoción
             </label>
-            <div id="wrapOfertaNuevo" style="display: none; margin-top: 0.6rem;">
-              <label for="nuevo_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de Oferta ($ COP)</label>
+            <div id="wrapOfertaNuevo" class="oferta-price-wrap">
+              <label for="nuevo_precio_oferta" class="oferta-price-label">Precio de Oferta ($ COP)</label>
               <input type="number" step="0.01" id="nuevo_precio_oferta" name="precio_oferta" class="form-input" placeholder="3200" oninput="calcularMargenNuevo()">
             </div>
           </div>
@@ -813,13 +604,13 @@
             <span class="value" id="calcValEditar">$0 COP (0%)</span>
           </div>
 
-          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
-            <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
+          <div class="oferta-config-box">
+            <label class="form-check oferta-check-label">
               <input type="checkbox" id="edit_en_oferta" name="en_oferta" onchange="toggleOfertaEditar()">
               Activar Precio de Oferta / Promoción
             </label>
-            <div id="wrapOfertaEditar" style="display: none; margin-top: 0.6rem;">
-              <label for="edit_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de Oferta ($ COP)</label>
+            <div id="wrapOfertaEditar" class="oferta-price-wrap">
+              <label for="edit_precio_oferta" class="oferta-price-label">Precio de Oferta ($ COP)</label>
               <input type="number" step="0.01" id="edit_precio_oferta" name="precio_oferta" class="form-input" oninput="calcularMargenEditar()">
             </div>
           </div>
@@ -879,25 +670,25 @@
   <!-- MODAL 3: CONFIRMACIÓN DE ELIMINACIÓN DE PRODUCTO                       -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalEliminarProducto">
-    <div class="dash-modal" style="max-width: 440px;">
-      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
-        <h3 style="color: #991b1b;">Eliminar Producto</h3>
+    <div class="dash-modal dash-modal-sm">
+      <div class="dash-modal-header dash-modal-header-danger">
+        <h3 class="dash-modal-title-danger">Eliminar Producto</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalEliminar()">✕</button>
       </div>
       <form id="formEliminarProducto" method="post" action="">
         {% csrf_token %}
-        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
-          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+        <div class="dash-modal-body dash-modal-body-danger">
+          <p class="dash-modal-danger-lead">
             ¿Estás seguro de que deseas eliminar permanentemente el producto
           </p>
-          <strong id="eliminarNombreProducto" style="font-size: 1.1rem; color: #0f172a; display: block; margin-bottom: 0.75rem;"></strong>
-          <p style="font-size: 0.8rem; color: #dc2626; margin: 0;">
+          <strong id="eliminarNombreProducto" class="dash-modal-danger-item"></strong>
+          <p class="dash-modal-danger-warn">
             Esta acción no se puede deshacer y el producto ya no aparecerá en la tienda ni en el catálogo.
           </p>
         </div>
-        <div class="dash-modal-footer" style="justify-content: center;">
+        <div class="dash-modal-footer dash-modal-footer-center">
           <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminar()">Cancelar</button>
-          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">Sí, Eliminar Producto</button>
+          <button type="submit" class="btn-action-delete btn-delete-confirm">Sí, Eliminar Producto</button>
         </div>
       </form>
     </div>
@@ -907,7 +698,7 @@
   <!-- MODAL 4: CREAR NUEVA CATEGORÍA                                         -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalNuevaCategoria">
-    <div class="dash-modal" style="max-width: 480px;">
+    <div class="dash-modal dash-modal-md">
       <div class="dash-modal-header">
         <h3>Registrar Nueva Categoría</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalNuevaCategoria()">✕</button>
@@ -936,7 +727,7 @@
   <!-- MODAL 5: REGISTRAR NUEVO PROVEEDOR AGRÍCOLA                            -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalNuevoProveedor">
-    <div class="dash-modal" style="max-width: 520px;">
+    <div class="dash-modal dash-modal-lg">
       <div class="dash-modal-header">
         <h3>Registrar Proveedor / Finca Productora</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalNuevoProveedor()">✕</button>
@@ -997,7 +788,7 @@
   <!-- MODAL 6: EDITAR PROVEEDOR AGRÍCOLA                                     -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalEditarProveedor">
-    <div class="dash-modal" style="max-width: 520px;">
+    <div class="dash-modal dash-modal-lg">
       <div class="dash-modal-header">
         <h3>Modificar Proveedor Agrícola</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalEditarProveedor()">✕</button>
@@ -1058,25 +849,25 @@
   <!-- MODAL 7: ELIMINAR PROVEEDOR AGRÍCOLA                                   -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalEliminarProveedor">
-    <div class="dash-modal" style="max-width: 440px;">
-      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
-        <h3 style="color: #991b1b;">Eliminar Proveedor</h3>
+    <div class="dash-modal dash-modal-sm">
+      <div class="dash-modal-header dash-modal-header-danger">
+        <h3 class="dash-modal-title-danger">Eliminar Proveedor</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalEliminarProveedor()">✕</button>
       </div>
       <form id="formEliminarProveedor" method="post" action="">
         {% csrf_token %}
-        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
-          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+        <div class="dash-modal-body dash-modal-body-danger">
+          <p class="dash-modal-danger-lead">
             ¿Estás seguro de que deseas eliminar permanentemente el proveedor aliado
           </p>
-          <strong id="eliminarRazonProveedor" style="font-size: 1.1rem; color: #0f172a; display: block; margin-bottom: 0.75rem;"></strong>
-          <p style="font-size: 0.8rem; color: #dc2626; margin: 0;">
+          <strong id="eliminarRazonProveedor" class="dash-modal-danger-item"></strong>
+          <p class="dash-modal-danger-warn">
             Esta acción no se puede deshacer. Los productos registrados anteriormente conservarán su información.
           </p>
         </div>
-        <div class="dash-modal-footer" style="justify-content: center;">
+        <div class="dash-modal-footer dash-modal-footer-center">
           <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminarProveedor()">Cancelar</button>
-          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">Sí, Eliminar Proveedor</button>
+          <button type="submit" class="btn-action-delete btn-delete-confirm">Sí, Eliminar Proveedor</button>
         </div>
       </form>
     </div>
