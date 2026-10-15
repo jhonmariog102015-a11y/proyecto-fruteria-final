@@ -102,6 +102,9 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
 
 # ==============================================================================
 # INTEGRACIÓN DE PERFIL INSTITUCIONAL EN EL ADMINISTRADOR DE USUARIOS DE DJANGO
+# NOTA PARA EL EQUIPO:
+# Se integra PerfilUsuarioInline en UserAdmin para que los administradores puedan crear y asignar
+# roles institucionales (Administrador, Cajero, Cliente) y teléfonos a cualquier usuario desde una sola pantalla.
 # ==============================================================================
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User

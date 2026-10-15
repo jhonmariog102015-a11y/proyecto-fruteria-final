@@ -258,6 +258,10 @@ class PerfilUsuario(models.Model):
 
 # ==============================================================================
 # SEÑALES DE INTEGRIDAD Y AUDITORÍA AUTOMÁTICA
+# NOTA PARA EL EQUIPO:
+# Se implementan señales automáticas de Django para:
+# 1. Garantizar que ningún usuario quede sin PerfilUsuario (post_save).
+# 2. Poblar RegistroLogin automáticamente ante inicios de sesión exitosos o fallidos para auditoría.
 # ==============================================================================
 from django.db.models.signals import post_save
 from django.dispatch import receiver

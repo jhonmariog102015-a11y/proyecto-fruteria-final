@@ -36,6 +36,7 @@
             <!-- Formulario de autenticación -->
             <form method="post" action="">
                 {% csrf_token %}
+                <!-- NOTA PARA EL EQUIPO: Soporte dual para iniciar sesión con nombre de usuario o correo vía EmailOrUsernameModelBackend -->
                 <div class="form-group">
                     <label for="id_username">Usuario o Correo Electrónico</label>
                     <input type="text" name="username" id="id_username" placeholder="Ingresa tu usuario o correo" required autofocus autocomplete="username">

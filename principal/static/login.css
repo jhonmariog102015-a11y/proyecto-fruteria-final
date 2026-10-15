@@ -40,6 +40,7 @@
    CUERPO Y FONDO AMBIENTAL
    ============================================================================== */
 
+/* NOTA PARA EL EQUIPO: Usar exclusivamente 'body.login-body' para evitar contaminar estilos globales de otras vistas */
 body.login-body {
     min-height: 100vh;
     display: flex;
@@ -78,6 +79,7 @@ body.login-body::before {
     z-index: 2;
 }
 
+/* NOTA PARA EL EQUIPO: Ancho específico para el contenedor de registro para permitir dos columnas cómodas */
 .register-container {
     max-width: 520px;
 }
