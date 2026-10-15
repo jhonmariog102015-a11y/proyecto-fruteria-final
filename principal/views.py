@@ -13,6 +13,9 @@ from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 from .models import Producto, Categoria, Proveedor, PerfilUsuario
 from .forms import ProductoForm, CategoriaForm, ProveedorForm
 
@@ -395,68 +398,99 @@ def admin_producto_list_preview(request):
 
 def registro_view(request):
     """
-    REGISTRO PÚBLICO DE USUARIOS Y ASIGNACIÓN DE PERFIL ('/registro/')
-    Almacena: username, email, contraseña, teléfono, rol, estado ('activo')
+    REGISTRO PÚBLICO DE CLIENTES Y ASIGNACIÓN DE PERFIL ('/registro/')
+    Almacena: username, email, contraseña, teléfono, rol ('cliente'), estado ('activo')
     y fecha de creación automática vía ORM.
+
+    NOTA TÉCNICA PARA EL EQUIPO (CORRECCIONES SOBRE EL CÓDIGO DE GUTIÉRREZ):
+    1. SEGURIDAD (Escalamiento de privilegios): En el registro público el rol se fuerza
+       estrictamente a 'cliente' (is_staff=False, is_superuser=False). Los roles 'admin'
+       y 'cajero' solo pueden ser concedidos por administradores en /admin/auth/user/.
+    2. VALIDACIÓN DE EMAIL: Se incorpora validate_email de Django para descartar correos malformados.
+    3. POLÍTICAS DE CONTRASEÑA: Se evalúa validate_password para cumplir con las políticas
+       configuradas en settings.py (longitud mínima, no numérica, no común).
+    4. EXPERIENCIA DE USUARIO: Los datos ingresados (form_data) se devuelven a la plantilla
+       en caso de error para que el usuario no deba reescribirlos.
     """
     if request.user.is_authenticated:
         return redirect('index')
+
+    form_data = {}
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         telefono = request.POST.get('telefono', '').strip()
-        rol = request.POST.get('rol', 'cliente').strip()
         password = request.POST.get('password', '')
         confirm_password = request.POST.get('confirm_password', '')
+        terminos = request.POST.get('terms')
 
-        # Validaciones de integridad
+        form_data = {
+            'username': username,
+            'email': email,
+            'telefono': telefono,
+        }
+
+        # 1. Validaciones de presencia de campos obligatorios
         if not username or not email or not password:
             messages.error(request, 'Por favor completa todos los campos obligatorios.')
-            return render(request, 'principal/Registro.html')
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
 
+        # 2. Validación de aceptación de términos del servicio
+        if not terminos:
+            messages.error(request, 'Debes aceptar los términos de servicio y políticas de privacidad para registrarte.')
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
+
+        # 3. Validación de coincidencia de contraseñas
         if password != confirm_password:
             messages.error(request, 'Las contraseñas ingresadas no coinciden.')
-            return render(request, 'principal/Registro.html')
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
 
-        if User.objects.filter(username=username).exists():
+        # 4. Validación de formato de correo electrónico
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, 'El correo electrónico ingresado no tiene un formato válido.')
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
+
+        # 5. Validación de unicidad de usuario y correo (insensible a mayúsculas)
+        if User.objects.filter(username__iexact=username).exists():
             messages.error(request, 'El nombre de usuario ya se encuentra registrado.')
-            return render(request, 'principal/Registro.html')
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
 
-        if User.objects.filter(email=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             messages.error(request, 'El correo electrónico ya está en uso.')
-            return render(request, 'principal/Registro.html')
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
 
-        # 1. Crear el usuario base de autenticación
+        # 6. Validación de robustez de contraseña mediante validadores de Django
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            for err in e.messages:
+                messages.error(request, err)
+            return render(request, 'principal/Registro.html', {'form_data': form_data})
+
+        # 7. Crear el usuario base de autenticación con rol 'cliente' seguro
         nuevo_usuario = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
+        nuevo_usuario.is_staff = False
+        nuevo_usuario.is_superuser = False
+        nuevo_usuario.save()
 
-        # 2. Configurar perfil vinculado y permisos acordes al rol
+        # 8. Configurar perfil vinculado de cliente
         perfil, _ = PerfilUsuario.objects.get_or_create(usuario=nuevo_usuario)
         perfil.telefono = telefono
-        perfil.rol = rol
+        perfil.rol = 'cliente'
         perfil.estado = 'activo'
         perfil.save()
 
-        if rol == 'admin':
-            nuevo_usuario.is_staff = True
-            nuevo_usuario.is_superuser = True
-            nuevo_usuario.save()
-        elif rol == 'cajero':
-            nuevo_usuario.is_staff = True
-            nuevo_usuario.save()
-
-        # 3. Autenticar e iniciar sesión de inmediato
+        # 9. Iniciar sesión automáticamente y redirigir
         auth_login(request, nuevo_usuario, backend='principal.backends.EmailOrUsernameModelBackend')
         messages.success(request, f'¡Bienvenido a Al Paso Frutería, {username}!')
-
-        # Redirigir según el rol asignado
-        if rol in ['admin', 'cajero']:
-            return redirect('dashboard')
         return redirect('index')
 
-    return render(request, 'principal/Registro.html')
+    return render(request, 'principal/Registro.html', {'form_data': form_data})
 

@@ -286,9 +286,9 @@ class RegistroViewTestCase(TestCase):
             'username': 'nuevo_cliente',
             'email': 'nuevo@example.com',
             'telefono': '3109998877',
-            'rol': 'cliente',
             'password': 'PasswordSeguro123!',
-            'confirm_password': 'PasswordSeguro123!'
+            'confirm_password': 'PasswordSeguro123!',
+            'terms': 'on'
         })
         self.assertRedirects(response, reverse('index'))
         User = get_user_model()
@@ -296,6 +296,61 @@ class RegistroViewTestCase(TestCase):
         nuevo = User.objects.get(username='nuevo_cliente')
         self.assertTrue(hasattr(nuevo, 'perfil'))
         self.assertEqual(nuevo.perfil.rol, 'cliente')
+        self.assertFalse(nuevo.is_staff)
+        self.assertFalse(nuevo.is_superuser)
+
+    def test_registro_view_previene_escalamiento_privilegios(self):
+        # Un atacante intenta forzar rol admin por POST
+        response = self.client.post('/registro/', {
+            'username': 'hacker_user',
+            'email': 'hacker@example.com',
+            'telefono': '3000000000',
+            'rol': 'admin',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!',
+            'terms': 'on'
+        })
+        self.assertRedirects(response, reverse('index'))
+        User = get_user_model()
+        user = User.objects.get(username='hacker_user')
+        # Debe ser forzado a cliente normal sin permisos de staff ni superuser
+        self.assertEqual(user.perfil.rol, 'cliente')
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+
+    def test_registro_view_post_password_mismatch(self):
+        response = self.client.post('/registro/', {
+            'username': 'mismatch_user',
+            'email': 'mismatch@example.com',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'DifferentPassword123!',
+            'terms': 'on'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Las contraseñas ingresadas no coinciden')
+        # Verifica persistencia del dato
+        self.assertContains(response, 'value="mismatch_user"')
+
+    def test_registro_view_post_terminos_obligatorios(self):
+        response = self.client.post('/registro/', {
+            'username': 'noterms_user',
+            'email': 'noterms@example.com',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Debes aceptar los términos de servicio')
+
+    def test_registro_view_post_email_invalido(self):
+        response = self.client.post('/registro/', {
+            'username': 'bademail_user',
+            'email': 'correo_no_valido',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!',
+            'terms': 'on'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'formato válido')
 
     def test_creacion_usuario_crea_perfil_automaticamente(self):
         User = get_user_model()
