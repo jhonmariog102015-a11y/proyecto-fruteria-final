@@ -1123,6 +1123,21 @@ body {
     gap: 1.5rem;
 }
 
+.footer-brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.footer-logo {
+    display: block;
+    width: clamp(130px, 16vw, 210px);
+    max-height: 70px;
+    height: auto;
+    object-fit: contain;
+    object-position: left center;
+}
+
 .footer .brand-name {
     color: #fff;
 }
@@ -1419,6 +1434,14 @@ body {
         flex-direction: column;
         text-align: center;
         padding: 2rem 1.25rem;
+    }
+
+    .footer .footer-brand {
+        justify-content: center;
+    }
+
+    .footer .footer-logo {
+        object-position: center;
     }
 }
 

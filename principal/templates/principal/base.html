@@ -6,8 +6,8 @@
     <!-- Metadatos estándar y responsividad -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ titulo|default:"El Paso Frutería — Mercado Campesino" }}{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}El Paso Frutería — Frutas y verduras frescas directas del campo a tu mesa.{% endblock %}">
+    <title>{% block title %}{{ titulo|default:"Al Paso Frutería — Mercado Campesino" }}{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Al Paso Frutería — Frutas y verduras frescas directas del campo a tu mesa.{% endblock %}">
 
     <!-- Preconexión e importación de Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -140,8 +140,8 @@
     <!-- ====================================================================== -->
     <header class="navbar">
         <!-- Logotipo oficial transparente -->
-        <a class="nav-brand" href="{% url 'index' %}" aria-label="El Paso Frutería, inicio">
-            <img class="navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="El Paso Frutería">
+        <a class="nav-brand" href="{% url 'index' %}" aria-label="Al Paso Frutería, inicio">
+            <img class="navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería">
         </a>
 
         <!-- Enlaces de navegación con detección activa de URL -->
@@ -192,7 +192,7 @@
     <!-- ====================================================================== -->
     <!-- 4. BOTÓN FLOTANTE PERSISTENTE DE WHATSAPP                             -->
     <!-- ====================================================================== -->
-    <a href="https://wa.me/573001234567?text=Hola%20El%20Paso%20Fruter%C3%ADa,%20quisiera%20hacer%20un%20pedido"
+    <a href="https://wa.me/573001234567?text=Hola%20Al%20Paso%20Fruter%C3%ADa,%20quisiera%20hacer%20un%20pedido"
        target="_blank"
        rel="noopener noreferrer"
        class="whatsapp-floating-btn"
@@ -207,14 +207,10 @@
     <!-- 5. PIE DE PÁGINA (Footer)                                              -->
     <!-- ====================================================================== -->
     <footer class="footer">
-        <div class="footer-brand">
-            <div class="brand-icon">EP</div>
-            <div>
-                <div class="brand-name">El Paso</div>
-                <div class="brand-tagline">Frutería</div>
-            </div>
-        </div>
-        <p class="footer-copy">© 2026 El Paso Frutería. Calidad, frescura y sabor directo de los mejores campos.</p>
+        <a class="footer-brand" href="{% url 'index' %}" aria-label="Al Paso Frutería, inicio">
+            <img class="footer-logo navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería">
+        </a>
+        <p class="footer-copy">© 2026 Al Paso Frutería. Calidad, frescura y sabor directo de los mejores campos.</p>
     </footer>
 
     <!-- ====================================================================== -->

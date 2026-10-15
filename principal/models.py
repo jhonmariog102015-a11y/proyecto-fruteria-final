@@ -1,6 +1,6 @@
 # ==============================================================================
 # MODELO ENTIDAD-RELACIÓN DEL PROYECTO (principal/models.py)
-# Define la estructura de base de datos relacional para "El Paso Frutería"
+# Define la estructura de base de datos relacional para "Al Paso Frutería"
 # Basado en la guía de diseño de datos SENA ADSO (Ficha 3321349).
 # ==============================================================================
 

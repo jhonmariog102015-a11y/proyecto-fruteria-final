@@ -33,7 +33,7 @@ def inicio(request):
     producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
 
     context = {
-        'titulo': 'El Paso Frutería — Mercado Campesino',
+        'titulo': 'Al Paso Frutería — Mercado Campesino',
         'productos': productos,
         'categorias': categorias,
         'producto_destacado': producto_destacado,
@@ -52,7 +52,7 @@ def catalogo_frutas_view(request):
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
     context = {
-        'titulo': 'Catálogo de Frutas Frescas — El Paso Frutería',
+        'titulo': 'Catálogo de Frutas Frescas — Al Paso Frutería',
         'productos': productos,
         'categorias': categorias,
         'total_productos': productos.count(),
@@ -444,7 +444,7 @@ def registro_view(request):
 
         # 3. Autenticar e iniciar sesión de inmediato
         auth_login(request, nuevo_usuario)
-        messages.success(request, f'¡Bienvenido a El Paso Frutería, {username}!')
+        messages.success(request, f'¡Bienvenido a Al Paso Frutería, {username}!')
 
         # Redirigir según el rol asignado
         if rol in ['admin', 'cajero']:
