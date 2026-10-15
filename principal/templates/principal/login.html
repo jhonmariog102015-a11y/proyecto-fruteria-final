@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Estilos exclusivos del login -->
     <link rel="stylesheet" href="{% static 'login.css' %}">
 </head>
@@ -43,7 +43,12 @@
 
                 <div class="form-group">
                     <label for="id_password">Contraseña</label>
-                    <input type="password" name="password" id="id_password" placeholder="••••••••" required autocomplete="current-password">
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="id_password" placeholder="••••••••" required autocomplete="current-password">
+                        <button class="btn-toggle-password" type="button" onclick="togglePass('id_password', 'eyeLogin')" aria-label="Mostrar u ocultar contraseña" tabindex="-1">
+                            <i class="bi bi-eye" id="eyeLogin"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-submit">Entrar al Panel</button>
@@ -61,5 +66,23 @@
             </div>
         </main>
     </div>
+
+    <!-- Script para alternar visibilidad de la contraseña -->
+    <script>
+    function togglePass(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (!input || !icon) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    }
+    </script>
 </body>
 </html>

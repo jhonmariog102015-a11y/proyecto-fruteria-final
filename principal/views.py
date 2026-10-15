@@ -20,11 +20,14 @@ def inicio(request):
     """
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
+    # Producto destacado para el Hero dinámico asimétrico
+    producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
 
     context = {
         'titulo': 'El Paso Frutería — Mercado Campesino',
         'productos': productos,
         'categorias': categorias,
+        'producto_destacado': producto_destacado,
         'total_productos': productos.count(),
     }
     return render(request, 'principal/index.html', context)
@@ -43,7 +46,11 @@ def catalogo_frutas_view(request):
         'categorias': categorias,
         'total_productos': productos.count(),
     }
-    return render(request, 'fruteria/catalogo_frutas.html', context)
+    # NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    # Se unificó la ubicación de plantillas dentro de 'principal/templates/principal/'
+    # para que todos los archivos HTML (index, catalogo, dashboard, login) residan
+    # en una sola carpeta bajo la convención estándar de Django MVT.
+    return render(request, 'principal/catalogo_frutas.html', context)
 
 
 @login_required
@@ -96,8 +103,12 @@ def crear_producto_dashboard(request):
             stock_actual = Decimal(request.POST.get('stock_actual', '0').replace(',', '.'))
             stock_minimo = Decimal(request.POST.get('stock_minimo', '5').replace(',', '.'))
             unidad_medida = request.POST.get('unidad_medida', 'kg').strip()
-            origen = request.POST.get('origen', '').strip() or '🌱 Cosecha: Hace 1 día • Finca El Campo'
-            icono_emoji = request.POST.get('icono_emoji', '🍎').strip() or '🍎'
+            # NOTA PARA EL EQUIPO (GAES):
+            # Se asignan valores de respaldo limpios sin caracteres emoji especiales para
+            # evitar fallos de codificación (UnicodeEncodeError en Windows/consolas cp1252/cp932)
+            # y garantizar persistencia consistente en la base de datos SQL.
+            origen = request.POST.get('origen', '').strip() or 'Cosecha: Hace 1 día • Finca El Campo'
+            icono_emoji = request.POST.get('icono_emoji', '').strip()
             imagen_url = request.POST.get('imagen_url', '').strip() or 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop'
             estado = request.POST.get('estado', 'Disponible').strip()
 

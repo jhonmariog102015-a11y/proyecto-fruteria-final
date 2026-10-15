@@ -74,9 +74,9 @@
                     <!-- Contraseña -->
                     <div class="col-md-6 mb-2">
                         <label class="form-label small fw-bold" for="password">Contraseña *</label>
-                        <div class="input-group">
-                            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
-                            <button class="btn btn-outline-secondary" type="button" onclick="togglePass('password', 'eye1')">
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
+                            <button class="btn-toggle-password" type="button" onclick="togglePass('password', 'eye1')" aria-label="Mostrar u ocultar contraseña" tabindex="-1">
                                 <i class="bi bi-eye" id="eye1"></i>
                             </button>
                         </div>
@@ -85,9 +85,9 @@
                     <!-- Confirmar Contraseña -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label small fw-bold" for="confirm_password">Confirmar *</label>
-                        <div class="input-group">
-                            <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="••••••••" required>
-                            <button class="btn btn-outline-secondary" type="button" onclick="togglePass('confirm_password', 'eye2')">
+                        <div class="password-wrapper">
+                            <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
+                            <button class="btn-toggle-password" type="button" onclick="togglePass('confirm_password', 'eye2')" aria-label="Mostrar u ocultar contraseña" tabindex="-1">
                                 <i class="bi bi-eye" id="eye2"></i>
                             </button>
                         </div>
@@ -131,6 +131,7 @@
         function togglePass(inputId, iconId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('bi-eye');

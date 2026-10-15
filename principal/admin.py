@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Categoria, Proveedor, Producto, Cliente, RegistroLogin, PerfilUsuario
 
 
@@ -13,9 +14,6 @@ class ProveedorAdmin(admin.ModelAdmin):
     list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')
     search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')
     list_filter = ('estado',)
-
-
-from django.utils.html import format_html
 
 
 @admin.register(Producto)
@@ -99,4 +97,4 @@ class RegistroLoginAdmin(admin.ModelAdmin):
 class PerfilUsuarioAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'rol', 'telefono', 'estado', 'fecha_creacion')
     list_filter = ('rol', 'estado', 'fecha_creacion')
-    search_fields = ('usuario__username', 'usuario__email', 'telefono')
+    search_fields = ('usuario__username', 'usuario__email', 'telefono')

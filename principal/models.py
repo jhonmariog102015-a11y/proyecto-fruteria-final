@@ -172,7 +172,8 @@ class Producto(models.Model):
 
     def __str__(self):
         oferta_tag = f" [OFERTA: ${self.precio_oferta:,.0f}]" if self.en_oferta and self.precio_oferta else ""
-        return f"{self.icono_emoji} {self.nombre} - Venta: ${self.precio_venta_unitario:,.0f}{oferta_tag} (Costo: ${self.costo_compra:,.0f})"
+        nombre_display = f"{self.icono_emoji} {self.nombre}".strip() if self.icono_emoji else self.nombre
+        return f"{nombre_display} - Venta: ${self.precio_venta_unitario:,.0f}{oferta_tag} (Costo: ${self.costo_compra:,.0f})"
 
 
 
@@ -252,4 +253,4 @@ class PerfilUsuario(models.Model):
         db_table = "perfiles_usuario"
 
     def __str__(self):
-        return f"{self.usuario.username} ({self.get_rol_display()}) - {self.get_estado_display()}"
+        return f"{self.usuario.username} ({self.get_rol_display()}) - {self.get_estado_display()}"

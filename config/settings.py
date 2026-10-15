@@ -66,6 +66,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -74,6 +77,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Seguridad de sesiones para empleados y administradores
+SESSION_COOKIE_AGE = 86400  # 24 horas de vigencia máxima de sesión
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Cierre automático de sesión al cerrar el navegador
+SESSION_COOKIE_HTTPONLY = True  # Protección contra robo de cookies vía JavaScript (XSS)
 
 # Internationalization
 LANGUAGE_CODE = 'es-co'
