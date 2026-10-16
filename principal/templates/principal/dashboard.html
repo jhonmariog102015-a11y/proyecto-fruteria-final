@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.3">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -452,12 +452,15 @@
                 </tbody>
               </table>
             </div>
-        </div> <!-- Fin #seccion-inventario -->
+          </div> <!-- Fin #proveedores -->
+        </div> <!-- Fin .finanzas-grid-2 -->
+      </div> <!-- Fin #seccion-inventario -->
 
-        <!-- ================================================================== -->
-        <!-- SECCIÓN DE ADMINISTRADORES DEL SISTEMA (CÓDIGO DE GUTIÉRREZ)       -->
-        <!-- ================================================================== -->
-<div id="seccion-usuarios" class="dashboard-section" style="display: none;">
+      <!-- ================================================================== -->
+      <!-- SECCIÓN DE ADMINISTRADORES DEL SISTEMA (CÓDIGO DE GUTIÉRREZ)       -->
+      <!-- ================================================================== -->
+      <div id="seccion-usuarios" class="dashboard-section" style="display: none;">
+        <section class="dashboard-products" style="margin-bottom: 1.5rem;">
           <!-- MÉTRICAS CLAVE ESPECÍFICAS DE ADMINISTRADORES -->
           <div class="stats-row">
             <!-- 1. Total Administradores -->
@@ -532,9 +535,10 @@
               </div>
             </div>
           </div>
+        </section>
 
-          <!-- TABLA COMPLETA DE ADMINISTRADORES -->
-          <section class="dashboard-products" style="margin-top: 0;">
+        <!-- TABLA COMPLETA DE ADMINISTRADORES -->
+        <section class="dashboard-products" style="margin-top: 0;">
             <div class="products-table-container">
               <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
@@ -589,7 +593,7 @@
                 <tbody id="tablaUsuariosBody">
                   {% for perfil in perfiles_usuarios %}
                   <tr class="fila-usuario"
-                    data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} admin {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }} {% if perfil.usuario.is_superuser %}superadmin{% endif %} {% if perfil.usuario.is_staff %}staff{% endif %}">
+                    data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} {{ perfil.rol|lower }} {{ perfil.get_rol_display|lower }} {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }} {% if perfil.usuario.is_superuser %}superadmin{% endif %} {% if perfil.usuario.is_staff %}staff{% endif %}">
                     <td>
                       <div class="table-prod-info">
                         <span class="table-prod-icon" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">
@@ -625,7 +629,7 @@
                     </td>
                     <td>
                       <span class="badge-oferta" style="background: #fee2e2; color: #b91c1c; border-color: #fca5a5; font-weight: 700;">
-                        Administrador
+                        {{ perfil.get_rol_display|default:"Administrador" }}
                       </span>
                     </td>
                     <td>
