@@ -1,0 +1,48 @@
+<!-- INICIO CAMBIOS GUÍA 4: listado y acciones del CRUD de productos (FBV). -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo_documento %}{{ titulo }} | El Paso{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0">{{ titulo }}</h1>
+    <a class="btn btn-success" href="{% url 'principal:producto_crear' %}">Crear producto</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle tabla-datos">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{ producto.icono_emoji }} {{ producto.nombre }}</td>
+                        <td>{{ producto.categoria.nombre }}</td>
+                        <td>${{ producto.precio_venta_unitario|floatformat:2 }}</td>
+                        <td>{{ producto.stock_actual }} {{ producto.unidad_medida }}</td>
+                        <td>{{ producto.get_estado_display }}</td>
+                        <td class="text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'principal:producto_editar' producto.pk %}">Editar</a>
+                            <form method="post" action="{% url 'principal:producto_eliminar' producto.pk %}" id="eliminar-producto-{{ producto.pk }}" class="d-none">
+                                {% csrf_token %}
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger js-confirmar-eliminacion" data-form-eliminar="eliminar-producto-{{ producto.pk }}" data-nombre="{{ producto.nombre }}">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<!-- FIN CAMBIOS GUÍA 4 -->

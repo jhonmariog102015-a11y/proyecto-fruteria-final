@@ -1,0 +1,23 @@
+<!-- INICIO CAMBIOS GUÍA 4: confirmación POST con token CSRF para categorías. -->
+{% extends "base.html" %}
+
+{% block titulo_documento %}{{ titulo }} | El Paso{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 text-danger">{{ titulo }}</h1>
+                <p>¿Confirmas que deseas eliminar la categoría <strong>{{ object.nombre }}</strong>?</p>
+                <p class="text-muted">Los productos asociados también se eliminarán según la relación configurada.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                    <a class="btn btn-outline-secondary" href="{% url 'principal:categoria_listar' %}">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<!-- FIN CAMBIOS GUÍA 4 -->

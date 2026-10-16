@@ -4,13 +4,16 @@
 # ==============================================================================
 
 from django.contrib import admin
-from django.urls import path, include
+# INICIO CAMBIOS GUÍA 4: autenticación POST y rutas del módulo CRUD.
+from django.contrib.auth.views import LogoutView
+from principal.forms import FormularioInicioSesion
+from django.urls import include, path
+# FIN CAMBIOS GUÍA 4: importaciones de autenticación y gestión.
 from principal.views import (
     inicio,
     tienda_view,
     catalogo_frutas_view,
     dashboard_view,
-    logout_view,
     admin_preview,
     admin_productos_preview,
     admin_producto_list_preview
@@ -51,10 +54,19 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
     # -------------------------------------------------------------------------
+    # INICIO CAMBIOS GUÍA 4: login con formulario Bootstrap y logout seguro por POST.
     # Login oficial de Django usando la plantilla personalizada login.html
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),
+    path(
+        'accounts/login/',
+        auth_views.LoginView.as_view(
+            template_name='principal/login.html',
+            authentication_form=FormularioInicioSesion,
+        ),
+        name='login',
+    ),
 
     # Cierre de sesión seguro y redirección a la página principal
-    path('accounts/logout/', logout_view, name='logout'),
+    path('accounts/logout/', LogoutView.as_view(), name='logout'),
+    path('gestion/', include('principal.urls')),
+    # FIN CAMBIOS GUÍA 4: rutas de autenticación y gestión.
 ]
-

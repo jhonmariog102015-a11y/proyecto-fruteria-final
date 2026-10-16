@@ -4,9 +4,18 @@
 # ==============================================================================
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.shortcuts import redirect, render
+from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseNotAllowed
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+
+# INICIO CAMBIOS GUÍA 4: importaciones de formularios, mensajes y protección CRUD.
+from .forms import CategoriaForm, ProductoForm
 from .models import Producto, Categoria
+# FIN CAMBIOS GUÍA 4: importaciones de la guía.
 
 
 def inicio(request):
@@ -96,14 +105,124 @@ def dashboard_view(request):
     })
 
 
-def logout_view(request):
-    """
-    CIERRE DE SESIÓN SEGURO ('/accounts/logout/')
-    ---------------------------------------------
-    Destruye la sesión activa del usuario y lo redirige limpiamente a la portada.
-    """
-    logout(request)
-    return redirect('index')
+# INICIO CAMBIOS GUÍA 4: CRUD seguro de productos mediante vistas basadas en funciones.
+@login_required
+def producto_listar(request):
+    productos = Producto.objects.select_related("categoria").order_by("nombre")
+    return render(
+        request,
+        "principal/productos/lista.html",
+        {"productos": productos, "titulo": "Gestión de productos"},
+    )
+
+
+@login_required
+def producto_crear(request):
+    datos = request.POST if request.method == "POST" else None
+    formulario = ProductoForm(datos)
+    if request.method == "POST":
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, "El producto se creó correctamente.")
+            return redirect("principal:producto_listar")
+        messages.error(request, "Revisa los errores del formulario.")
+    return render(
+        request,
+        "principal/productos/formulario.html",
+        {"formulario": formulario, "titulo": "Crear producto"},
+    )
+
+
+@login_required
+def producto_editar(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    datos = request.POST if request.method == "POST" else None
+    formulario = ProductoForm(datos, instance=producto)
+    if request.method == "POST":
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, "El producto se actualizó correctamente.")
+            return redirect("principal:producto_listar")
+        messages.error(request, "Revisa los errores del formulario.")
+    return render(
+        request,
+        "principal/productos/formulario.html",
+        {
+            "formulario": formulario,
+            "producto": producto,
+            "titulo": "Editar producto",
+        },
+    )
+
+
+@login_required
+def producto_eliminar(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == "POST":
+        producto.delete()
+        messages.success(request, "El producto se eliminó correctamente.")
+        return redirect("principal:producto_listar")
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET", "POST"])
+    return render(
+        request,
+        "principal/productos/confirmar_eliminar.html",
+        {"objeto": producto, "titulo": "Eliminar producto"},
+    )
+
+
+class CategoriaListaView(LoginRequiredMixin, ListView):
+    model = Categoria
+    template_name = "principal/categorias/lista.html"
+    context_object_name = "categorias"
+    ordering = ["nombre"]
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Gestión de categorías"
+        return contexto
+
+
+class CategoriaCrearView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = "principal/categorias/formulario.html"
+    success_url = reverse_lazy("principal:categoria_listar")
+    success_message = "La categoría «%(nombre)s» se creó correctamente."
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Crear categoría"
+        return contexto
+
+
+class CategoriaEditarView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = "principal/categorias/formulario.html"
+    success_url = reverse_lazy("principal:categoria_listar")
+    success_message = "La categoría «%(nombre)s» se actualizó correctamente."
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Editar categoría"
+        return contexto
+
+
+class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
+    model = Categoria
+    template_name = "principal/categorias/confirmar_eliminar.html"
+    success_url = reverse_lazy("principal:categoria_listar")
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Eliminar categoría"
+        return contexto
+
+    def form_valid(self, form):
+        messages.success(self.request, "La categoría se eliminó correctamente.")
+        return super().form_valid(form)
+# FIN CAMBIOS GUÍA 4: CRUD de productos y categorías.
 
 
 def admin_preview(request):
