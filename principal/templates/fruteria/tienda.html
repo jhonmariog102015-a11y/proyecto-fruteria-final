@@ -36,12 +36,18 @@
             <a href="#categorias" class="nav-link">Categorías</a>
             <a href="#carrusel-frutas" class="nav-link">Frutas de Temporada</a>
             <a href="#nosotros" class="nav-link">Nosotros</a>
-            {% if user.is_authenticated %}
+            <!-- INICIO CAMBIOS GUÍA 4: usuario y logout mediante formulario POST. -->
+            {% if request.user.is_authenticated %}
                 <a href="{% url 'dashboard' %}" class="nav-link" style="color:#28a745; font-weight:700;">📊 Panel Admin</a>
-                <a href="{% url 'logout' %}" class="nav-link" style="color:#dc3545; font-weight:600;">Cerrar Sesión</a>
+                <span class="nav-link">{{ request.user.username }}</span>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link btn btn-link" style="color:#dc3545; font-weight:600;">Cerrar Sesión</button>
+                </form>
             {% else %}
                 <a href="{% url 'login' %}" class="nav-link" style="color:#ffc107; font-weight:700;">👤 Ingresar</a>
             {% endif %}
+            <!-- FIN CAMBIOS GUÍA 4: autenticación de la navbar. -->
         </nav>
 
         <div class="nav-actions">
@@ -264,7 +270,11 @@
     </footer>
 
     <!-- SCRIPT CARRUSEL -->
-    <script src="{% static 'js/carrusel.js' %}"></script>
+    <!-- INICIO CAMBIOS GUÍA 4: JavaScript propio modularizado. -->
+    {% block scripts %}
+        <script src="{% static 'js/modulos/tienda/carrusel/productos.js' %}"></script>
+    {% endblock %}
+    <!-- FIN CAMBIOS GUÍA 4: scripts de la tienda. -->
 </body>
 
 </html>

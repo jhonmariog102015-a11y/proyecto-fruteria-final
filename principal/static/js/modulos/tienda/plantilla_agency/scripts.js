@@ -1,3 +1,4 @@
+// CAMBIO GUÍA 4: reubicado en la estructura modular de JavaScript.
 /*!
 * Start Bootstrap - Agency v7.0.12 (https://startbootstrap.com/theme/agency)
 * Copyright 2013-2023 Start Bootstrap

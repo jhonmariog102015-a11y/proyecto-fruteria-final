@@ -1,3 +1,4 @@
+// CAMBIO GUÍA 4: reubicado en la estructura modular de JavaScript.
 /**
  * CATÁLOGO COMPLETO DE FRUTAS - EL PASO FRUTERÍA (DISEÑO 4)
  * Manejo de filtros por pestañas, búsqueda en vivo, contador y carrito con WhatsApp

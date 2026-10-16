@@ -1,3 +1,4 @@
+// CAMBIO GUÍA 4: copia reubicada del script que estaba fuera de static.
 /*!
 * Start Bootstrap - Agency v7.0.12 (https://startbootstrap.com/theme/agency)
 * Copyright 2013-2023 Start Bootstrap

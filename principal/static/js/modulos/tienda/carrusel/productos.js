@@ -1,3 +1,4 @@
+// CAMBIO GUÍA 4: reubicado en la estructura modular de JavaScript.
 /**
  * ==============================================================================
  * CARRUSEL DE FRUTAS CON PESTAÑAS Y CONTROL TÁCTIL (carrusel.js)
@@ -212,4 +213,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicialización al cargar la página
     updateDots();
 });
-

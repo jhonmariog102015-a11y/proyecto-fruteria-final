@@ -6,6 +6,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>El Paso Frutería — Panel Administrativo</title>
+  <!-- INICIO CAMBIOS GUÍA 4: DataTables para la tabla del dashboard. -->
+  <link href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css" rel="stylesheet">
+  <!-- FIN CAMBIOS GUÍA 4: estilos de tabla. -->
   <!-- Hoja de estilos del Dashboard con tema oscuro/verde moderno -->
   <link rel="stylesheet" href="{% static 'panel.css' %}">
 </head>
@@ -29,6 +32,14 @@
         <a href="{% url 'catalogo_frutas' %}">
           <span class="nav-icon">🍊</span> Catálogo de Frutas
         </a>
+        <!-- INICIO CAMBIOS GUÍA 4: enlaces a módulos CRUD protegidos. -->
+        <a href="{% url 'principal:producto_listar' %}">
+          <span class="nav-icon">📦</span> Gestionar productos
+        </a>
+        <a href="{% url 'principal:categoria_listar' %}">
+          <span class="nav-icon">🏷</span> Gestionar categorías
+        </a>
+        <!-- FIN CAMBIOS GUÍA 4: enlaces a productos y categorías. -->
         <a href="{% url 'index' %}">
           <span class="nav-icon">🏪</span> Ir a la Tienda
         </a>
@@ -109,7 +120,8 @@
           <!-- ================================================================ -->
           <div class="products-table-container">
             <h2 id="products-heading">Inventario de Productos Frutícolas</h2>
-            <table>
+            <!-- INICIO CAMBIOS GUÍA 4: tabla con DataTables en español. -->
+            <table class="tabla-datos">
               <thead>
                 <tr>
                   <th scope="col">Nombre</th>
@@ -128,13 +140,10 @@
                   <td>{{ producto.stock }} {{ producto.unidad_medida|default:"kg" }}</td>
                   <td><span class="badge-status">{{ producto.estado|default:"Disponible" }}</span></td>
                 </tr>
-                {% empty %}
-                <tr>
-                  <td class="empty-products" colspan="5">No hay productos registrados todavía.</td>
-                </tr>
                 {% endfor %}
               </tbody>
             </table>
+            <!-- FIN CAMBIOS GUÍA 4: tabla interactiva. -->
           </div>
         </section>
 
@@ -493,5 +502,12 @@
       </div>
     </main>
   </div>
+  <!-- INICIO CAMBIOS GUÍA 4: carga de DataTables y módulos JavaScript. -->
+  {% block scripts %}
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+  <script src="{% static 'js/modulos/interfaz/tablas/data_tables.js' %}"></script>
+  {% endblock %}
+  <!-- FIN CAMBIOS GUÍA 4: scripts del dashboard. -->
 </body>
 </html>
