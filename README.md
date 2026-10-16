@@ -118,6 +118,16 @@ El aplicativo estará disponible en: **`http://127.0.0.1:8000/`**
 * **Inicio de Sesión:** `http://127.0.0.1:8000/accounts/login/` *(Credenciales: `admin` / `admin123`)*
 * **Django Admin:** `http://127.0.0.1:8000/admin/`
 
+<!-- CAMBIO GUÍA 4: documentación del CRUD y sus rutas. -->
+### CRUD seguro de la Guía de Aprendizaje 4
+
+El módulo de gestión requiere iniciar sesión y está disponible en:
+
+* **Productos (CRUD con vistas basadas en funciones):** `http://127.0.0.1:8000/gestion/productos/`
+* **Categorías (CRUD con vistas basadas en clases):** `http://127.0.0.1:8000/gestion/categorias/`
+
+Los formularios validan los datos en el servidor. Las tablas usan DataTables en español, los campos de selección usan Select2 y las eliminaciones piden confirmación antes de enviar el formulario protegido con CSRF. El cierre de sesión también se realiza mediante POST.
+
 ---
 
 ## 📄 Documentación Académica Oficial (Normas APA 7ma Edición)
