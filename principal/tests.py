@@ -135,3 +135,187 @@ class DashboardCrudTestCase(TestCase):
         self.assertRedirects(response, reverse('dashboard'))
         self.assertTrue(Categoria.objects.filter(nombre='Tubérculos').exists())
 
+
+from principal.models import PerfilUsuario
+
+class UsuariosRolesDashboardTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        # 1. Super Admin
+        self.superadmin = User.objects.create_superuser(username='super_boss', password='password123', email='super@fruteria.com')
+        # 2. Bodeguero
+        self.bodeguero = User.objects.create_user(username='carlos_bodega', password='password123', email='bodega@fruteria.com', is_staff=True)
+        PerfilUsuario.objects.update_or_create(usuario=self.bodeguero, defaults={'rol': 'bodeguero', 'estado': 'activo', 'telefono': '3111111111'})
+        # 3. Cajero
+        self.cajero = User.objects.create_user(username='ana_caja', password='password123', email='caja@fruteria.com', is_staff=True)
+        PerfilUsuario.objects.update_or_create(usuario=self.cajero, defaults={'rol': 'cajero', 'estado': 'activo', 'telefono': '3222222222'})
+        # 4. Usuario Inactivo (no debe aparecer en activos)
+        self.inactivo = User.objects.create_user(username='inactivo_user', password='password123', email='inactivo@fruteria.com', is_active=False)
+        PerfilUsuario.objects.update_or_create(usuario=self.inactivo, defaults={'rol': 'cajero', 'estado': 'inactivo'})
+
+        self.client.login(username='super_boss', password='password123')
+
+    def test_dashboard_muestra_registros_activos_ordenados_por_roles(self):
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+
+        # Verificar contexto de roles y registros activos
+        perfiles = list(response.context['perfiles_usuarios'])
+        # Debe haber exactamente 3 perfiles activos (super_boss, carlos_bodega, ana_caja)
+        self.assertEqual(len(perfiles), 3)
+
+        # Jerarquía estricta requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
+        self.assertEqual(perfiles[0].usuario.username, 'super_boss')
+        self.assertTrue(perfiles[0].usuario.is_superuser or perfiles[0].rol == 'admin')
+
+        self.assertEqual(perfiles[1].usuario.username, 'carlos_bodega')
+        self.assertEqual(perfiles[1].rol, 'bodeguero')
+
+        self.assertEqual(perfiles[2].usuario.username, 'ana_caja')
+        self.assertEqual(perfiles[2].rol, 'cajero')
+
+        # Verificar métricas
+        self.assertEqual(response.context['total_activos'], 3)
+        self.assertEqual(response.context['total_superadmins'], 1)
+        self.assertEqual(response.context['total_bodegueros'], 1)
+        self.assertEqual(response.context['total_cajeros'], 1)
+
+        # Verificar que el usuario inactivo NO aparece
+        nombres = [p.usuario.username for p in perfiles]
+        self.assertNotIn('inactivo_user', nombres)
+
+    def test_crear_usuario_dashboard_exitoso(self):
+        User = get_user_model()
+        response = self.client.post(reverse('dashboard_crear_usuario'), {
+            'username': 'pedro_bodeguero',
+            'first_name': 'Pedro',
+            'last_name': 'Ramírez',
+            'email': 'pedro@fruteria.com',
+            'telefono': '3009998877',
+            'rol': 'bodeguero',
+            'password': 'password123',
+            'confirm_password': 'password123',
+        })
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        user = User.objects.get(username='pedro_bodeguero')
+        self.assertEqual(user.first_name, 'Pedro')
+        self.assertEqual(user.email, 'pedro@fruteria.com')
+        self.assertTrue(user.is_staff)
+        self.assertFalse(user.is_superuser)
+        self.assertEqual(user.perfil.rol, 'bodeguero')
+        self.assertEqual(user.perfil.telefono, '3009998877')
+        self.assertEqual(user.perfil.estado, 'activo')
+
+    def test_crear_usuario_dashboard_validaciones_duplicado_y_contrasena(self):
+        User = get_user_model()
+        # Contraseñas no coinciden
+        response = self.client.post(reverse('dashboard_crear_usuario'), {
+            'username': 'nuevo_user',
+            'email': 'nuevo@fruteria.com',
+            'rol': 'cajero',
+            'password': 'pass1',
+            'confirm_password': 'pass2',
+        })
+        self.assertFalse(User.objects.filter(username='nuevo_user').exists())
+
+        # Username duplicado
+        response = self.client.post(reverse('dashboard_crear_usuario'), {
+            'username': 'ana_caja',
+            'email': 'diferente@fruteria.com',
+            'rol': 'cajero',
+            'password': 'password123',
+            'confirm_password': 'password123',
+        })
+        self.assertEqual(User.objects.filter(username='ana_caja').count(), 1)
+
+    def test_editar_usuario_dashboard_exitoso(self):
+        response = self.client.post(reverse('dashboard_editar_usuario', args=[self.cajero.pk]), {
+            'username': 'ana_cajera_senior',
+            'first_name': 'Ana',
+            'last_name': 'López',
+            'email': 'ana_senior@fruteria.com',
+            'telefono': '3555555555',
+            'rol': 'cajero',
+            'estado': 'activo',
+            'nueva_password': '',
+        })
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        self.cajero.refresh_from_db()
+        self.assertEqual(self.cajero.username, 'ana_cajera_senior')
+        self.assertEqual(self.cajero.email, 'ana_senior@fruteria.com')
+        self.assertEqual(self.cajero.first_name, 'Ana')
+        self.assertEqual(self.cajero.perfil.telefono, '3555555555')
+
+    def test_editar_usuario_dashboard_seguridad_cuenta_propia(self):
+        # Intentar desactivarse a sí mismo
+        response = self.client.post(reverse('dashboard_editar_usuario', args=[self.superadmin.pk]), {
+            'username': 'super_boss',
+            'email': 'super@fruteria.com',
+            'rol': 'admin',
+            'estado': 'inactivo',
+        })
+        self.superadmin.refresh_from_db()
+        self.assertTrue(self.superadmin.is_active)
+        self.assertEqual(self.superadmin.perfil.estado, 'activo')
+
+    def test_eliminar_usuario_dashboard_exitoso_post(self):
+        User = get_user_model()
+        cajero_id = self.cajero.pk
+        response = self.client.post(reverse('dashboard_eliminar_usuario', args=[cajero_id]))
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        self.assertFalse(User.objects.filter(pk=cajero_id).exists())
+
+    def test_eliminar_usuario_dashboard_previene_auto_eliminacion(self):
+        User = get_user_model()
+        super_id = self.superadmin.pk
+        response = self.client.post(reverse('dashboard_eliminar_usuario', args=[super_id]))
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        self.assertTrue(User.objects.filter(pk=super_id).exists())
+
+    def test_no_administrador_no_puede_crear_usuario(self):
+        User = get_user_model()
+        # Iniciar sesión como Cajero (no administrador)
+        self.client.login(username='ana_caja', password='password123')
+        response = self.client.post(reverse('dashboard_crear_usuario'), {
+            'username': 'intento_cajero',
+            'email': 'hacker@fruteria.com',
+            'rol': 'admin',
+            'password': 'password123',
+            'confirm_password': 'password123',
+        })
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        self.assertFalse(User.objects.filter(username='intento_cajero').exists())
+
+    def test_no_administrador_no_puede_editar_usuario(self):
+        # Iniciar sesión como Bodeguero (no administrador)
+        self.client.login(username='carlos_bodega', password='password123')
+        response = self.client.post(reverse('dashboard_editar_usuario', args=[self.cajero.pk]), {
+            'username': 'ana_modificada_ilegal',
+            'email': 'ilegal@fruteria.com',
+            'rol': 'admin',
+            'estado': 'activo',
+        })
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        self.cajero.refresh_from_db()
+        self.assertEqual(self.cajero.username, 'ana_caja')
+        self.assertNotEqual(self.cajero.username, 'ana_modificada_ilegal')
+
+    def test_no_administrador_no_puede_eliminar_usuario(self):
+        User = get_user_model()
+        # Iniciar sesión como Cajero (no administrador)
+        self.client.login(username='ana_caja', password='password123')
+        response = self.client.post(reverse('dashboard_eliminar_usuario', args=[self.bodeguero.pk]))
+        self.assertRedirects(response, '/dashboard/#usuarios')
+        self.assertTrue(User.objects.filter(pk=self.bodeguero.pk).exists())
+
+    def test_no_administrador_ve_interfaz_solo_lectura(self):
+        self.client.login(username='ana_caja', password='password123')
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['es_admin'])
+        self.assertContains(response, 'Modo de solo lectura')
+        self.assertContains(response, 'Solo Administrador')
+        self.assertNotContains(response, 'onclick="abrirModalNuevoUsuario()"')
+
+
+

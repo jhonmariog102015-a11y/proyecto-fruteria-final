@@ -82,12 +82,62 @@ class ClienteAdmin(admin.ModelAdmin):
     list_filter = ('tipo_cliente',)
 
 
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
+
+
+class PerfilUsuarioInline(admin.StackedInline):
+    model = PerfilUsuario
+    can_delete = False
+    verbose_name_plural = 'Perfil del Usuario (Rol, Teléfono y Estado)'
+    fk_name = 'usuario'
+    extra = 0
+
+
+# Re-registrar User para unificar el perfil sin duplicidad de tablas o columnas en el admin
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+
+
+@admin.register(User)
+class CustomUserAdmin(BaseUserAdmin):
+    inlines = (PerfilUsuarioInline,)
+    list_display = ('username', 'email', 'mostrar_rol', 'mostrar_telefono', 'mostrar_estado', 'is_staff')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', 'perfil__rol', 'perfil__estado')
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'perfil__telefono')
+
+    @admin.display(description="Rol en el Sistema", ordering="perfil__rol")
+    def mostrar_rol(self, obj):
+        if obj.is_superuser or (hasattr(obj, 'perfil') and obj.perfil.rol == 'admin'):
+            return mark_safe('<span style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:4px; font-weight:700;">Super Admin</span>')
+        rol = getattr(obj.perfil, 'rol', None) if hasattr(obj, 'perfil') else None
+        if rol == 'bodeguero':
+            return mark_safe('<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:4px; font-weight:700;">Bodeguero</span>')
+        elif rol == 'cajero':
+            return mark_safe('<span style="background:#d1fae5; color:#047857; padding:3px 8px; border-radius:4px; font-weight:700;">Cajero</span>')
+        return mark_safe('<span style="color:#64748b;">—</span>')
+
+    @admin.display(description="Teléfono")
+    def mostrar_telefono(self, obj):
+        return getattr(obj.perfil, 'telefono', '—') if hasattr(obj, 'perfil') else '—'
+
+    @admin.display(description="Estado", ordering="perfil__estado")
+    def mostrar_estado(self, obj):
+        estado = getattr(obj.perfil, 'estado', 'activo') if hasattr(obj, 'perfil') else ('activo' if obj.is_active else 'inactivo')
+        if estado == 'activo' and obj.is_active:
+            return mark_safe('<span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:4px; font-weight:600;">Activo</span>')
+        return mark_safe('<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:4px; font-weight:600;">Inactivo</span>')
+
+
 @admin.register(RegistroLogin)
 class RegistroLoginAdmin(admin.ModelAdmin):
     list_display = ('fecha_creacion', 'identificador', 'rol', 'telefono', 'estado', 'ip_origen')
     list_filter = ('estado', 'rol', 'fecha_creacion')
     search_fields = ('identificador', 'telefono', 'ip_origen')
-    readonly_fields = ('fecha_creacion', 'identificador', 'usuario', 'telefono', 'rol', 'estado', 'ip_origen')
+    readonly_fields = ('fecha_creacion', 'identificador', 'telefono', 'rol', 'estado', 'ip_origen')
 
     def has_add_permission(self, request):
         return False  # Los registros son automáticos, no se crean a mano
@@ -95,6 +145,24 @@ class RegistroLoginAdmin(admin.ModelAdmin):
 
 @admin.register(PerfilUsuario)
 class PerfilUsuarioAdmin(admin.ModelAdmin):
-    list_display = ('usuario', 'rol', 'telefono', 'estado', 'fecha_creacion')
+    list_display = ('usuario', 'mostrar_rol', 'telefono', 'mostrar_estado', 'fecha_creacion')
     list_filter = ('rol', 'estado', 'fecha_creacion')
     search_fields = ('usuario__username', 'usuario__email', 'telefono')
+    ordering = ('rol', 'usuario__username')
+
+    @admin.display(description="Rol Asignado", ordering="rol")
+    def mostrar_rol(self, obj):
+        if obj.usuario.is_superuser or obj.rol == 'admin':
+            return mark_safe('<span style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:4px; font-weight:700;">Super Admin</span>')
+        elif obj.rol == 'bodeguero':
+            return mark_safe('<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:4px; font-weight:700;">Bodeguero</span>')
+        elif obj.rol == 'cajero':
+            return mark_safe('<span style="background:#d1fae5; color:#047857; padding:3px 8px; border-radius:4px; font-weight:700;">Cajero</span>')
+        return obj.get_rol_display()
+
+    @admin.display(description="Estado", ordering="estado")
+    def mostrar_estado(self, obj):
+        if obj.estado == 'activo' and obj.usuario.is_active:
+            return mark_safe('<span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:4px; font-weight:600;">Activo</span>')
+        return mark_safe('<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:4px; font-weight:600;">Inactivo</span>')
+

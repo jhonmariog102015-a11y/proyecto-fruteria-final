@@ -14,6 +14,9 @@ from principal.views import (
     eliminar_producto_dashboard,
     crear_categoria_dashboard,
     eliminar_categoria_dashboard,
+    crear_usuario_dashboard,
+    editar_usuario_dashboard,
+    eliminar_usuario_dashboard,
     logout_view,
     admin_preview,
     admin_productos_preview,
@@ -55,6 +58,10 @@ urlpatterns = [
     path('dashboard/producto/<int:id_producto>/eliminar/', eliminar_producto_dashboard, name='dashboard_eliminar_producto'),
     path('dashboard/categoria/crear/', crear_categoria_dashboard, name='dashboard_crear_categoria'),
     path('dashboard/categoria/<int:id_categoria>/eliminar/', eliminar_categoria_dashboard, name='dashboard_eliminar_categoria'),
+    # CRUD de Usuarios y Roles (FBV con get_object_or_404 y confirmación POST)
+    path('dashboard/usuario/crear/', crear_usuario_dashboard, name='dashboard_crear_usuario'),
+    path('dashboard/usuario/<int:user_id>/editar/', editar_usuario_dashboard, name='dashboard_editar_usuario'),
+    path('dashboard/usuario/<int:user_id>/eliminar/', eliminar_usuario_dashboard, name='dashboard_eliminar_usuario'),
 
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN

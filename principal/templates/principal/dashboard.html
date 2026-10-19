@@ -6,7 +6,7 @@
   <!-- Metadatos de codificación y renderizado en el panel administrativo -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>El Paso Frutería — Panel de Control Administrativo</title>
+  <title> Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
   <link rel="stylesheet" href="{% static 'panel.css' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -224,7 +224,7 @@
           <span class="nav-icon">▪</span> Resumen e Inventario
         </a>
         <a href="#usuarios" id="nav-usuarios" data-section="usuarios" onclick="mostrarSeccion('usuarios', this); return false;">
-          <span class="nav-icon">▪</span> Administradores del Sistema
+          <span class="nav-icon">▪</span> Registros y Roles
         </a>
         <a href="#finanzas" id="nav-finanzas" data-section="finanzas" onclick="mostrarSeccion('finanzas', this); return false;">
           <span class="nav-icon">▪</span> Finanzas y Categorías
@@ -574,219 +574,275 @@
           </div>
         </div>
 
-        <!-- ================================================================== -->
-        <!-- SECCIÓN 2: GESTIÓN DE USUARIOS Y ROLES DEL SISTEMA (NUEVA SECCIÓN) -->
-        <!-- ================================================================== -->
-        <div id="seccion-usuarios" class="dashboard-section" style="display: none;">
-          <!-- MÉTRICAS CLAVE ESPECÍFICAS DE ADMINISTRADORES -->
-          <div class="stats-row">
-            <!-- 1. Total Administradores -->
-            <div class="dash-card" style="--card-accent: #dc2626;">
-              <div class="dash-card-header">
-                <h5>Total Administradores</h5>
-                <span class="dash-card-icon" style="background: #fee2e2; color: #dc2626;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                </span>
-              </div>
-              <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #dc2626;">{{ total_admins }}</h3>
-                <span class="kpi-badge kpi-badge-red"><span class="kpi-dot"></span> Equipo</span>
-              </div>
-              <div class="dash-card-footer">
-                <span class="kpi-subtext">Cuentas administradoras oficiales</span>
-                <span style="font-weight: 700; color: #dc2626; font-size: 0.75rem;">100%</span>
-              </div>
-            </div>
+       <!-- ================================================================== -->
+<!-- SECCIÓN 2: GESTIÓN DE USUARIOS Y ROLES DEL SISTEMA -->
+<!-- ================================================================== -->
+<div id="seccion-usuarios" class="dashboard-section" style="display: none;">
+  <!-- MÉTRICAS CLAVE POR ROLES DEL SISTEMA -->
+  <div class="stats-row">
+    <!-- 1. Total Cuentas Activas -->
+    <div class="dash-card" style="--card-accent: #059669;">
+      <div class="dash-card-header">
+        <h5>Registros Activos</h5>
+        <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </span>
+      </div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <h3 style="color: #059669;">{{ total_activos }}</h3>
+        <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Operativo</span>
+      </div>
+      <div class="dash-card-footer">
+        <span class="kpi-subtext">Cuentas con acceso activo</span>
+        <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">100% Activo</span>
+      </div>
+    </div>
 
-            <!-- 2. Administradores Activos -->
-            <div class="dash-card" style="--card-accent: #059669;">
-              <div class="dash-card-header">
-                <h5>Cuentas Activas</h5>
-                <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </span>
-              </div>
-              <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #059669;">{{ total_admins_activos }}</h3>
-                <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Operativo</span>
-              </div>
-              <div class="dash-card-footer">
-                <span class="kpi-subtext">Acceso vigente a la plataforma</span>
-                <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">Habilitado</span>
-              </div>
-            </div>
+    <!-- 2. Super Admin -->
+    <div class="dash-card" style="--card-accent: #dc2626;">
+      <div class="dash-card-header">
+        <h5>Super Admin</h5>
+        <span class="dash-card-icon" style="background: #fee2e2; color: #dc2626;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </span>
+      </div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <h3 style="color: #dc2626;">{{ total_superadmins }}</h3>
+        <span class="kpi-badge kpi-badge-red"><span class="kpi-dot"></span> Control Total</span>
+      </div>
+      <div class="dash-card-footer">
+        <span class="kpi-subtext">Administración general y root</span>
+        <span style="font-weight: 700; color: #dc2626; font-size: 0.75rem;">Jerarquía 1</span>
+      </div>
+    </div>
 
-            <!-- 3. Superadministradores -->
-            <div class="dash-card" style="--card-accent: #7c3aed;">
-              <div class="dash-card-header">
-                <h5>Superadministradores</h5>
-                <span class="dash-card-icon" style="background: #ede9fe; color: #7c3aed;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-6 6 7 7-4 4-7-7m-4-4a5 5 0 1 1 7-7 5 5 0 0 1-7 7Z"></path></svg>
-                </span>
-              </div>
-              <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #7c3aed;">{{ total_superadmins }}</h3>
-                <span class="kpi-badge kpi-badge-purple">Control Total</span>
-              </div>
-              <div class="dash-card-footer">
-                <span class="kpi-subtext">Acceso maestro y Django Admin</span>
-                <span style="font-weight: 700; color: #7c3aed; font-size: 0.75rem;">Root</span>
-              </div>
-            </div>
+    <!-- 3. Bodegueros -->
+    <div class="dash-card" style="--card-accent: #d97706;">
+      <div class="dash-card-header">
+        <h5>Bodegueros</h5>
+        <span class="dash-card-icon" style="background: #fef3c7; color: #d97706;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        </span>
+      </div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <h3 style="color: #d97706;">{{ total_bodegueros }}</h3>
+        <span class="kpi-badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">Inventario</span>
+      </div>
+      <div class="dash-card-footer">
+        <span class="kpi-subtext">Almacén, stock y cosechas</span>
+        <span style="font-weight: 700; color: #d97706; font-size: 0.75rem;">Jerarquía 2</span>
+      </div>
+    </div>
 
-            <!-- 4. Staff Técnico -->
-            <div class="dash-card" style="--card-accent: #0284c7;">
-              <div class="dash-card-header">
-                <h5>Staff Técnico</h5>
-                <span class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                </span>
-              </div>
-              <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #0284c7;">{{ total_staff }}</h3>
-                <span class="kpi-badge kpi-badge-blue">Staff Django</span>
-              </div>
-              <div class="dash-card-footer">
-                <span class="kpi-subtext">Gestión de catálogo y auditoría</span>
-                <span style="font-weight: 700; color: #0284c7; font-size: 0.75rem;">Activo</span>
-              </div>
-            </div>
-          </div>
+    <!-- 4. Cajeros -->
+    <div class="dash-card" style="--card-accent: #0284c7;">
+      <div class="dash-card-header">
+        <h5>Cajeros</h5>
+        <span class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+        </span>
+      </div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <h3 style="color: #0284c7;">{{ total_cajeros }}</h3>
+        <span class="kpi-badge kpi-badge-blue">Ventas</span>
+      </div>
+      <div class="dash-card-footer">
+        <span class="kpi-subtext">Atención a cliente y caja</span>
+        <span style="font-weight: 700; color: #0284c7; font-size: 0.75rem;">Jerarquía 3</span>
+      </div>
+    </div>
+  </div>
 
-          <!-- TABLA COMPLETA DE ADMINISTRADORES -->
-          <section class="dashboard-products" style="margin-top: 0;">
-            <div class="products-table-container">
-              <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-                <div>
-                  <h2 style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; color: #dc2626;">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </span>
-                    Administradores del Sistema
-                  </h2>
-                  <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">
-                    Control exclusivo de cuentas con permisos de administración, gestión de catálogo y configuración general (sin clientes).
-                  </p>
-                </div>
-                <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-                  <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
-                    <input type="search" id="inputBuscarUsuario" placeholder="Buscar administrador o email..."
-                      aria-label="Buscar administrador" onkeyup="filtrarTablaUsuarios()" style="font-size: 0.85rem;">
-                    <span aria-hidden="true">⌕</span>
-                  </label>
-                  <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #fee2e2; color: #b91c1c; border-color: #fca5a5;">
-                    Total: {{ total_admins }} administradores
-                  </span>
-                  <a href="/admin/auth/user/" target="_blank" class="btn-secondary-dash" title="Gestionar en Django Admin">
-                    Django Admin ↗
-                  </a>
-                </div>
-              </div>
-
-              <!-- Pestañas de filtrado rápido por estado y privilegios -->
-              <div style="display: flex; gap: 8px; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center;">
-                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Filtrar:</span>
-                <button type="button" class="btn-role-tab active" onclick="filtrarPorRol('todos', this)">Todos ({{ total_admins }})</button>
-                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('activo', this)">Activos ({{ total_admins_activos }})</button>
-                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('superadmin', this)">Superadmin ({{ total_superadmins }})</button>
-                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('staff', this)">Staff Técnico ({{ total_staff }})</button>
-              </div>
-
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Administrador</th>
-                    <th scope="col">Correo Electrónico</th>
-                    <th scope="col">Teléfono</th>
-                    <th scope="col">Rol Asignado</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Fecha de Registro</th>
-                    <th scope="col" style="text-align: center;">Nivel de Acceso</th>
-                    <th scope="col" style="text-align: center;">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody id="tablaUsuariosBody">
-                  {% for perfil in perfiles_usuarios %}
-                  <tr class="fila-usuario"
-                    data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} admin {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }} {% if perfil.usuario.is_superuser %}superadmin{% endif %} {% if perfil.usuario.is_staff %}staff{% endif %}">
-                    <td>
-                      <div class="table-prod-info">
-                        <span class="table-prod-icon" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">
-                          {{ perfil.usuario.username|slice:":2"|upper }}
-                        </span>
-                        <div>
-                          <strong style="color: #1e293b;">{{ perfil.usuario.username }}</strong>
-                          <div style="font-size: 0.75rem; color: #64748b;">
-                            {% if perfil.usuario.first_name %}
-                              {{ perfil.usuario.first_name }} {{ perfil.usuario.last_name }}
-                            {% else %}
-                              Administrador del Sistema
-                            {% endif %}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      {% if perfil.usuario.email %}
-                      <span style="color: #334155; font-size: 0.88rem;">{{ perfil.usuario.email }}</span>
-                      {% else %}
-                      <span style="color: #94a3b8; font-style: italic; font-size: 0.82rem;">No registrado</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      {% if perfil.telefono %}
-                      <span style="font-weight: 500; color: #047857; font-size: 0.85rem;">
-                        {{ perfil.telefono }}
-                      </span>
-                      {% else %}
-                      <span style="color: #94a3b8; font-size: 0.82rem;">—</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <span class="badge-oferta" style="background: #fee2e2; color: #b91c1c; border-color: #fca5a5; font-weight: 700;">
-                        Administrador
-                      </span>
-                    </td>
-                    <td>
-                      {% if perfil.estado == 'activo' %}
-                      <span class="badge-status">Activo</span>
-                      {% else %}
-                      <span class="badge-oferta">Inactivo</span>
-                      {% endif %}
-                    </td>
-                    <td style="color: #64748b; font-size: 0.82rem;">
-                      {{ perfil.fecha_creacion|date:"d/m/Y H:i" }}
-                    </td>
-                    <td style="text-align: center;">
-                      {% if perfil.usuario.is_superuser %}
-                      <span style="font-size: 0.75rem; font-weight: 700; color: #b91c1c; background: #fff1f2; padding: 3px 8px; border-radius: 6px; border: 1px solid #fecdd3;">Superadmin</span>
-                      {% elif perfil.usuario.is_staff %}
-                      <span style="font-size: 0.75rem; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 3px 8px; border-radius: 6px; border: 1px solid #bfdbfe;">Staff / Admin</span>
-                      {% else %}
-                      <span style="font-size: 0.75rem; font-weight: 600; color: #047857; background: #ecfdf5; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">Administrador</span>
-                      {% endif %}
-                    </td>
-                    <td style="text-align: center; white-space: nowrap;">
-                      <a href="/admin/auth/user/{{ perfil.usuario.id }}/change/" target="_blank"
-                         class="btn-action-edit" title="Gestionar cuenta en Django Admin">
-                        Gestionar ↗
-                      </a>
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td class="empty-products" colspan="8">
-                      No hay cuentas de administradores registradas en el sistema.
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </section>
+  <!-- TABLA COMPLETA DE REGISTROS ACTIVOS -->
+  <section class="dashboard-products" style="margin-top: 0;">
+    <div class="products-table-container">
+      {% if not es_admin %}
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #64748b; border-radius: 8px; padding: 0.85rem 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <span style="font-size: 0.85rem; color: #475569;">
+          <strong>Modo de solo lectura:</strong> Tu rol actual ({{ request.user.perfil.nombre_rol|default:'Empleado' }}) te permite consultar la lista de usuarios activos. Las acciones de registro, modificación y eliminación están reservadas exclusivamente para <strong>Super Administradores</strong>.
+        </span>
+      </div>
+      {% endif %}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #d1fae5; color: #059669;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </span>
+            Registros Activos del Sistema
+          </h2>
+          <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">
+            Cuentas activas organizadas por roles jerárquicos: Super Admin, Bodeguero y Cajero.
+          </p>
         </div>
+        <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+          <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
+            <input type="search" id="inputBuscarUsuario" placeholder="Buscar usuario, rol o email..."
+              aria-label="Buscar usuario" onkeyup="filtrarTablaUsuarios()" style="font-size: 0.85rem;">
+            <span aria-hidden="true">⌕</span>
+          </label>
+          <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
+            Total: {{ total_activos }} activos
+          </span>
+          {% if es_admin %}
+          <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoUsuario()"
+            style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nuevo usuario">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + Nuevo Usuario
+          </button>
+          {% else %}
+          <span style="font-size: 0.8rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Gestión solo para Administradores
+          </span>
+          {% endif %}
+        </div>
+      </div>
 
+      <!-- Pestañas de filtrado rápido por roles -->
+      <div style="display: flex; gap: 8px; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Filtrar por Rol:</span>
+        <button type="button" class="btn-role-tab active" onclick="filtrarPorRol('todos', this)">Todos ({{ total_activos }})</button>
+        <button type="button" class="btn-role-tab" onclick="filtrarPorRol('super admin', this)">Super Admin ({{ total_superadmins }})</button>
+        <button type="button" class="btn-role-tab" onclick="filtrarPorRol('bodeguero', this)">Bodeguero ({{ total_bodegueros }})</button>
+        <button type="button" class="btn-role-tab" onclick="filtrarPorRol('cajero', this)">Cajero ({{ total_cajeros }})</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Usuario</th>
+            <th scope="col">Correo Electrónico</th>
+            <th scope="col">Teléfono</th>
+            <th scope="col" style="text-align: center;">Rol en el Sistema</th>
+            <th scope="col" style="text-align: center;">Estado</th>
+            <th scope="col">Fecha de Registro</th>
+            {% if es_admin %}
+            <th scope="col" style="text-align: center;">Acciones</th>
+            {% else %}
+            <th scope="col" style="text-align: center;">Permisos</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody id="tablaUsuariosBody">
+          {% for perfil in perfiles_usuarios %}
+          <tr class="fila-usuario"
+            data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}super admin superadmin{% elif perfil.rol == 'bodeguero' %}bodeguero bodega{% elif perfil.rol == 'cajero' %}cajero caja{% endif %} {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }}">
+            <td>
+              <div class="table-prod-info">
+                <span class="table-prod-icon"
+                  style="{% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}background: #fee2e2; color: #b91c1c;{% elif perfil.rol == 'bodeguero' %}background: #fef3c7; color: #b45309;{% else %}background: #d1fae5; color: #047857;{% endif %} font-weight: 800;">
+                  {{ perfil.usuario.username|slice:":2"|upper }}
+                </span>
+                <div>
+                  <strong style="color: #1e293b;">{{ perfil.usuario.username }}</strong>
+                  <div style="font-size: 0.75rem; color: #64748b;">
+                    {% if perfil.usuario.first_name %}
+                      {{ perfil.usuario.first_name }} {{ perfil.usuario.last_name }}
+                    {% else %}
+                      {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}Super Administrador{% elif perfil.rol == 'bodeguero' %}Encargado de Bodega{% else %}Cajero de Tienda{% endif %}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if perfil.usuario.email %}
+              <span style="color: #334155; font-size: 0.88rem;">{{ perfil.usuario.email }}</span>
+              {% else %}
+              <span style="color: #94a3b8; font-style: italic; font-size: 0.82rem;">No registrado</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if perfil.telefono %}
+              <span style="font-weight: 500; color: #047857; font-size: 0.85rem;">
+                {{ perfil.telefono }}
+              </span>
+              {% else %}
+              <span style="color: #94a3b8; font-size: 0.82rem;">—</span>
+              {% endif %}
+            </td>
+            <td style="text-align: center;">
+              {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Super Admin
+              </span>
+              {% elif perfil.rol == 'bodeguero' %}
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                Bodeguero
+              </span>
+              {% else %}
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background: #d1fae5; color: #047857; border: 1px solid #a7f3d0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                Cajero
+              </span>
+              {% endif %}
+            </td>
+            <td style="text-align: center;">
+              <span class="badge-status">Activo</span>
+            </td>
+            <td style="color: #64748b; font-size: 0.82rem;">
+              {{ perfil.fecha_creacion|date:"d/m/Y H:i" }}
+            </td>
+            <td style="text-align: center; white-space: nowrap;">
+              {% if es_admin %}
+                <!-- Botón de Editar (Modal Nativo en Dashboard) -->
+                <button type="button" class="btn-action-edit"
+                  data-id="{{ perfil.usuario.id }}"
+                  data-username="{{ perfil.usuario.username }}"
+                  data-firstname="{{ perfil.usuario.first_name|default:'' }}"
+                  data-lastname="{{ perfil.usuario.last_name|default:'' }}"
+                  data-email="{{ perfil.usuario.email|default:'' }}"
+                  data-telefono="{{ perfil.telefono|default:'' }}"
+                  data-rol="{{ perfil.rol }}"
+                  data-estado="{{ perfil.estado }}"
+                  onclick="abrirModalEditarUsuario(this)"
+                  style="margin-right: 6px; cursor: pointer; border: none; background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                  title="Editar usuario y rol">
+                  Editar
+                </button>
+
+                <!-- Botón de Eliminar (Confirmación POST Nativa en Dashboard) -->
+                {% if perfil.usuario.id == request.user.id %}
+                <button type="button" class="btn-action-delete"
+                  style="color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; opacity: 0.5; cursor: not-allowed; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                  title="No puedes eliminar tu propia cuenta en sesión" disabled>
+                  Eliminar
+                </button>
+                {% else %}
+                <button type="button" class="btn-action-delete"
+                  data-id="{{ perfil.usuario.id }}"
+                  data-username="{{ perfil.usuario.username }}"
+                  data-rol="{{ perfil.nombre_rol }}"
+                  onclick="abrirModalEliminarUsuario(this)"
+                  style="color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; cursor: pointer; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                  title="Eliminar usuario del sistema">
+                  Eliminar
+                </button>
+                {% endif %}
+              {% else %}
+                <span style="font-size: 0.78rem; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 10px; border-radius: 9999px; border: 1px solid #e2e8f0;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                  Solo Administrador
+                </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td class="empty-products" colspan="7">
+              No hay registros activos encontrados en el sistema.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
       </div>
     </main>
   </div>
@@ -1078,6 +1134,179 @@
   </div>
 
   <!-- ====================================================================== -->
+  <!-- MODAL 5: REGISTRAR NUEVO USUARIO Y ASIGNAR ROL                          -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalNuevoUsuario">
+    <div class="dash-modal" style="max-width: 520px;">
+      <div class="dash-modal-header">
+        <h3>Registrar Nuevo Usuario y Rol</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalNuevoUsuario()">✕</button>
+      </div>
+      <form action="{% url 'dashboard_crear_usuario' %}" method="post">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="nuevo_usu_username">Nombre de Usuario (Username) *</label>
+            <input type="text" id="nuevo_usu_username" name="username" class="form-input" placeholder="Ej: maria_ventas" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_usu_firstname">Nombres</label>
+              <input type="text" id="nuevo_usu_firstname" name="first_name" class="form-input" placeholder="Ej: María">
+            </div>
+            <div class="form-group">
+              <label for="nuevo_usu_lastname">Apellidos</label>
+              <input type="text" id="nuevo_usu_lastname" name="last_name" class="form-input" placeholder="Ej: Gómez">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_usu_email">Correo Electrónico *</label>
+              <input type="email" id="nuevo_usu_email" name="email" class="form-input" placeholder="maria@fruteria.com" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_usu_telefono">Teléfono / Celular</label>
+              <input type="tel" id="nuevo_usu_telefono" name="telefono" class="form-input" placeholder="3101234567">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="nuevo_usu_rol">Rol en el Sistema *</label>
+            <select id="nuevo_usu_rol" name="rol" class="form-select" required>
+              <option value="cajero" selected>Cajero (Punto de Venta / Jerarquía 3)</option>
+              <option value="bodeguero">Bodeguero (Inventario y Cosecha / Jerarquía 2)</option>
+              <option value="admin">Super Admin (Control Total / Jerarquía 1)</option>
+            </select>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_usu_password">Contraseña *</label>
+              <input type="password" id="nuevo_usu_password" name="password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_usu_confirm">Confirmar Contraseña *</label>
+              <input type="password" id="nuevo_usu_confirm" name="confirm_password" class="form-input" placeholder="••••••••" required>
+            </div>
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevoUsuario()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Crear Usuario</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 6: MODIFICAR USUARIO Y ROL                                       -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEditarUsuario">
+    <div class="dash-modal" style="max-width: 520px;">
+      <div class="dash-modal-header">
+        <h3>Modificar Usuario y Rol</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEditarUsuario()">✕</button>
+      </div>
+      <form id="formEditarUsuario" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="edit_usu_username">Nombre de Usuario (Username) *</label>
+            <input type="text" id="edit_usu_username" name="username" class="form-input" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_usu_firstname">Nombres</label>
+              <input type="text" id="edit_usu_firstname" name="first_name" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="edit_usu_lastname">Apellidos</label>
+              <input type="text" id="edit_usu_lastname" name="last_name" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_usu_email">Correo Electrónico *</label>
+              <input type="email" id="edit_usu_email" name="email" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_usu_telefono">Teléfono / Celular</label>
+              <input type="tel" id="edit_usu_telefono" name="telefono" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_usu_rol">Rol en el Sistema *</label>
+              <select id="edit_usu_rol" name="rol" class="form-select" required>
+                <option value="admin">Super Admin (Jerarquía 1)</option>
+                <option value="bodeguero">Bodeguero (Jerarquía 2)</option>
+                <option value="cajero">Cajero (Jerarquía 3)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_usu_estado">Estado de la Cuenta *</label>
+              <select id="edit_usu_estado" name="estado" class="form-select" required>
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="edit_usu_password">Nueva Contraseña <span style="font-weight: 400; color: #64748b; font-size: 0.8rem;">(Opcional, dejar vacío para conservar la actual)</span></label>
+            <input type="password" id="edit_usu_password" name="nueva_password" class="form-input" placeholder="Nueva contraseña (opcional)">
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEditarUsuario()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 7: CONFIRMACIÓN DE ELIMINACIÓN DE USUARIO (POST)                 -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEliminarUsuario">
+    <div class="dash-modal" style="max-width: 440px;">
+      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
+        <h3 style="color: #991b1b; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Eliminar Usuario y Rol
+        </h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEliminarUsuario()">✕</button>
+      </div>
+      <form id="formEliminarUsuario" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
+          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+            ¿Estás seguro de que deseas eliminar permanentemente al usuario
+          </p>
+          <strong id="eliminarNombreUsuario"
+            style="font-size: 1.15rem; color: #0f172a; display: block; margin-bottom: 0.25rem;"></strong>
+          <span id="eliminarRolUsuario"
+            style="display: inline-block; font-size: 0.82rem; font-weight: 700; color: #b45309; margin-bottom: 0.9rem;"></span>
+          <p style="font-size: 0.8rem; color: #dc2626; margin: 0; background: #fff5f5; padding: 8px 12px; border-radius: 6px; border: 1px solid #fed7d7;">
+            Esta acción se confirmará mediante petición <strong>POST</strong> y no se puede deshacer. Se removerán todos los accesos del usuario.
+          </p>
+        </div>
+        <div class="dash-modal-footer" style="justify-content: center;">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminarUsuario()">Cancelar</button>
+          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
+            Sí, Eliminar Usuario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
   <!-- JAVASCRIPT: CONTROLADORES DE MODALES, CÁLCULO DE MÁRGENES Y BÚSQUEDA    -->
   <!-- ====================================================================== -->
   <script>
@@ -1200,6 +1429,57 @@
       document.getElementById('modalNuevaCategoria').classList.remove('open');
     }
 
+    // Funciones para Modal Nuevo Usuario
+    function abrirModalNuevoUsuario() {
+      document.getElementById('modalNuevoUsuario').classList.add('open');
+      document.getElementById('nuevo_usu_username').focus();
+    }
+    function cerrarModalNuevoUsuario() {
+      document.getElementById('modalNuevoUsuario').classList.remove('open');
+    }
+
+    // Funciones para Modal Editar Usuario
+    function abrirModalEditarUsuario(btn) {
+      const id = btn.getAttribute('data-id');
+      const username = btn.getAttribute('data-username');
+      const firstName = btn.getAttribute('data-firstname');
+      const lastName = btn.getAttribute('data-lastname');
+      const email = btn.getAttribute('data-email');
+      const telefono = btn.getAttribute('data-telefono');
+      const rol = btn.getAttribute('data-rol');
+      const estado = btn.getAttribute('data-estado');
+
+      document.getElementById('formEditarUsuario').action = `/dashboard/usuario/${id}/editar/`;
+      document.getElementById('edit_usu_username').value = username || '';
+      document.getElementById('edit_usu_firstname').value = firstName || '';
+      document.getElementById('edit_usu_lastname').value = lastName || '';
+      document.getElementById('edit_usu_email').value = email || '';
+      document.getElementById('edit_usu_telefono').value = telefono || '';
+      document.getElementById('edit_usu_rol').value = rol || 'cajero';
+      document.getElementById('edit_usu_estado').value = estado || 'activo';
+      document.getElementById('edit_usu_password').value = '';
+
+      document.getElementById('modalEditarUsuario').classList.add('open');
+    }
+    function cerrarModalEditarUsuario() {
+      document.getElementById('modalEditarUsuario').classList.remove('open');
+    }
+
+    // Funciones para Modal Eliminar Usuario
+    function abrirModalEliminarUsuario(btn) {
+      const id = btn.getAttribute('data-id');
+      const username = btn.getAttribute('data-username');
+      const rol = btn.getAttribute('data-rol');
+
+      document.getElementById('formEliminarUsuario').action = `/dashboard/usuario/${id}/eliminar/`;
+      document.getElementById('eliminarNombreUsuario').textContent = `"${username}"`;
+      document.getElementById('eliminarRolUsuario').textContent = `Rol actual: ${rol}`;
+      document.getElementById('modalEliminarUsuario').classList.add('open');
+    }
+    function cerrarModalEliminarUsuario() {
+      document.getElementById('modalEliminarUsuario').classList.remove('open');
+    }
+
     // 5. Control de Secciones SPA en el Dashboard
     function mostrarSeccion(seccionId, navEl) {
       const secKey = seccionId.replace('seccion-', '');
@@ -1234,8 +1514,8 @@
       const inputBuscar = document.getElementById('inputBuscarProducto');
       if (breadcrumb) {
         if (secKey === 'usuarios') {
-          breadcrumb.innerHTML = '» &nbsp; El Paso Frutería • <strong>Administradores del Sistema</strong>';
-          if (inputBuscar) inputBuscar.placeholder = 'Buscar administrador o email...';
+          breadcrumb.innerHTML = '» &nbsp; El Paso Frutería • <strong>Registros Activos por Roles</strong>';
+          if (inputBuscar) inputBuscar.placeholder = 'Buscar usuario, rol o email...';
         } else if (secKey === 'finanzas') {
           breadcrumb.innerHTML = '» &nbsp; El Paso Frutería • <strong>Rentabilidad y Categorías</strong>';
           if (inputBuscar) inputBuscar.placeholder = 'Buscar en finanzas...';
@@ -1339,6 +1619,9 @@
         cerrarModalEditar();
         cerrarModalEliminar();
         cerrarModalNuevaCategoria();
+        cerrarModalNuevoUsuario();
+        cerrarModalEditarUsuario();
+        cerrarModalEliminarUsuario();
       }
     });
 
