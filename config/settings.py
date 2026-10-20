@@ -90,9 +90,20 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Redirecciones de autenticación
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
+
+# Configuración SMTP real para envío de correos (Gmail)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'alpasofruteria029@gmail.com'
+EMAIL_HOST_PASSWORD = 'vgoispoggvsvijdh'
+DEFAULT_FROM_EMAIL = 'Al Paso Frutería <alpasofruteria029@gmail.com>'
+SERVER_EMAIL = 'alpasofruteria029@gmail.com'
