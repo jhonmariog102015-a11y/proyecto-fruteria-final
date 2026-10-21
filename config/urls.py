@@ -68,7 +68,6 @@ urlpatterns = [
     path('dashboard/usuario/crear/', crear_usuario_dashboard, name='dashboard_crear_usuario'),
     path('dashboard/usuario/<int:user_id>/editar/', editar_usuario_dashboard, name='dashboard_editar_usuario'),
     path('dashboard/usuario/<int:user_id>/eliminar/', eliminar_usuario_dashboard, name='dashboard_eliminar_usuario'),
-    
     # Exportación de inventario compatible con Excel
     path('dashboard/inventario/exportar-csv/', exportar_inventario_csv, name='dashboard_exportar_inventario_csv'),
 
@@ -88,12 +87,42 @@ urlpatterns = [
     path('accounts/logout/', logout_view, name='logout'),
 
     # -------------------------------------------------------------------------
-    # 5. MÓDULO DE GESTIÓN CRUD GUÍA 4 (FBV Y CBV)
+    # 5. RECUPERACIÓN DE CONTRASEÑA POR CORREO ELECTRÓNICO (SMTP)
+    # -------------------------------------------------------------------------
+    path('accounts/password_reset/', 
+         auth_views.PasswordResetView.as_view(
+             template_name='principal/password_reset_form.html',
+             email_template_name='principal/password_reset_email.html',
+             html_email_template_name='principal/password_reset_email.html',
+             subject_template_name='principal/password_reset_subject.txt'
+         ), 
+         name='password_reset'),
+
+    path('accounts/password_reset/done/', 
+         auth_views.PasswordResetDoneView.as_view(
+             template_name='principal/password_reset_done.html'
+         ), 
+         name='password_reset_done'),
+
+    path('accounts/reset/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(
+             template_name='principal/password_reset_confirm.html'
+         ), 
+         name='password_reset_confirm'),
+
+    path('accounts/reset/done/', 
+         auth_views.PasswordResetCompleteView.as_view(
+             template_name='principal/password_reset_complete.html'
+         ), 
+         name='password_reset_complete'),
+
+    # -------------------------------------------------------------------------
+    # 6. MÓDULO DE GESTIÓN CRUD GUÍA 4 (FBV Y CBV)
     # -------------------------------------------------------------------------
     path('gestion/', include('principal.urls')),
 
     # -------------------------------------------------------------------------
-    # 6. RUTAS DE PREVISUALIZACIÓN DE ERRORES DE MARCA
+    # 7. RUTAS DE PREVISUALIZACIÓN DE ERRORES DE MARCA
     # -------------------------------------------------------------------------
     path('404/', error_404_preview, name='error_404_preview'),
     path('500/', error_500_preview, name='error_500_preview'),
@@ -102,4 +131,5 @@ urlpatterns = [
 # Manejadores globales de error HTTP para producción
 handler404 = 'principal.views.error_404_view'
 handler500 = 'principal.views.error_500_view'
+
 
