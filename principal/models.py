@@ -234,10 +234,9 @@ class PerfilUsuario(models.Model):
     # Se integra el rol 'bodeguero' creado por Gutiérrez en conjunto con 'admin', 'cajero' y 'cliente'
     # para garantizar compatibilidad total con la administración, logística y catálogo de clientes.
     ROLES = [
-        ('admin', 'Administrador'),
-        ('cajero', 'Cajero'),
+        ('admin', 'Super Admin'),
         ('bodeguero', 'Bodeguero'),
-        ('cliente', 'Cliente'),
+        ('cajero', 'Cajero'),
     ]
     ESTADOS = [
         ('activo', 'Activo'),
@@ -256,8 +255,35 @@ class PerfilUsuario(models.Model):
         ordering = ['-fecha_creacion']
         db_table = "perfiles_usuario"
 
+    @property
+    def nombre_rol(self):
+        """Retorna la etiqueta legible del rol (Super Admin, Bodeguero, Cajero)"""
+        if self.usuario.is_superuser or self.rol == 'admin':
+            return 'Super Admin'
+        elif self.rol == 'bodeguero':
+            return 'Bodeguero'
+        elif self.rol == 'cajero':
+            return 'Cajero'
+        return self.get_rol_display()
+
+    @property
+    def rol_prioridad(self):
+        """Jerarquía de ordenamiento requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero"""
+        if self.usuario.is_superuser or self.rol == 'admin':
+            return 1
+        elif self.rol == 'bodeguero':
+            return 2
+        elif self.rol == 'cajero':
+            return 3
+        return 4
+
+    @property
+    def es_admin(self):
+        """Retorna True si el usuario tiene rol de Super Admin o rol 'admin'"""
+        return self.usuario.is_superuser or self.rol == 'admin'
+
     def __str__(self):
-        return f"{self.usuario.username} ({self.get_rol_display()}) - {self.get_estado_display()}"
+        return f"{self.usuario.username} ({self.nombre_rol}) - {self.get_estado_display()}"
 
 
 # ==============================================================================

@@ -4,3 +4,13 @@ __pycache__/
 *.pyc
 pruebas/
 
+# Documentación del proyecto excluida de Git
+docuemnto proyecto/
+docuemnto proyecto
+documento proyecto/
+documento proyecto
+documentos proyecto/
+documentos proyecto
+documentos_proyecto/
+documentos_proyecto
+*.docx

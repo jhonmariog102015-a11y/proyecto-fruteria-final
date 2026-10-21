@@ -9,15 +9,33 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, logout, login as auth_login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Count, Case, When, Value, IntegerField
+from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.utils import timezone
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from .models import Producto, Categoria, Proveedor, PerfilUsuario
 from .forms import ProductoForm, CategoriaForm, ProveedorForm
+
+
+def es_administrador(user):
+    """
+    Control de acceso RBAC: Verifica si el usuario autenticado tiene rol de Super Admin
+    o rol administrativo en PerfilUsuario.
+    """
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    perfil = getattr(user, 'perfil', None)
+    return perfil is not None and (perfil.rol == 'admin' or getattr(perfil, 'es_admin', False))
+
 
 
 def inicio(request):
@@ -114,19 +132,33 @@ def dashboard_view(request):
     # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
     # Sincronización de perfiles administrativos y métricas del equipo de gestión
     for u in User.objects.filter(perfil__isnull=True):
+        rol_def = 'admin' if u.is_superuser else ('bodeguero' if u.is_staff else 'cajero')
         PerfilUsuario.objects.get_or_create(
             usuario=u,
-            defaults={'rol': 'admin' if u.is_staff else 'cliente', 'estado': 'activo', 'telefono': '3001234567'}
+            defaults={'rol': rol_def, 'estado': 'activo', 'telefono': '3001234567'}
         )
 
-    # Listado de usuarios administrativos del sistema (admin, cajero, bodeguero)
+    # Obtener única y exclusivamente los REGISTROS ACTIVOS ordenados por ROLES:
+    # Jerarquía requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
     perfiles_usuarios = PerfilUsuario.objects.select_related('usuario').filter(
-        rol__in=['admin', 'cajero', 'bodeguero']
-    ).order_by('-fecha_creacion')
+        estado='activo',
+        usuario__is_active=True
+    ).annotate(
+        orden_rol=Case(
+            When(usuario__is_superuser=True, then=Value(1)),
+            When(rol='admin', then=Value(1)),
+            When(rol='bodeguero', then=Value(2)),
+            When(rol='cajero', then=Value(3)),
+            default=Value(4),
+            output_field=IntegerField()
+        )
+    ).order_by('orden_rol', 'usuario__username')
 
-    total_admins = perfiles_usuarios.filter(rol='admin').count()
-    total_admins_activos = perfiles_usuarios.filter(estado='activo').count()
-    total_superadmins = perfiles_usuarios.filter(usuario__is_superuser=True).count()
+    # Métricas específicas del equipo de cuentas activas por rol
+    total_activos = perfiles_usuarios.count()
+    total_superadmins = perfiles_usuarios.filter(orden_rol=1).count()
+    total_bodegueros = perfiles_usuarios.filter(orden_rol=2).count()
+    total_cajeros = perfiles_usuarios.filter(orden_rol=3).count()
     total_staff = perfiles_usuarios.filter(usuario__is_staff=True).count()
 
     return render(request, 'principal/dashboard.html', {
@@ -140,14 +172,18 @@ def dashboard_view(request):
         'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,
-        'total_admins': total_admins,
-        'total_admins_activos': total_admins_activos,
+        'total_activos': total_activos,
         'total_superadmins': total_superadmins,
+        'total_bodegueros': total_bodegueros,
+        'total_cajeros': total_cajeros,
+        'total_admins': total_activos,
+        'total_admins_activos': total_activos,
         'total_staff': total_staff,
         'inversion_total': inversion_total,
         'valor_venta_potencial': valor_venta_potencial,
         'ganancia_potencial': ganancia_potencial,
         'margen_promedio': margen_promedio,
+        'es_admin': es_administrador(request.user),
         'chart_cat_labels': chart_cat_labels,
         'chart_cat_data': chart_cat_data,
         'chart_prod_labels': chart_prod_labels,
@@ -235,6 +271,189 @@ def eliminar_categoria_dashboard(request, id_categoria):
             categoria.delete()
             messages.success(request, f"Categoría '{nombre}' eliminada con éxito.")
     return redirect('dashboard')
+
+
+# ==============================================================================
+# CRUD REGISTROS Y ROLES (VISTAS BASADAS EN FUNCIONES - FBV)
+# Listar (en dashboard_view), Crear, Editar (get_object_or_404) y Eliminar (POST)
+# ==============================================================================
+
+@login_required
+def crear_usuario_dashboard(request):
+    """
+    CRUD REGISTROS Y ROLES: CREACIÓN DE USUARIO DESDE EL DASHBOARD (FBV)
+    Crea la cuenta en auth.User y su PerfilUsuario vinculado con rol jerárquico.
+    Acción restringida exclusivamente a usuarios con rol de Administrador.
+    """
+    if not es_administrador(request.user):
+        messages.error(request, 'Acceso denegado: Únicamente los administradores tienen permiso para registrar nuevos usuarios.')
+        return redirect('/dashboard/#usuarios')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        rol = request.POST.get('rol', 'cajero').strip().lower()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        # Validaciones de integridad
+        if not username or not email or not password:
+            messages.error(request, 'El nombre de usuario, correo electrónico y contraseña son obligatorios.')
+            return redirect('/dashboard/#usuarios')
+
+        if password != confirm_password:
+            messages.error(request, 'Las contraseñas ingresadas no coinciden.')
+            return redirect('/dashboard/#usuarios')
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f"El nombre de usuario '{username}' ya está registrado.")
+            return redirect('/dashboard/#usuarios')
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, f"El correo electrónico '{email}' ya se encuentra en uso.")
+            return redirect('/dashboard/#usuarios')
+
+        if rol not in ['admin', 'bodeguero', 'cajero']:
+            rol = 'cajero'
+
+        es_super = (rol == 'admin')
+        nuevo_usuario = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            is_staff=True,
+            is_superuser=es_super
+        )
+
+        perfil, _ = PerfilUsuario.objects.update_or_create(
+            usuario=nuevo_usuario,
+            defaults={
+                'telefono': telefono,
+                'rol': rol,
+                'estado': 'activo'
+            }
+        )
+
+        rol_nombre = perfil.nombre_rol
+        messages.success(request, f"¡Usuario '{username}' registrado exitosamente con rol de {rol_nombre}!")
+
+    return redirect('/dashboard/#usuarios')
+
+
+@login_required
+def editar_usuario_dashboard(request, user_id):
+    """
+    CRUD REGISTROS Y ROLES: EDICIÓN DE USUARIO Y ROL (FBV CON get_object_or_404)
+    Actualiza datos de autenticación (User) y perfil operativo (PerfilUsuario).
+    Acción restringida exclusivamente a usuarios con rol de Administrador.
+    """
+    if not es_administrador(request.user):
+        messages.error(request, 'Acceso denegado: Únicamente los administradores tienen permiso para modificar usuarios y roles.')
+        return redirect('/dashboard/#usuarios')
+
+    target_user = get_object_or_404(User, pk=user_id)
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        rol = request.POST.get('rol', '').strip().lower()
+        estado = request.POST.get('estado', 'activo').strip().lower()
+        nueva_password = request.POST.get('nueva_password', '').strip()
+
+        if not username or not email:
+            messages.error(request, 'El nombre de usuario y correo electrónico no pueden estar vacíos.')
+            return redirect('/dashboard/#usuarios')
+
+        if User.objects.filter(username=username).exclude(pk=target_user.pk).exists():
+            messages.error(request, f"El nombre de usuario '{username}' ya pertenece a otra cuenta.")
+            return redirect('/dashboard/#usuarios')
+
+        if User.objects.filter(email=email).exclude(pk=target_user.pk).exists():
+            messages.error(request, f"El correo electrónico '{email}' ya está registrado en otra cuenta.")
+            return redirect('/dashboard/#usuarios')
+
+        if rol not in ['admin', 'bodeguero', 'cajero']:
+            rol = getattr(getattr(target_user, 'perfil', None), 'rol', 'cajero')
+
+        if estado not in ['activo', 'inactivo']:
+            estado = 'activo'
+
+        # Prevenir desactivación o pérdida de privilegios del usuario en sesión
+        if request.user.pk == target_user.pk:
+            if estado == 'inactivo':
+                messages.error(request, 'No puedes desactivar tu propia cuenta mientras estás en sesión activa.')
+                return redirect('/dashboard/#usuarios')
+            if rol != 'admin' and target_user.is_superuser:
+                messages.warning(request, 'No puedes degradar tu propio rol de Super Admin en sesión.')
+                rol = 'admin'
+
+        target_user.username = username
+        target_user.first_name = first_name
+        target_user.last_name = last_name
+        target_user.email = email
+
+        if rol == 'admin':
+            target_user.is_superuser = True
+            target_user.is_staff = True
+        else:
+            target_user.is_superuser = False
+            target_user.is_staff = True
+
+        if estado == 'inactivo':
+            target_user.is_active = False
+        else:
+            target_user.is_active = True
+
+        if nueva_password:
+            target_user.set_password(nueva_password)
+
+        target_user.save()
+
+        perfil, _ = PerfilUsuario.objects.get_or_create(usuario=target_user)
+        perfil.rol = rol
+        perfil.estado = estado
+        perfil.telefono = telefono
+        perfil.save()
+
+        messages.success(request, f"¡Usuario '{target_user.username}' y rol '{perfil.nombre_rol}' actualizados exitosamente!")
+
+    return redirect('/dashboard/#usuarios')
+
+
+@login_required
+def eliminar_usuario_dashboard(request, user_id):
+    """
+    CRUD REGISTROS Y ROLES: ELIMINACIÓN DEFINITIVA CON CONFIRMACIÓN POST (FBV CON get_object_or_404)
+    Exige petición POST obligatoria para eliminar un usuario y su perfil asociado.
+    Acción restringida exclusivamente a usuarios con rol de Administrador.
+    """
+    if not es_administrador(request.user):
+        messages.error(request, 'Acceso denegado: Únicamente los administradores tienen permiso para eliminar usuarios del sistema.')
+        return redirect('/dashboard/#usuarios')
+
+    if request.method == 'POST':
+        target_user = get_object_or_404(User, pk=user_id)
+
+        # Prevenir que el usuario elimine su propia cuenta
+        if request.user.pk == target_user.pk:
+            messages.error(request, 'Acción no permitida: no puedes eliminar tu propia cuenta de administrador en sesión.')
+            return redirect('/dashboard/#usuarios')
+
+        nombre_eliminado = target_user.username
+        target_user.delete()
+        messages.success(request, f"El usuario '{nombre_eliminado}' y su rol han sido eliminados correctamente.")
+    else:
+        messages.warning(request, 'La eliminación de usuarios requiere confirmación mediante petición POST.')
+
+    return redirect('/dashboard/#usuarios')
 
 
 @login_required
@@ -373,8 +592,11 @@ def logout_view(request):
     """
     CIERRE DE SESIÓN SEGURO ('/accounts/logout/')
     ---------------------------------------------
+    Exige petición POST con token CSRF para prevenir desautenticación forzada.
     Destruye la sesión activa del usuario y lo redirige limpiamente a la portada.
     """
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
     logout(request)
     return redirect('index')
 
@@ -516,4 +738,151 @@ def registro_view(request):
         return redirect('index')
 
     return render(request, 'principal/Registro.html', {'form_data': form_data})
+
+
+# ==============================================================================
+# CRUD SEGURO GUIA 4 (PRODUCTOS Y CATEGORIAS - FBV Y CBV)
+# ==============================================================================
+
+@login_required
+def producto_listar(request):
+    """
+    Lista todos los productos del catálogo ordenados alfabéticamente (FBV).
+    """
+    productos = Producto.objects.select_related("categoria").order_by("nombre")
+    return render(
+        request,
+        "principal/productos/lista.html",
+        {"productos": productos, "titulo": "Gestion de productos"},
+    )
+
+
+@login_required
+def producto_crear(request):
+    """
+    Crea un nuevo producto mediante formulario validado (FBV).
+    """
+    datos = request.POST if request.method == "POST" else None
+    formulario = ProductoForm(datos)
+    if request.method == "POST":
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, "El producto se creo correctamente.")
+            return redirect("principal:producto_listar")
+        messages.error(request, "Revisa los errores del formulario.")
+    return render(
+        request,
+        "principal/productos/formulario.html",
+        {"formulario": formulario, "titulo": "Crear producto"},
+    )
+
+
+@login_required
+def producto_editar(request, pk):
+    """
+    Actualiza la información de un producto existente (FBV).
+    """
+    producto = get_object_or_404(Producto, pk=pk)
+    datos = request.POST if request.method == "POST" else None
+    formulario = ProductoForm(datos, instance=producto)
+    if request.method == "POST":
+        if formulario.is_valid():
+            formulario.save()
+            messages.success(request, "El producto se actualizo correctamente.")
+            return redirect("principal:producto_listar")
+        messages.error(request, "Revisa los errores del formulario.")
+    return render(
+        request,
+        "principal/productos/formulario.html",
+        {
+            "formulario": formulario,
+            "producto": producto,
+            "titulo": "Editar producto",
+        },
+    )
+
+
+@login_required
+def producto_eliminar(request, pk):
+    """
+    Elimina un producto previa confirmación y petición POST segura (FBV).
+    """
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == "POST":
+        producto.delete()
+        messages.success(request, "El producto se elimino correctamente.")
+        return redirect("principal:producto_listar")
+    if request.method != "GET":
+        return HttpResponseNotAllowed(["GET", "POST"])
+    return render(
+        request,
+        "principal/productos/confirmar_eliminar.html",
+        {"objeto": producto, "titulo": "Eliminar producto"},
+    )
+
+
+class CategoriaListaView(LoginRequiredMixin, ListView):
+    """
+    Vista basada en clases para listar categorías ordenadas por nombre (CBV).
+    """
+    model = Categoria
+    template_name = "principal/categorias/lista.html"
+    context_object_name = "categorias"
+    ordering = ["nombre"]
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Gestion de categorias"
+        return contexto
+
+
+class CategoriaCrearView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+    """
+    Vista basada en clases para registrar una nueva categoría (CBV).
+    """
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = "principal/categorias/formulario.html"
+    success_url = reverse_lazy("principal:categoria_listar")
+    success_message = "La categoria «%(nombre)s» se creo correctamente."
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Crear categoria"
+        return contexto
+
+
+class CategoriaEditarView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+    """
+    Vista basada en clases para editar una categoría existente (CBV).
+    """
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = "principal/categorias/formulario.html"
+    success_url = reverse_lazy("principal:categoria_listar")
+    success_message = "La categoria «%(nombre)s» se actualizo correctamente."
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Editar categoria"
+        return contexto
+
+
+class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
+    """
+    Vista basada en clases para eliminar una categoría previa confirmación (CBV).
+    """
+    model = Categoria
+    template_name = "principal/categorias/confirmar_eliminar.html"
+    success_url = reverse_lazy("principal:categoria_listar")
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto["titulo"] = "Eliminar categoria"
+        return contexto
+
+    def form_valid(self, form):
+        messages.success(self.request, "La categoria se elimino correctamente.")
+        return super().form_valid(form)
+
 

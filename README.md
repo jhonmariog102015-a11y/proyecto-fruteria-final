@@ -117,6 +117,20 @@ El aplicativo estará disponible en: **`http://127.0.0.1:8000/`**
 * **Inicio de Sesión:** `http://127.0.0.1:8000/accounts/login/` *(Credenciales: `admin` / `admin123`)*
 * **Django Admin:** `http://127.0.0.1:8000/admin/`
 
+### Modulo de Gestion CRUD (Guia de Aprendizaje 4)
+
+El modulo de gestion administrativa con formularios ModelForm y control de acceso esta disponible en:
+
+* **Productos (CRUD con vistas basadas en funciones - FBV):** `http://127.0.0.1:8000/gestion/productos/`
+* **Categorias (CRUD con vistas basadas en clases - CBV):** `http://127.0.0.1:8000/gestion/categorias/`
+
+Caracteristicas tecnicas implementadas:
+* **Formularios Django ModelForm:** Integracion con validacion en servidor para consistencia de datos, campos estilizados con Bootstrap 5 y mensajes de validacion.
+* **Componentes Frontend Interactivos:** Tablas paginadas con DataTables en espanol, campos selectores con Select2 y confirmacion reactiva con SweetAlert2 para borrado seguro con token CSRF.
+* **Seguridad y Control de Acceso:** Proteccion de rutas mediante `@login_required` y `LoginRequiredMixin`. Manejo de cierre de sesion restringido exclusivamente a peticiones POST.
+* **Pruebas Automatizadas:** 39 pruebas unitarias que validan la navegabilidad, formularios, permisos y consistencia de datos ejecutables con `python manage.py test principal.tests`.
+
+
 ---
 
 ## 📄 Documentación Académica Oficial (Normas APA 7ma Edición)

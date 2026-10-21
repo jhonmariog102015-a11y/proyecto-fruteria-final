@@ -4,8 +4,24 @@
 # ==============================================================================
 
 from decimal import Decimal
+from typing import ClassVar
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Producto, Categoria, Proveedor
+
+
+class FormularioInicioSesion(AuthenticationForm):
+    """
+    Formulario de autenticación con estilos y atributos Bootstrap para username y password.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.update(
+            {"class": "form-control", "autocomplete": "username"}
+        )
+        self.fields["password"].widget.attrs.update(
+            {"class": "form-control", "autocomplete": "current-password"}
+        )
 
 
 class ProductoForm(forms.ModelForm):
@@ -16,8 +32,8 @@ class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = [
-            'nombre',
             'categoria',
+            'nombre',
             'costo_compra',
             'precio_venta_unitario',
             'en_oferta',
@@ -25,11 +41,44 @@ class ProductoForm(forms.ModelForm):
             'stock_actual',
             'stock_minimo',
             'unidad_medida',
+            'brix_minimo',
             'origen',
             'icono_emoji',
             'imagen_url',
             'estado'
         ]
+        labels: ClassVar[dict[str, str]] = {
+            'categoria': 'Categoría',
+            'nombre': 'Nombre del producto',
+            'costo_compra': 'Costo de compra',
+            'precio_venta_unitario': 'Precio de venta unitario',
+            'en_oferta': '¿En oferta / promoción?',
+            'precio_oferta': 'Precio de oferta',
+            'stock_actual': 'Stock actual',
+            'stock_minimo': 'Stock mínimo',
+            'unidad_medida': 'Unidad de medida',
+            'brix_minimo': 'Grados Brix mínimos',
+            'origen': 'Origen y cosecha',
+            'icono_emoji': 'Icono / Identificador',
+            'imagen_url': 'URL de imagen',
+            'estado': 'Estado',
+        }
+        widgets: ClassVar[dict[str, forms.Widget]] = {
+            'categoria': forms.Select(attrs={'class': 'form-select'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'costo_compra': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
+            'precio_venta_unitario': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
+            'en_oferta': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'precio_oferta': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
+            'stock_actual': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.001'}),
+            'stock_minimo': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.001'}),
+            'unidad_medida': forms.TextInput(attrs={'class': 'form-control'}),
+            'brix_minimo': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'step': '0.01'}),
+            'origen': forms.TextInput(attrs={'class': 'form-control'}),
+            'icono_emoji': forms.TextInput(attrs={'class': 'form-control'}),
+            'imagen_url': forms.URLInput(attrs={'class': 'form-control'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+        }
 
     def __init__(self, *args, **kwargs):
         # Normalizar ya sea que data venga como args[0] o kwargs['data']
@@ -57,16 +106,22 @@ class ProductoForm(forms.ModelForm):
                         data[campo] = val
 
             # Respaldos predeterminados para asegurar consistencia
-            if not data.get('imagen_url') and not getattr(inst, 'imagen_url', None):
-                data['imagen_url'] = 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop'
-            if not data.get('origen') and not getattr(inst, 'origen', None):
-                data['origen'] = 'Cosecha: Hace 1 día • Finca El Campo'
-            if 'icono_emoji' not in data and not getattr(inst, 'icono_emoji', None):
-                data['icono_emoji'] = ''
-            if not data.get('estado') and not getattr(inst, 'estado', None):
-                data['estado'] = 'Disponible'
-            if not data.get('unidad_medida') and not getattr(inst, 'unidad_medida', None):
-                data['unidad_medida'] = 'kg'
+            if not data.get('imagen_url'):
+                data['imagen_url'] = getattr(inst, 'imagen_url', '') or 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop'
+            if not data.get('origen'):
+                data['origen'] = getattr(inst, 'origen', '') or 'Cosecha: Hace 1 día • Finca El Campo'
+            if 'icono_emoji' not in data:
+                data['icono_emoji'] = getattr(inst, 'icono_emoji', '') or ''
+            if not data.get('estado'):
+                data['estado'] = getattr(inst, 'estado', '') or 'Disponible'
+            if not data.get('unidad_medida'):
+                data['unidad_medida'] = getattr(inst, 'unidad_medida', '') or 'kg'
+            if 'costo_compra' not in data or data.get('costo_compra') in [None, '']:
+                data['costo_compra'] = str(getattr(inst, 'costo_compra', '0.00') if getattr(inst, 'costo_compra', None) is not None else '0.00')
+            if 'brix_minimo' not in data or data.get('brix_minimo') in [None, '']:
+                data['brix_minimo'] = str(getattr(inst, 'brix_minimo', '0.00') if getattr(inst, 'brix_minimo', None) is not None else '0.00')
+            if 'stock_minimo' not in data or data.get('stock_minimo') in [None, '']:
+                data['stock_minimo'] = str(getattr(inst, 'stock_minimo', '0.000') if getattr(inst, 'stock_minimo', None) is not None else '0.000')
 
             if len(args) > 0:
                 args[0] = data
@@ -75,16 +130,55 @@ class ProductoForm(forms.ModelForm):
                 kwargs['data'] = data
 
         super().__init__(*args, **kwargs)
-        if 'origen' in self.fields:
-            self.fields['origen'].required = False
-        if 'icono_emoji' in self.fields:
-            self.fields['icono_emoji'].required = False
-        if 'imagen_url' in self.fields:
-            self.fields['imagen_url'].required = False
+        for campo_opcional in ['costo_compra', 'brix_minimo', 'origen', 'icono_emoji', 'imagen_url', 'en_oferta', 'precio_oferta', 'stock_minimo', 'unidad_medida', 'estado']:
+            if campo_opcional in self.fields:
+                self.fields[campo_opcional].required = False
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data.get('nombre', '').strip()
+        if not nombre:
+            raise forms.ValidationError("El nombre del producto no puede estar vacío.")
+        return nombre
+
+    def clean_unidad_medida(self):
+        unidad_medida = self.cleaned_data.get('unidad_medida', '').strip()
+        if not unidad_medida:
+            return 'kg'
+        return unidad_medida
+
+    def clean_origen(self):
+        origen = self.cleaned_data.get('origen', '').strip()
+        if not origen:
+            return 'Cosecha: Hace 1 día • Finca El Campo'
+        return origen
+
+    def clean_brix_minimo(self):
+        brix = self.cleaned_data.get('brix_minimo')
+        if brix is None:
+            return Decimal('0.00')
+        if brix < 0:
+            raise forms.ValidationError("Los grados Brix no pueden ser negativos.")
+        return brix
+
+    def clean_stock_actual(self):
+        stock = self.cleaned_data.get('stock_actual')
+        if stock is not None and stock < 0:
+            raise forms.ValidationError("El stock actual no puede ser negativo.")
+        return stock
+
+    def clean_stock_minimo(self):
+        stock_min = self.cleaned_data.get('stock_minimo')
+        if stock_min is None:
+            return Decimal('0.000')
+        if stock_min < 0:
+            raise forms.ValidationError("El stock mínimo no puede ser negativo.")
+        return stock_min
 
     def clean_costo_compra(self):
         costo = self.cleaned_data.get('costo_compra')
-        if costo is not None and costo < 0:
+        if costo is None:
+            return Decimal('0.00')
+        if costo < 0:
             raise forms.ValidationError("El costo de compra no puede ser negativo.")
         return costo
 
@@ -126,12 +220,26 @@ class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
         fields = ['nombre', 'descripcion']
+        labels: ClassVar[dict[str, str]] = {
+            'nombre': 'Nombre de la categoría',
+            'descripcion': 'Descripción',
+        }
+        widgets: ClassVar[dict[str, forms.Widget]] = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
 
     def clean_nombre(self):
         nombre = self.cleaned_data.get('nombre', '').strip()
         if not nombre:
             raise forms.ValidationError("El nombre de la categoría es obligatorio.")
         return nombre
+
+    def clean_descripcion(self):
+        descripcion = self.cleaned_data.get('descripcion')
+        if descripcion and not descripcion.strip():
+            return ""
+        return descripcion.strip() if descripcion else descripcion
 
 
 class ProveedorForm(forms.ModelForm):

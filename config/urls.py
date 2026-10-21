@@ -14,6 +14,9 @@ from principal.views import (
     eliminar_producto_dashboard,
     crear_categoria_dashboard,
     eliminar_categoria_dashboard,
+    crear_usuario_dashboard,
+    editar_usuario_dashboard,
+    eliminar_usuario_dashboard,
     exportar_inventario_csv,
     crear_proveedor_dashboard,
     editar_proveedor_dashboard,
@@ -61,6 +64,10 @@ urlpatterns = [
     path('dashboard/producto/<int:id_producto>/eliminar/', eliminar_producto_dashboard, name='dashboard_eliminar_producto'),
     path('dashboard/categoria/crear/', crear_categoria_dashboard, name='dashboard_crear_categoria'),
     path('dashboard/categoria/<int:id_categoria>/eliminar/', eliminar_categoria_dashboard, name='dashboard_eliminar_categoria'),
+    # CRUD de Usuarios y Roles (FBV con get_object_or_404 y confirmación POST)
+    path('dashboard/usuario/crear/', crear_usuario_dashboard, name='dashboard_crear_usuario'),
+    path('dashboard/usuario/<int:user_id>/editar/', editar_usuario_dashboard, name='dashboard_editar_usuario'),
+    path('dashboard/usuario/<int:user_id>/eliminar/', eliminar_usuario_dashboard, name='dashboard_eliminar_usuario'),
     
     # Exportación de inventario compatible con Excel
     path('dashboard/inventario/exportar-csv/', exportar_inventario_csv, name='dashboard_exportar_inventario_csv'),
@@ -81,7 +88,12 @@ urlpatterns = [
     path('accounts/logout/', logout_view, name='logout'),
 
     # -------------------------------------------------------------------------
-    # 5. RUTAS DE PREVISUALIZACIÓN DE ERRORES DE MARCA
+    # 5. MÓDULO DE GESTIÓN CRUD GUÍA 4 (FBV Y CBV)
+    # -------------------------------------------------------------------------
+    path('gestion/', include('principal.urls')),
+
+    # -------------------------------------------------------------------------
+    # 6. RUTAS DE PREVISUALIZACIÓN DE ERRORES DE MARCA
     # -------------------------------------------------------------------------
     path('404/', error_404_preview, name='error_404_preview'),
     path('500/', error_500_preview, name='error_500_preview'),
