@@ -49,12 +49,16 @@
         <div class="nav-divider"></div>
 
         <div class="nav-section-title">ACCESOS EXTERNOS</div>
-        <a href="{% url 'index' %}" target="_blank" rel="noopener noreferrer">
-          <span class="nav-icon">🏪</span> Ver Tienda ↗
+        <a href="{% url 'index' %}" target="_blank" rel="noopener noreferrer" class="nav-link-store" title="Abrir tienda en nueva pestaña">
+          <span class="nav-icon">🏪</span>
+          <span>Ver Tienda</span>
+          <span class="nav-arrow-ext">↗</span>
         </a>
         {% if request.user.is_superuser %}
-        <a href="/admin/" target="_blank" rel="noopener noreferrer">
-          <span class="nav-icon">⚙️</span> Django Admin ↗
+        <a href="/admin/" target="_blank" rel="noopener noreferrer" class="nav-link-django-admin" title="Abrir Panel Maestro de Django Admin">
+          <span class="nav-icon">⚙️</span>
+          <span>Django Admin</span>
+          <span class="badge-super-pill">Super Admin</span>
         </a>
         {% endif %}
       </nav>
@@ -63,8 +67,13 @@
       <div class="sidebar-bottom">
         <form action="{% url 'logout' %}" method="post" class="sidebar-logout-form">
           {% csrf_token %}
-          <button type="submit" class="logout logout-btn">
-            <span class="nav-icon">▪</span> Cerrar Sesión
+          <button type="submit" class="sidebar-logout-btn" title="Cerrar sesión de administrador">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Cerrar Sesión</span>
           </button>
         </form>
 
