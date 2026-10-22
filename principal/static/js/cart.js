@@ -225,7 +225,7 @@
 
         if (badge) {
             badge.textContent = count;
-            badge.style.display = count > 0 ? 'inline-flex' : 'none';
+            badge.style.display = 'inline-flex';
         }
 
         // Barra flotante inferior fija para dispositivos móviles

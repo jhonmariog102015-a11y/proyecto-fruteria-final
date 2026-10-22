@@ -940,104 +940,582 @@
 }
 
 /* ==============================================================================
-   BOTÓN ÚNICO DE ACCESO AL PANEL ADMINISTRATIVO EN NAVBAR
-   Diseño minimalista, directo y unificado junto a las acciones principales
+   BARRA DE ICONOS DE ACCIÓN UNIFICADA (LUPA, HOMBRE, CORAZÓN, CARRITO)
+   Inspirado en ecommerce modernos de alta gama (Shopify / Zara)
    ============================================================================== */
-.btn-nav-admin {
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.nav-actions .nav-icon-action-btn {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #1e293b !important;
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.nav-actions .nav-icon-action-btn:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #15803d !important;
+    transform: translateY(-1px);
+}
+
+.nav-actions .nav-icon-action-btn svg {
+    display: block;
+    color: currentColor;
+    transition: transform 0.2s ease;
+}
+
+.nav-actions .nav-icon-action-btn:hover svg {
+    transform: scale(1.08);
+}
+
+/* Badge circular negro (Exacto al de referencia del usuario con fondo negro y número blanco) */
+.nav-action-badge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    min-width: 19px;
+    height: 19px;
+    background: #000000 !important;
+    color: #ffffff !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Indicador de estado verde si el usuario está autenticado */
+.user-auth-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 9px;
+    height: 9px;
+    background: #10b981;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+}
+
+/* 1. Lupa / Buscador Expandible */
+.nav-search-wrap {
+    position: relative;
+}
+
+.nav-search-dropdown-form {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%) scale(0.95);
+    display: none;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+    padding: 3px 6px 3px 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.14);
+    z-index: 100;
+    width: 270px;
+    transition: all 0.25s ease;
+}
+
+.nav-search-wrap.active .nav-search-dropdown-form {
+    display: flex;
+    transform: translateY(-50%) scale(1);
+}
+
+.nav-search-drop-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #1e293b;
+    width: 100%;
+}
+
+.nav-search-drop-submit {
+    border: none;
+    background: #1e3a29;
+    color: #ffffff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.18s ease;
+}
+
+.nav-search-drop-submit:hover {
+    background: #2e7d32;
+}
+
+.nav-search-drop-close {
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0 6px;
+    margin-left: 2px;
+}
+
+.nav-search-drop-close:hover {
+    color: #0f172a;
+}
+
+/* 2. Hombre / Popover de Usuario */
+.nav-user-wrap {
+    position: relative;
+}
+
+.nav-user-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: -10px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 1.1rem;
+    width: 270px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1000;
+    animation: popoverFadeIn 0.2s ease forwards;
+}
+
+@keyframes popoverFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-user-wrap.active .nav-user-popover {
+    display: block;
+}
+
+.user-popover-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.75rem;
+}
+
+.user-popover-header.unauth {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 0.9rem;
+}
+
+.user-popover-header.unauth strong {
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.user-popover-header.unauth small {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.user-popover-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1e3a29;
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+.user-popover-meta strong {
+    display: block;
+    color: #0f172a;
+    font-size: 0.9rem;
+}
+
+.user-popover-meta small {
+    display: block;
+    color: #059669;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.user-popover-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.07);
+    margin: 0.75rem 0;
+}
+
+.user-popover-link {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.user-popover-action-btn {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.user-popover-register-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    box-sizing: border-box;
+    transition: all 0.18s ease;
+}
+
+.user-popover-register-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.user-popover-logout-form {
+    margin: 0;
+}
+
+.user-popover-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.user-popover-logout-btn:hover {
+    background: #fca5a5;
+    color: #991b1b;
+}
+
+/* 3. Drawer de Favoritos */
+.fav-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.fav-drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.fav-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 380px;
+    background: #ffffff;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
+    z-index: 1060;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.fav-drawer.open {
+    transform: translateX(0);
+}
+
+.fav-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.fav-drawer-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fav-drawer-title-wrap h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.close-fav-btn {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.close-fav-btn:hover {
+    color: #0f172a;
+}
+
+.fav-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+
+.fav-empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.fav-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.7;
+}
+
+.fav-empty-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.35rem;
+}
+
+.fav-empty-subtitle {
+    display: block;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-fav-go-catalog {
+    display: inline-block;
+    background: #1e3a29;
+    color: #ffffff !important;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+}
+
+.btn-fav-go-catalog:hover {
+    background: #2e7d32;
+    transform: translateY(-1px);
+}
+
+.fav-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.fav-item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fafaf9;
+    transition: all 0.2s ease;
+}
+
+.fav-item-row:hover {
+    background: #f5f5f4;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.fav-item-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #ffffff;
+}
+
+.fav-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fav-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.fav-item-details h4 {
+    margin: 0 0 2px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fav-item-price {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1e3a29;
+}
+
+.fav-item-origin {
+    display: block;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.fav-item-actions {
+    display: flex;
     align-items: center;
     gap: 6px;
-    background: #0f172a;
-    color: #f8fafc !important;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 0.55rem 1rem;
-    border-radius: 999px;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 0.86rem;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    white-space: nowrap;
-}
-
-.btn-nav-admin svg {
     flex-shrink: 0;
-    color: #34d399;
 }
 
-.btn-nav-admin:hover {
-    background: #1e293b;
-    color: #ffffff !important;
-    border-color: rgba(52, 211, 153, 0.45);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-@media (max-width: 640px) {
-    .btn-nav-admin {
-        padding: 0.5rem 0.65rem;
-        font-size: 0.75rem;
-        gap: 4px;
-    }
-}
-
-/* ==============================================================================
-   BOTÓN DESTACADO DE INICIAR SESIÓN EN NAVBAR
-   Altamente visible para administradores y empleados antes de autenticarse
-   ============================================================================== */
-.btn-nav-login {
+.btn-fav-add-cart {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    background: #e65100;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.55rem 1.1rem;
-    border-radius: 999px;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 0.86rem;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 10px rgba(230, 81, 0, 0.3);
-    white-space: nowrap;
-}
-
-.btn-nav-login svg {
-    flex-shrink: 0;
+    gap: 4px;
+    background: #1e3a29;
     color: #ffffff;
-}
-
-.btn-nav-login:hover {
-    background: #c64000;
-    color: #ffffff !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(230, 81, 0, 0.45);
-}
-
-.mobile-login-link {
-    display: none;
+    border: none;
+    padding: 0.45rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: #e65100 !important;
+    cursor: pointer;
+    transition: all 0.18s ease;
 }
 
-@media (max-width: 900px) {
-    .mobile-login-link {
-        display: block;
-        padding-top: 0.85rem;
-        margin-top: 0.5rem;
-        border-top: 1px solid rgba(0, 0, 0, 0.08);
-    }
+.btn-fav-add-cart:hover {
+    background: #2e7d32;
+    transform: translateY(-1px);
+}
+
+.btn-fav-remove {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.18s ease;
+}
+
+.btn-fav-remove:hover {
+    color: #dc2626;
+}
+
+/* 4. Botón Corazón en Tarjeta de Frutas */
+.btn-card-fav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 5;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 0;
+}
+
+.btn-card-fav:hover {
+    background: #ffffff;
+    color: #e11d48;
+    transform: scale(1.15);
+}
+
+.btn-card-fav.is-fav {
+    background: #ffffff;
+    color: #e11d48;
+    border-color: rgba(225, 29, 72, 0.3);
+}
+
+.btn-card-fav.is-fav svg {
+    fill: #e11d48;
+    stroke: #e11d48;
 }
 
 @media (max-width: 640px) {
-    .btn-nav-login {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-        gap: 4px;
+    .nav-actions .nav-icon-action-btn {
+        width: 38px;
+        height: 38px;
+    }
+    .nav-search-dropdown-form {
+        width: calc(100vw - 32px);
+        right: -80px;
+    }
+    .nav-user-popover {
+        right: -50px;
+        width: 260px;
     }
 }
 
