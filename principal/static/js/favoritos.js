@@ -216,36 +216,18 @@
                 return;
             }
 
-            // Popover de Usuario (Hombre)
+            // Popover de Usuario (Hombre en móviles o pantallas táctiles)
             const userTrigger = e.target.closest('#navUserTrigger');
             const userWrap = document.getElementById('navUserWrap');
             if (userTrigger && userWrap) {
-                e.preventDefault();
-                e.stopPropagation();
-                userWrap.classList.toggle('active');
+                if (window.innerWidth <= 992) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userWrap.classList.toggle('active');
+                }
             } else if (!e.target.closest('#navUserWrap')) {
                 const uWrap = document.getElementById('navUserWrap');
                 if (uWrap) uWrap.classList.remove('active');
-            }
-
-            // Buscador expandible (Lupa)
-            const searchTrigger = e.target.closest('#navSearchTrigger');
-            const searchWrap = document.getElementById('navSearchWrap');
-            if (searchTrigger && searchWrap) {
-                e.preventDefault();
-                e.stopPropagation();
-                searchWrap.classList.toggle('active');
-                if (searchWrap.classList.contains('active')) {
-                    const inp = document.getElementById('navSearchDropInput');
-                    if (inp) inp.focus();
-                }
-            } else if (e.target.closest('#navSearchClose')) {
-                e.preventDefault();
-                const sWrap = document.getElementById('navSearchWrap');
-                if (sWrap) sWrap.classList.remove('active');
-            } else if (!e.target.closest('#navSearchWrap')) {
-                const sWrap = document.getElementById('navSearchWrap');
-                if (sWrap) sWrap.classList.remove('active');
             }
         });
 
@@ -255,8 +237,6 @@
                 window.closeFavDrawer();
                 const userWrap = document.getElementById('navUserWrap');
                 if (userWrap) userWrap.classList.remove('active');
-                const searchWrap = document.getElementById('navSearchWrap');
-                if (searchWrap) searchWrap.classList.remove('active');
             }
         });
     });
