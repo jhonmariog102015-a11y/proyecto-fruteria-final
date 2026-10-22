@@ -17,6 +17,14 @@ from principal.views import (
     crear_usuario_dashboard,
     editar_usuario_dashboard,
     eliminar_usuario_dashboard,
+    exportar_inventario_csv,
+    crear_proveedor_dashboard,
+    editar_proveedor_dashboard,
+    eliminar_proveedor_dashboard,
+    error_404_view,
+    error_500_view,
+    error_404_preview,
+    error_500_preview,
     logout_view,
     admin_preview,
     admin_productos_preview,
@@ -29,7 +37,6 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 1. PANEL DE ADMINISTRACIÓN DE DJANGO (ORM & CRUD Nativo)
     # -------------------------------------------------------------------------
-    # Acceso oficial para administradores del sistema (requiere superusuario)
     path('admin/', admin.site.urls),
 
     # Rutas auxiliares de previsualización para auditoría y capturas del informe técnico
@@ -40,7 +47,6 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 2. VISTAS PÚBLICAS DE LA TIENDA WEB (FRONTEND CLIENTES)
     # -------------------------------------------------------------------------
-    # Ruta raíz ('/') y alias ('/inicio/', '/tienda/'): Carga la tienda principal
     path('', inicio, name='index'),
     path('inicio/', inicio, name='inicio'),
     path('tienda/', inicio, name='tienda'),
@@ -50,7 +56,7 @@ urlpatterns = [
     path('catalogo/', catalogo_frutas_view, name='catalogo'),
 
     # -------------------------------------------------------------------------
-    # 3. PANEL DE CONTROL INTERNO (DASHBOARD Y GESTIÓN TOTAL)
+    # 3. PANEL DE CONTROL INTERNO (DASHBOARD, INVENTARIO Y PROVEEDORES)
     # -------------------------------------------------------------------------
     path('dashboard/', dashboard_view, name='dashboard'),
     path('dashboard/producto/crear/', crear_producto_dashboard, name='dashboard_crear_producto'),
@@ -62,24 +68,27 @@ urlpatterns = [
     path('dashboard/usuario/crear/', crear_usuario_dashboard, name='dashboard_crear_usuario'),
     path('dashboard/usuario/<int:user_id>/editar/', editar_usuario_dashboard, name='dashboard_editar_usuario'),
     path('dashboard/usuario/<int:user_id>/eliminar/', eliminar_usuario_dashboard, name='dashboard_eliminar_usuario'),
+    # Exportación de inventario compatible con Excel
+    path('dashboard/inventario/exportar-csv/', exportar_inventario_csv, name='dashboard_exportar_inventario_csv'),
+
+    # Gestión de proveedores agrícolas
+    path('dashboard/proveedor/crear/', crear_proveedor_dashboard, name='dashboard_crear_proveedor'),
+    path('dashboard/proveedor/<int:id_proveedor>/editar/', editar_proveedor_dashboard, name='dashboard_editar_proveedor'),
+    path('dashboard/proveedor/<int:id_proveedor>/eliminar/', eliminar_proveedor_dashboard, name='dashboard_eliminar_proveedor'),
 
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
     # -------------------------------------------------------------------------
-    # Soporta tanto /login/ como /accounts/login/
     path('login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login_direct'),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),
     path('registro/', registro_view, name='registro'),
 
-    # Cierre de sesión seguro y redirección a la página principal
     path('logout/', logout_view, name='logout_direct'),
     path('accounts/logout/', logout_view, name='logout'),
-
 
     # -------------------------------------------------------------------------
     # 5. RECUPERACIÓN DE CONTRASEÑA POR CORREO ELECTRÓNICO (SMTP)
     # -------------------------------------------------------------------------
-    # 1. Vista para solicitar el cambio de contraseña (formulario de correo)
     path('accounts/password_reset/', 
          auth_views.PasswordResetView.as_view(
              template_name='principal/password_reset_form.html',
@@ -106,6 +115,21 @@ urlpatterns = [
              template_name='principal/password_reset_complete.html'
          ), 
          name='password_reset_complete'),
+
+    # -------------------------------------------------------------------------
+    # 6. MÓDULO DE GESTIÓN CRUD GUÍA 4 (FBV Y CBV)
+    # -------------------------------------------------------------------------
+    path('gestion/', include('principal.urls')),
+
+    # -------------------------------------------------------------------------
+    # 7. RUTAS DE PREVISUALIZACIÓN DE ERRORES DE MARCA
+    # -------------------------------------------------------------------------
+    path('404/', error_404_preview, name='error_404_preview'),
+    path('500/', error_500_preview, name='error_500_preview'),
 ]
+
+# Manejadores globales de error HTTP para producción
+handler404 = 'principal.views.error_404_view'
+handler500 = 'principal.views.error_500_view'
 
 

@@ -1,0 +1,47 @@
+{% extends 'principal/base.html' %}
+{% load static %}
+
+{% block title %}Error interno (500) — Al Paso Frutería{% endblock %}
+{% block meta_description %}Se produjo una interrupción técnica en el servidor de Al Paso Frutería.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/errors.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="error-page-wrapper error-500-bg">
+    <div class="error-card error-card-500">
+        
+        <!-- Icono vectorial de advertencia técnica -->
+        <div class="error-icon-box error-icon-500">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+
+        <span class="error-tag error-tag-500">
+            Error 500 — Servidor no disponible
+        </span>
+
+        <h1 class="error-title error-title-500">
+            Interrupción en la cosecha
+        </h1>
+
+        <p class="error-description error-desc-500">
+            Ocurrió una inconsistencia temporal en el servidor. Nuestro equipo técnico ha sido notificado para restablecer el servicio a la brevedad.
+        </p>
+
+        <!-- Botón de regreso -->
+        <div class="error-actions">
+            <a href="{% url 'index' %}" class="error-btn-primary">
+                Regresar a la Tienda
+            </a>
+            <a href="https://wa.me/573001234567" target="_blank" rel="noopener noreferrer" class="error-btn-whatsapp">
+                Atención vía WhatsApp
+            </a>
+        </div>
+    </div>
+</main>
+{% endblock %}

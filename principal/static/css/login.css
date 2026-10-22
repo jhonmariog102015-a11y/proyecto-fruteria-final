@@ -1,5 +1,5 @@
 /* ==============================================================================
-   EL PASO FRUTERÍA — SISTEMA DE DISEÑO DE AUTENTICACIÓN (login.css)
+   AL PASO FRUTERÍA — SISTEMA DE DISEÑO DE AUTENTICACIÓN (principal/static/css/login.css)
    ============================================================================== */
 
 :root {
@@ -40,8 +40,8 @@
    CUERPO Y FONDO AMBIENTAL
    ============================================================================== */
 
-body.login-body,
-body {
+/* NOTA PARA EL EQUIPO: Usar exclusivamente 'body.login-body' para evitar contaminar estilos globales de otras vistas */
+body.login-body {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -55,8 +55,7 @@ body {
 }
 
 /* Destello ambiental en el fondo (acento esmeralda y oro campesino) */
-body.login-body::before,
-body::before {
+body.login-body::before {
     content: "";
     position: fixed;
     inset: 0;
@@ -78,6 +77,11 @@ body::before {
     max-width: 440px;
     position: relative;
     z-index: 2;
+}
+
+/* NOTA PARA EL EQUIPO: Ancho específico para el contenedor de registro para permitir dos columnas cómodas */
+.register-container {
+    max-width: 520px;
 }
 
 .login-card {

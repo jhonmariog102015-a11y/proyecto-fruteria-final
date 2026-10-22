@@ -703,6 +703,23 @@ body {
     box-shadow: 0 4px 12px rgba(26, 58, 38, 0.25);
 }
 
+.carousel-tab.tab-oferta {
+    color: #d32f2f;
+    font-weight: 700;
+}
+
+.carousel-tab.tab-oferta:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.carousel-tab.tab-oferta.active {
+    background: #d32f2f;
+    color: #ffffff;
+    border-color: #d32f2f;
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.25);
+}
+
 .carousel-outer {
     position: relative;
     margin: 0 -0.5rem;
@@ -853,6 +870,23 @@ body {
     font-weight: 800;
     color: var(--green-deep);
     letter-spacing: -0.5px;
+}
+
+.carousel-price.price-oferta {
+    color: #d32f2f;
+}
+
+.carousel-price-offer-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.carousel-empty-state {
+    padding: 40px;
+    color: #666;
+    text-align: center;
+    width: 100%;
 }
 
 .carousel-unit {
@@ -1121,6 +1155,21 @@ body {
     align-items: center;
     flex-wrap: wrap;
     gap: 1.5rem;
+}
+
+.footer-brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.footer-logo {
+    display: block;
+    width: clamp(130px, 16vw, 210px);
+    max-height: 70px;
+    height: auto;
+    object-fit: contain;
+    object-position: left center;
 }
 
 .footer .brand-name {
@@ -1419,6 +1468,14 @@ body {
         flex-direction: column;
         text-align: center;
         padding: 2rem 1.25rem;
+    }
+
+    .footer .footer-brand {
+        justify-content: center;
+    }
+
+    .footer .footer-logo {
+        object-position: center;
     }
 }
 

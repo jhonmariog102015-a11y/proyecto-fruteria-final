@@ -1,0 +1,48 @@
+<!-- ==============================================================================
+     LISTADO DE CATEGORÍAS (principal/templates/principal/categorias/lista.html)
+     CRUD con vistas basadas en clases (CBV - Guía 4)
+     ============================================================================== -->
+{% extends "principal/base_crud.html" %}
+{% load static %}
+
+{% block titulo_documento %}{{ titulo }} | Al Paso Frutería{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0">{{ titulo }}</h1>
+    <a class="btn btn-success" href="{% url 'principal:categoria_crear' %}">+ Crear categoría</a>
+</div>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle tabla-datos">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for categoria in categorias %}
+                    <tr>
+                        <td><strong>{{ categoria.nombre }}</strong></td>
+                        <td>{{ categoria.descripcion|default:"Sin descripción registrada" }}</td>
+                        <td class="text-nowrap text-center">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'principal:categoria_editar' categoria.pk %}">Editar</a>
+                            <form method="post" action="{% url 'principal:categoria_eliminar' categoria.pk %}" id="eliminar-categoria-{{ categoria.pk }}" class="d-none">
+                                {% csrf_token %}
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger js-confirmar-eliminacion" data-form-eliminar="eliminar-categoria-{{ categoria.pk }}" data-nombre="{{ categoria.nombre }}">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">No hay categorías registradas en el catálogo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

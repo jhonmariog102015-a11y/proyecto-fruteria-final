@@ -1,0 +1,34 @@
+<!-- ==============================================================================
+     FORMULARIO DE PRODUCTO (principal/templates/principal/productos/formulario.html)
+     Creación y edición con validación Bootstrap (Guía 4)
+     ============================================================================== -->
+{% extends "principal/base_crud.html" %}
+
+{% block titulo_documento %}{{ titulo }} | Al Paso Frutería{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h1 class="h2 mb-4 text-success">{{ titulo }}</h1>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for campo in formulario %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                            {{ campo }}
+                            {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+                            {% for error in campo.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                    {% endfor %}
+                    {% for error in formulario.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                    <div class="mt-4 pt-2 border-top d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4">Guardar Producto</button>
+                        <a class="btn btn-outline-secondary" href="{% url 'principal:producto_listar' %}">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

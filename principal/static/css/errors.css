@@ -1,0 +1,209 @@
+/* ==============================================================================
+   HOJA DE ESTILOS DE PÁGINAS DE ERROR (404 / 500)
+   Al Paso Frutería — principal/static/css/errors.css
+   ============================================================================== */
+
+/* 1. Contenedor Principal de la Página de Error */
+.error-page-wrapper {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+    background: radial-gradient(circle at center, #fbfdfa 0%, #edf6ee 100%);
+}
+
+.error-page-wrapper.error-500-bg {
+    background: radial-gradient(circle at center, #fefcfb 0%, #fef3ee 100%);
+}
+
+/* 2. Tarjeta Central */
+.error-card {
+    max-width: 580px;
+    width: 100%;
+    text-align: center;
+    background: #ffffff;
+    padding: 3rem 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 16px 40px rgba(26, 58, 38, 0.08);
+    border: 1px solid #e2ece3;
+}
+
+.error-card.error-card-500 {
+    box-shadow: 0 16px 40px rgba(180, 83, 9, 0.08);
+    border: 1px solid #fee2e2;
+}
+
+/* 3. Icono Vectorial Representativo */
+.error-icon-box {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 1.5rem;
+    background: #e8f5e9;
+    border: 2px solid #c8e6c9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e3a29;
+}
+
+.error-icon-box.error-icon-500 {
+    background: #fff1f2;
+    border: 2px solid #fecdd3;
+    color: #be123c;
+}
+
+/* 4. Etiqueta / Tag del Código de Estado */
+.error-tag {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #2e7d32;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    background: #e8f5e9;
+    padding: 4px 12px;
+    border-radius: 999px;
+}
+
+.error-tag.error-tag-500 {
+    color: #be123c;
+    background: #ffe4e6;
+}
+
+/* 5. Títulos y Descripciones */
+.error-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #142a1b;
+    margin: 0.5rem 0 1rem;
+    line-height: 1.15;
+}
+
+.error-title.error-title-500 {
+    color: #881337;
+}
+
+.error-description {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: #526356;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+}
+
+.error-description.error-desc-500 {
+    color: #64748b;
+}
+
+/* 6. Botones de Acción */
+.error-actions {
+    display: flex;
+    gap: 0.85rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1e3a29;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 0.85rem 1.6rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 14px rgba(30, 58, 41, 0.25);
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.error-btn-primary:hover {
+    background: #254a34;
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.error-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f6f2;
+    color: #1e3a29;
+    text-decoration: none;
+    padding: 0.85rem 1.6rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: 1px solid #d4e3d7;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.error-btn-secondary:hover {
+    background: #e2ede4;
+    transform: translateY(-1px);
+    color: #1e3a29;
+}
+
+.error-btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    color: #166534;
+    text-decoration: none;
+    padding: 0.85rem 1.6rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: 1px solid #bbf7d0;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.error-btn-whatsapp:hover {
+    background: #dcfce7;
+    transform: translateY(-1px);
+    color: #166534;
+}
+
+/* 7. Pie de Ayuda Adicional */
+.error-footer-help {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #edf4ee;
+    font-size: 0.82rem;
+    color: #788a7c;
+}
+
+.error-link-whatsapp {
+    color: #25d366;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.error-link-whatsapp:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+    .error-card {
+        padding: 2rem 1.5rem;
+    }
+    .error-title {
+        font-size: 1.75rem;
+    }
+    .error-actions {
+        flex-direction: column;
+    }
+    .error-btn-primary,
+    .error-btn-secondary,
+    .error-btn-whatsapp {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.test import TestCase
-from principal.models import Categoria, Producto
+from principal.models import Categoria, Producto, PerfilUsuario
+from django.contrib.auth import authenticate
 
 
 class ProductoMargenOfertaTestCase(TestCase):
@@ -136,7 +137,429 @@ class DashboardCrudTestCase(TestCase):
         self.assertTrue(Categoria.objects.filter(nombre='Tubérculos').exists())
 
 
-from principal.models import PerfilUsuario
+from principal.models import Proveedor
+from principal.forms import ProveedorForm
+
+
+class ProveedorFormTestCase(TestCase):
+    def test_proveedor_form_valido(self):
+        data = {
+            'razon_social': 'Finca Villa Diana',
+            'nit_rut': '900456789-1',
+            'contacto_nombre': 'Carlos Mendoza',
+            'telefono': '3124567890',
+            'email': 'carlos@villadiana.co',
+            'calificacion_estrellas': '4.8',
+            'estado': 'Activo'
+        }
+        form = ProveedorForm(data=data)
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_proveedor_form_requiere_razon_y_nit(self):
+        form = ProveedorForm(data={'calificacion_estrellas': '5.0'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('razon_social', form.errors)
+        self.assertIn('nit_rut', form.errors)
+
+    def test_proveedor_form_calificacion_invalida(self):
+        data = {
+            'razon_social': 'Finca La Esperanza',
+            'nit_rut': '900111222-3',
+            'calificacion_estrellas': '6.5',
+            'estado': 'Activo'
+        }
+        form = ProveedorForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('calificacion_estrellas', form.errors)
+
+
+class ProveedorDashboardCrudTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username='admin_prov', password='password123')
+        self.client.login(username='admin_prov', password='password123')
+
+    def test_crear_proveedor_dashboard(self):
+        response = self.client.post(reverse('dashboard_crear_proveedor'), {
+            'razon_social': 'Finca Santa Inés',
+            'nit_rut': '800555444-2',
+            'contacto_nombre': 'Mariana Gómez',
+            'telefono': '3157894561',
+            'email': 'santaines@frutales.co',
+            'calificacion_estrellas': '4.9',
+            'estado': 'Activo'
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertTrue(Proveedor.objects.filter(nit_rut='800555444-2').exists())
+        prov = Proveedor.objects.get(nit_rut='800555444-2')
+        self.assertEqual(prov.razon_social, 'Finca Santa Inés')
+
+    def test_editar_proveedor_dashboard(self):
+        prov = Proveedor.objects.create(
+            razon_social='Finca El Paraíso',
+            nit_rut='900333222-1',
+            telefono='3101112233',
+            calificacion_estrellas=Decimal('4.5'),
+            estado='Activo'
+        )
+        response = self.client.post(reverse('dashboard_editar_proveedor', args=[prov.id_proveedor]), {
+            'razon_social': 'Finca El Paraíso Orgánico',
+            'nit_rut': '900333222-1',
+            'contacto_nombre': 'Pedro Vargas',
+            'telefono': '3109998877',
+            'email': 'pedro@elparaiso.co',
+            'calificacion_estrellas': '5.0',
+            'estado': 'Activo'
+        })
+        self.assertRedirects(response, reverse('dashboard'))
+        prov.refresh_from_db()
+        self.assertEqual(prov.razon_social, 'Finca El Paraíso Orgánico')
+        self.assertEqual(prov.calificacion_estrellas, Decimal('5.0'))
+        self.assertEqual(prov.telefono, '3109998877')
+
+    def test_eliminar_proveedor_dashboard(self):
+        prov = Proveedor.objects.create(
+            razon_social='Distribuidora Andina',
+            nit_rut='900777888-9',
+            calificacion_estrellas=Decimal('3.8'),
+            estado='Inactivo'
+        )
+        response = self.client.post(reverse('dashboard_eliminar_proveedor', args=[prov.id_proveedor]))
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertFalse(Proveedor.objects.filter(id_proveedor=prov.id_proveedor).exists())
+
+
+class ExportarInventarioCsvTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(username='admin_csv', password='password123')
+        self.client.login(username='admin_csv', password='password123')
+        self.cat = Categoria.objects.create(nombre="Frutas Exóticas")
+        self.prod = Producto.objects.create(
+            nombre="Maracuyá Amarillo",
+            categoria=self.cat,
+            costo_compra=Decimal('2500.00'),
+            precio_venta_unitario=Decimal('4500.00'),
+            en_oferta=True,
+            precio_oferta=Decimal('4000.00'),
+            stock_actual=60,
+            stock_minimo=15,
+            unidad_medida='kg',
+            estado='Disponible',
+            origen='Boyacá'
+        )
+
+    def test_exportar_inventario_csv_respuesta(self):
+        response = self.client.get(reverse('dashboard_exportar_inventario_csv'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('text/csv', response['Content-Type'])
+        self.assertIn('charset=utf-8-sig', response['Content-Type'])
+        self.assertIn('inventario_el_paso_', response['Content-Disposition'])
+
+        content = response.content.decode('utf-8-sig')
+        self.assertIn('ID Producto;Nombre del Producto;Categoría;', content)
+        self.assertIn('Maracuyá Amarillo', content)
+        self.assertIn('Boyacá', content)
+
+
+class ErrorPagesViewsTestCase(TestCase):
+    def test_error_404_preview(self):
+        response = self.client.get('/404/')
+        self.assertEqual(response.status_code, 404)
+        self.assertContains(response, 'Error 404', status_code=404)
+        self.assertContains(response, 'Esta fruta se cayó del canasto', status_code=404)
+
+    def test_error_500_preview(self):
+        response = self.client.get('/500/')
+        self.assertEqual(response.status_code, 500)
+        self.assertContains(response, 'Error 500', status_code=500)
+        self.assertContains(response, 'Interrupción en la cosecha', status_code=500)
+
+
+class RegistroViewTestCase(TestCase):
+    def test_registro_view_get(self):
+        response = self.client.get('/registro/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_registro_view_post_exitoso(self):
+        response = self.client.post('/registro/', {
+            'username': 'nuevo_cliente',
+            'email': 'nuevo@example.com',
+            'telefono': '3109998877',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!',
+            'terms': 'on'
+        })
+        self.assertRedirects(response, reverse('index'))
+        User = get_user_model()
+        self.assertTrue(User.objects.filter(username='nuevo_cliente').exists())
+        nuevo = User.objects.get(username='nuevo_cliente')
+        self.assertTrue(hasattr(nuevo, 'perfil'))
+        self.assertEqual(nuevo.perfil.rol, 'cliente')
+        self.assertFalse(nuevo.is_staff)
+        self.assertFalse(nuevo.is_superuser)
+
+    def test_registro_view_previene_escalamiento_privilegios(self):
+        # Un atacante intenta forzar rol admin por POST
+        response = self.client.post('/registro/', {
+            'username': 'hacker_user',
+            'email': 'hacker@example.com',
+            'telefono': '3000000000',
+            'rol': 'admin',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!',
+            'terms': 'on'
+        })
+        self.assertRedirects(response, reverse('index'))
+        User = get_user_model()
+        user = User.objects.get(username='hacker_user')
+        # Debe ser forzado a cliente normal sin permisos de staff ni superuser
+        self.assertEqual(user.perfil.rol, 'cliente')
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+
+    def test_registro_view_post_password_mismatch(self):
+        response = self.client.post('/registro/', {
+            'username': 'mismatch_user',
+            'email': 'mismatch@example.com',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'DifferentPassword123!',
+            'terms': 'on'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Las contraseñas ingresadas no coinciden')
+        # Verifica persistencia del dato
+        self.assertContains(response, 'value="mismatch_user"')
+
+    def test_registro_view_post_terminos_obligatorios(self):
+        response = self.client.post('/registro/', {
+            'username': 'noterms_user',
+            'email': 'noterms@example.com',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Debes aceptar los términos de servicio')
+
+    def test_registro_view_post_email_invalido(self):
+        response = self.client.post('/registro/', {
+            'username': 'bademail_user',
+            'email': 'correo_no_valido',
+            'password': 'PasswordSeguro123!',
+            'confirm_password': 'PasswordSeguro123!',
+            'terms': 'on'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'formato válido')
+
+    def test_creacion_usuario_crea_perfil_automaticamente(self):
+        User = get_user_model()
+        u = User.objects.create_user(username='auto_perfil_user', email='auto@fruteria.com', password='Password123!')
+        self.assertTrue(hasattr(u, 'perfil'))
+        self.assertEqual(u.perfil.rol, 'cliente')
+        self.assertEqual(u.perfil.estado, 'activo')
+
+    def test_autenticacion_por_email_y_username(self):
+        User = get_user_model()
+        User.objects.create_user(username='test_auth_user', email='test_auth@fruteria.com', password='PasswordSeguro123!')
+        
+        # Probar autenticación por nombre de usuario
+        auth_by_user = authenticate(username='test_auth_user', password='PasswordSeguro123!')
+        self.assertIsNotNone(auth_by_user)
+        self.assertEqual(auth_by_user.username, 'test_auth_user')
+
+        # Probar autenticación por correo electrónico
+        auth_by_email = authenticate(username='test_auth@fruteria.com', password='PasswordSeguro123!')
+        self.assertIsNotNone(auth_by_email)
+        self.assertEqual(auth_by_email.username, 'test_auth_user')
+
+
+# ==============================================================================
+# PRUEBAS GUIA 4: FORMULARIOS, OPERACIONES CRUD Y SEGURIDAD (JUAN CARLOS)
+# ==============================================================================
+
+from .forms import CategoriaForm, ProductoForm
+
+
+class FormulariosCrudTests(TestCase):
+    def test_categoria_rechaza_nombre_vacio(self):
+        formulario = CategoriaForm(data={"nombre": "   ", "descripcion": ""})
+        self.assertFalse(formulario.is_valid())
+        self.assertIn("nombre", formulario.errors)
+
+    def test_producto_rechaza_precio_negativo(self):
+        categoria = Categoria.objects.create(nombre="Frutas")
+        formulario = ProductoForm(
+            data={
+                "categoria": categoria.pk,
+                "nombre": "Manzana",
+                "icono_emoji": "",
+                "imagen_url": "",
+                "origen": "Finca local",
+                "unidad_medida": "kg",
+                "brix_minimo": "0",
+                "stock_actual": "1",
+                "stock_minimo": "0",
+                "precio_venta_unitario": "-1",
+                "estado": "Disponible",
+            }
+        )
+        self.assertFalse(formulario.is_valid())
+        self.assertIn("precio_venta_unitario", formulario.errors)
+
+
+class CrudProductoFbvTests(TestCase):
+    def setUp(self):
+        usuario = get_user_model().objects.create_user(
+            username="gestor", password="Clave-segura-123"
+        )
+        self.client.force_login(usuario)
+        self.categoria = Categoria.objects.create(nombre="Frutas")
+        self.producto = Producto.objects.create(
+            categoria=self.categoria,
+            nombre="Manzana",
+            precio_venta_unitario=Decimal("2500.00"),
+        )
+
+    def test_listado_y_edicion_producto(self):
+        respuesta_lista = self.client.get(reverse("principal:producto_listar"))
+        respuesta_edicion = self.client.get(
+            reverse("principal:producto_editar", args=[self.producto.pk])
+        )
+
+        self.assertEqual(respuesta_lista.status_code, 200)
+        self.assertContains(respuesta_lista, "Manzana")
+        self.assertEqual(respuesta_edicion.status_code, 200)
+
+    def test_creacion_producto(self):
+        respuesta = self.client.post(
+            reverse("principal:producto_crear"),
+            {
+                "categoria": self.categoria.pk,
+                "nombre": "Pera",
+                "icono_emoji": "",
+                "imagen_url": "",
+                "origen": "Finca local",
+                "unidad_medida": "kg",
+                "brix_minimo": "0",
+                "stock_actual": "1",
+                "stock_minimo": "0",
+                "precio_venta_unitario": "3000",
+                "estado": "Disponible",
+            },
+        )
+
+        self.assertRedirects(respuesta, reverse("principal:producto_listar"))
+        self.assertTrue(Producto.objects.filter(nombre="Pera").exists())
+
+    def test_actualizacion_producto(self):
+        respuesta = self.client.post(
+            reverse("principal:producto_editar", args=[self.producto.pk]),
+            {
+                "categoria": self.categoria.pk,
+                "nombre": "Manzana roja",
+                "icono_emoji": "",
+                "imagen_url": "",
+                "origen": "Finca local",
+                "unidad_medida": "kg",
+                "brix_minimo": "0",
+                "stock_actual": "1",
+                "stock_minimo": "0",
+                "precio_venta_unitario": "2500",
+                "estado": "Disponible",
+            },
+        )
+
+        self.assertRedirects(respuesta, reverse("principal:producto_listar"))
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.nombre, "Manzana roja")
+
+    def test_get_eliminar_solo_confirma_y_post_elimina(self):
+        url = reverse("principal:producto_eliminar", args=[self.producto.pk])
+
+        respuesta_get = self.client.get(url)
+        self.assertEqual(respuesta_get.status_code, 200)
+        self.assertTrue(Producto.objects.filter(pk=self.producto.pk).exists())
+
+        respuesta_post = self.client.post(url)
+        self.assertRedirects(respuesta_post, reverse("principal:producto_listar"))
+        self.assertFalse(Producto.objects.filter(pk=self.producto.pk).exists())
+
+
+class CrudCategoriaCbvTests(TestCase):
+    def setUp(self):
+        usuario = get_user_model().objects.create_user(
+            username="gestor_cat", password="Clave-segura-123"
+        )
+        self.client.force_login(usuario)
+        self.categoria = Categoria.objects.create(nombre="Tropicales")
+
+    def test_vista_lista_y_formulario_categoria(self):
+        respuesta_lista = self.client.get(reverse("principal:categoria_listar"))
+        respuesta_formulario = self.client.get(reverse("principal:categoria_crear"))
+
+        self.assertEqual(respuesta_lista.status_code, 200)
+        self.assertContains(respuesta_lista, "Tropicales")
+        self.assertEqual(respuesta_formulario.status_code, 200)
+        self.assertContains(respuesta_formulario, "Crear categoria")
+
+    def test_creacion_y_actualizacion_categoria(self):
+        respuesta_creacion = self.client.post(
+            reverse("principal:categoria_crear"),
+            {"nombre": "Citricos", "descripcion": "Frutas citricas"},
+        )
+        self.assertRedirects(
+            respuesta_creacion, reverse("principal:categoria_listar")
+        )
+        categoria = Categoria.objects.get(nombre="Citricos")
+
+        respuesta_edicion = self.client.post(
+            reverse("principal:categoria_editar", args=[categoria.pk]),
+            {"nombre": "Citricos frescos", "descripcion": "Seleccion citrica"},
+        )
+        self.assertRedirects(respuesta_edicion, reverse("principal:categoria_listar"))
+        categoria.refresh_from_db()
+        self.assertEqual(categoria.nombre, "Citricos frescos")
+
+    def test_eliminacion_categoria_requiere_post(self):
+        url = reverse("principal:categoria_eliminar", args=[self.categoria.pk])
+
+        respuesta_get = self.client.get(url)
+        self.assertEqual(respuesta_get.status_code, 200)
+        self.assertTrue(Categoria.objects.filter(pk=self.categoria.pk).exists())
+
+        respuesta_post = self.client.post(url)
+        self.assertRedirects(respuesta_post, reverse("principal:categoria_listar"))
+        self.assertFalse(Categoria.objects.filter(pk=self.categoria.pk).exists())
+
+
+class SeguridadCrudTests(TestCase):
+    def test_listados_requieren_autenticacion(self):
+        rutas = [
+            reverse("principal:producto_listar"),
+            reverse("principal:categoria_listar"),
+        ]
+
+        for ruta in rutas:
+            with self.subTest(ruta=ruta):
+                respuesta = self.client.get(ruta)
+                self.assertEqual(respuesta.status_code, 302)
+                self.assertIn("/accounts/login/", respuesta.url)
+
+    def test_logout_no_acepta_get(self):
+        respuesta = self.client.get(reverse("logout"))
+        self.assertEqual(respuesta.status_code, 405)
+
+    def test_logout_por_post_cierra_sesion(self):
+        usuario = get_user_model().objects.create_user(
+            username="salida", password="Clave-segura-123"
+        )
+        self.client.force_login(usuario)
+
+        respuesta = self.client.post(reverse("logout"))
+        self.assertRedirects(respuesta, reverse("index"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
 
 class UsuariosRolesDashboardTestCase(TestCase):
     def setUp(self):
@@ -164,7 +587,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
         # Debe haber exactamente 3 perfiles activos (super_boss, carlos_bodega, ana_caja)
         self.assertEqual(len(perfiles), 3)
 
-        # Jerarquía estricta requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
+        # Jerarquia estricta requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
         self.assertEqual(perfiles[0].usuario.username, 'super_boss')
         self.assertTrue(perfiles[0].usuario.is_superuser or perfiles[0].rol == 'admin')
 
@@ -174,7 +597,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
         self.assertEqual(perfiles[2].usuario.username, 'ana_caja')
         self.assertEqual(perfiles[2].rol, 'cajero')
 
-        # Verificar métricas
+        # Verificar metricas
         self.assertEqual(response.context['total_activos'], 3)
         self.assertEqual(response.context['total_superadmins'], 1)
         self.assertEqual(response.context['total_bodegueros'], 1)
@@ -189,7 +612,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
         response = self.client.post(reverse('dashboard_crear_usuario'), {
             'username': 'pedro_bodeguero',
             'first_name': 'Pedro',
-            'last_name': 'Ramírez',
+            'last_name': 'Ramirez',
             'email': 'pedro@fruteria.com',
             'telefono': '3009998877',
             'rol': 'bodeguero',
@@ -208,7 +631,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
 
     def test_crear_usuario_dashboard_validaciones_duplicado_y_contrasena(self):
         User = get_user_model()
-        # Contraseñas no coinciden
+        # Contrasenas no coinciden
         response = self.client.post(reverse('dashboard_crear_usuario'), {
             'username': 'nuevo_user',
             'email': 'nuevo@fruteria.com',
@@ -232,7 +655,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
         response = self.client.post(reverse('dashboard_editar_usuario', args=[self.cajero.pk]), {
             'username': 'ana_cajera_senior',
             'first_name': 'Ana',
-            'last_name': 'López',
+            'last_name': 'Lopez',
             'email': 'ana_senior@fruteria.com',
             'telefono': '3555555555',
             'rol': 'cajero',
@@ -247,7 +670,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
         self.assertEqual(self.cajero.perfil.telefono, '3555555555')
 
     def test_editar_usuario_dashboard_seguridad_cuenta_propia(self):
-        # Intentar desactivarse a sí mismo
+        # Intentar desactivarse a si mismo
         response = self.client.post(reverse('dashboard_editar_usuario', args=[self.superadmin.pk]), {
             'username': 'super_boss',
             'email': 'super@fruteria.com',
@@ -274,7 +697,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
 
     def test_no_administrador_no_puede_crear_usuario(self):
         User = get_user_model()
-        # Iniciar sesión como Cajero (no administrador)
+        # Iniciar sesion como Cajero (no administrador)
         self.client.login(username='ana_caja', password='password123')
         response = self.client.post(reverse('dashboard_crear_usuario'), {
             'username': 'intento_cajero',
@@ -287,7 +710,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
         self.assertFalse(User.objects.filter(username='intento_cajero').exists())
 
     def test_no_administrador_no_puede_editar_usuario(self):
-        # Iniciar sesión como Bodeguero (no administrador)
+        # Iniciar sesion como Bodeguero (no administrador)
         self.client.login(username='carlos_bodega', password='password123')
         response = self.client.post(reverse('dashboard_editar_usuario', args=[self.cajero.pk]), {
             'username': 'ana_modificada_ilegal',
@@ -302,7 +725,7 @@ class UsuariosRolesDashboardTestCase(TestCase):
 
     def test_no_administrador_no_puede_eliminar_usuario(self):
         User = get_user_model()
-        # Iniciar sesión como Cajero (no administrador)
+        # Iniciar sesion como Cajero (no administrador)
         self.client.login(username='ana_caja', password='password123')
         response = self.client.post(reverse('dashboard_eliminar_usuario', args=[self.bodeguero.pk]))
         self.assertRedirects(response, '/dashboard/#usuarios')
@@ -316,6 +739,10 @@ class UsuariosRolesDashboardTestCase(TestCase):
         self.assertContains(response, 'Modo de solo lectura')
         self.assertContains(response, 'Solo Administrador')
         self.assertNotContains(response, 'onclick="abrirModalNuevoUsuario()"')
+
+
+
+
 
 
 

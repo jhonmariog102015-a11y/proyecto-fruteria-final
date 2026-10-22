@@ -1,0 +1,52 @@
+{% extends 'principal/base.html' %}
+{% load static %}
+
+{% block title %}Página no encontrada (Error 404) — Al Paso Frutería{% endblock %}
+{% block meta_description %}La página que buscas no existe o ha cambiado de lugar en Al Paso Frutería.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/errors.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="error-page-wrapper">
+    <div class="error-card">
+        
+        <!-- Icono vectorial botánico de canasta / fruta -->
+        <div class="error-icon-box">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v4"></path>
+                <path d="M4.93 10.93a10 10 0 1 0 14.14 0"></path>
+                <path d="M2 12h20"></path>
+                <path d="M4 12v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"></path>
+            </svg>
+        </div>
+
+        <span class="error-tag">
+            Error 404 — Ruta no encontrada
+        </span>
+
+        <h1 class="error-title">
+            Esta fruta se cayó del canasto
+        </h1>
+
+        <p class="error-description">
+            La dirección a la que intentas acceder no existe, fue trasladada o el producto ya no se encuentra en el inventario activo de esta temporada.
+        </p>
+
+        <!-- Botones de navegación y rescate -->
+        <div class="error-actions">
+            <a href="{% url 'catalogo_frutas' %}" class="error-btn-primary">
+                Explorar Catálogo de Frutas
+            </a>
+            <a href="{% url 'index' %}" class="error-btn-secondary">
+                Volver al Inicio
+            </a>
+        </div>
+
+        <div class="error-footer-help">
+            ¿Necesitas ayuda para un pedido especial? <a href="https://wa.me/573001234567" target="_blank" rel="noopener noreferrer" class="error-link-whatsapp">Escríbenos por WhatsApp</a>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -171,38 +171,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --------------------------------------------------------------------------
-    // 7. BOTÓN RÁPIDO DE AÑADIR PRODUCTO Y NOTIFICACIÓN TOAST
+    // 7. BOTÓN RÁPIDO DE AÑADIR PRODUCTO A LA CANASTA UNIVERSAL
     // --------------------------------------------------------------------------
     const addBtns = document.querySelectorAll('.carousel-card .btn-add-fruit');
     addBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const fruitName = btn.dataset.nombre || 'Fruta fresca';
+            const card = btn.closest('.carousel-card');
+            if (card && typeof window.addToCart === 'function') {
+                const id = btn.dataset.id || card.dataset.id;
+                const nombre = btn.dataset.nombre || card.querySelector('.card-fruit-title')?.textContent.trim();
+                const precioRaw = card.querySelector('.card-price-value')?.textContent.replace(/[^0-9]/g, '');
+                const precio = parseFloat(precioRaw) || 0;
+                const unidad = card.querySelector('.card-price-unit')?.textContent.replace('/', '').trim() || 'kg';
+                const imagen = card.querySelector('img')?.src || '';
+
+                window.addToCart({ id, nombre, precio, unidad, imagen });
+            }
             btn.classList.add('added');
-            
-            showToast(`"${fruitName}" agregado a tu lista de compra`);
-            
             setTimeout(() => {
                 btn.classList.remove('added');
-            }, 1200);
+            }, 600);
         });
     });
-
-    // Muestra una notificación flotante estilo Toast en pantalla
-    function showToast(message) {
-        let toast = document.getElementById('fruitToast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'fruitToast';
-            toast.className = 'fruit-toast';
-            document.body.appendChild(toast);
-        }
-        toast.innerHTML = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2800);
-    }
 
     // Recalcula los puntos cuando el usuario cambia el tamaño de la ventana
     window.addEventListener('resize', () => {

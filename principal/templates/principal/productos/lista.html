@@ -1,0 +1,54 @@
+<!-- ==============================================================================
+     LISTADO DE PRODUCTOS (principal/templates/principal/productos/lista.html)
+     CRUD con vistas basadas en funciones (FBV - Guía 4)
+     ============================================================================== -->
+{% extends "principal/base_crud.html" %}
+{% load static %}
+
+{% block titulo_documento %}{{ titulo }} | Al Paso Frutería{% endblock %}
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h2 mb-0">{{ titulo }}</h1>
+    <a class="btn btn-success" href="{% url 'principal:producto_crear' %}">+ Crear producto</a>
+</div>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle tabla-datos">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio Venta</th>
+                        <th>Stock</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td><strong>{{ producto.nombre }}</strong></td>
+                        <td><span class="badge bg-secondary">{{ producto.categoria.nombre }}</span></td>
+                        <td>${{ producto.precio_venta_unitario|floatformat:2 }} COP</td>
+                        <td>{{ producto.stock_actual }} {{ producto.unidad_medida }}</td>
+                        <td><span class="badge bg-success">{{ producto.get_estado_display }}</span></td>
+                        <td class="text-nowrap text-center">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'principal:producto_editar' producto.pk %}">Editar</a>
+                            <form method="post" action="{% url 'principal:producto_eliminar' producto.pk %}" id="eliminar-producto-{{ producto.pk }}" class="d-none">
+                                {% csrf_token %}
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger js-confirmar-eliminacion" data-form-eliminar="eliminar-producto-{{ producto.pk }}" data-nombre="{{ producto.nombre }}">Eliminar</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No hay productos registrados en el catálogo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

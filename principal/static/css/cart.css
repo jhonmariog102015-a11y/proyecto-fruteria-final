@@ -1,0 +1,532 @@
+/* ==============================================================================
+   CARRITO DE COMPRAS UNIVERSAL Y NOTIFICACIONES TOAST (principal/static/css/cart.css)
+   Al Paso Frutería — Experiencia de Canasta y Checkout directo a WhatsApp
+   ============================================================================== */
+
+/* 1. Botón de Canasta en Navbar */
+.btn-nav-cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #1e3a29;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.btn-nav-cart:hover {
+    background: #254a34;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.cart-count-badge {
+    background: #e11d48;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 10px;
+    display: none; /* Oculto por defecto hasta que cart.js detecte productos en canasta */
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* Formulario de salida en barra de navegación */
+.nav-logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+/* Tipografía de estado vacío en canasta */
+.cart-empty-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e3a29;
+    margin: 0 0 0.3rem;
+}
+
+.cart-empty-subtitle {
+    color: #64748b;
+    display: block;
+}
+
+/* 2. Capa de Fondo (Overlay) */
+.cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(3px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.cart-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 3. Panel Lateral Deslizante (Cart Drawer) */
+.cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-left: 1px solid #e2ece3;
+    box-shadow: -8px 0 35px rgba(0, 0, 0, 0.18);
+    z-index: 1001;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.cart-drawer.open {
+    transform: translateX(0);
+}
+
+.cart-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #edf4ee;
+    background: #fbfdfa;
+}
+
+.cart-drawer-header h3 {
+    margin: 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #142a1b;
+}
+
+.close-cart-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.close-cart-btn:hover {
+    color: #0f172a;
+    background: #e2ece3;
+}
+
+.cart-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem;
+}
+
+.cart-empty-msg {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+}
+
+.cart-empty-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2e7d32;
+}
+
+/* 4. Elementos individuales del Carrito */
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.cart-item-visual {
+    width: 44px;
+    height: 44px;
+    background: #f1f6f2;
+    border: 1px solid #e2ece3;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1e3a29;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.cart-item-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.cart-item-title {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #1e293b;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cart-item-unit {
+    font-size: 0.74rem;
+    color: #64748b;
+}
+
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2px 4px;
+}
+
+.qty-btn {
+    background: transparent;
+    border: none;
+    color: #334155;
+    cursor: pointer;
+    width: 22px;
+    height: 22px;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    transition: background 0.15s ease;
+}
+
+.qty-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.qty-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+    color: #0f172a;
+}
+
+.cart-item-subtotal {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: #1e3a29;
+    min-width: 68px;
+    text-align: right;
+}
+
+.cart-item-remove {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: color 0.15s ease;
+}
+
+.cart-item-remove:hover {
+    color: #dc2626;
+}
+
+/* 5. Pie del Carrito y Botón de WhatsApp */
+.cart-drawer-footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid #edf4ee;
+    background: #fbfdfa;
+}
+
+.cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.cart-total-row span {
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.cart-total-row strong {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.45rem;
+    color: #142a1b;
+}
+
+.btn-whatsapp-order {
+    width: 100%;
+    background: #25d366;
+    color: #ffffff;
+    border: none;
+    padding: 0.9rem 1.25rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+    transition: all 0.2s ease;
+}
+
+.btn-whatsapp-order:hover:not(.disabled) {
+    background: #1ebe5c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+}
+
+.btn-whatsapp-order.disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* ==============================================================================
+   6. SISTEMA DE NOTIFICACIONES TOAST FLOTANTES
+   ============================================================================== */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast-alert {
+    pointer-events: auto;
+    background: #ffffff;
+    border-left: 4px solid #1e3a29;
+    border-radius: 10px;
+    padding: 0.85rem 1.2rem;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    max-width: 380px;
+    animation: toastSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast-alert.hiding {
+    opacity: 0;
+    transform: translateY(15px);
+}
+
+.toast-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e8f5e9;
+    color: #1e3a29;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.toast-text {
+    flex: 1;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #1e293b;
+    line-height: 1.35;
+}
+
+.toast-action-btn {
+    background: #e8f5e9;
+    color: #1e3a29;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.toast-action-btn:hover {
+    background: #c8e6c9;
+}
+
+@keyframes toastSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        left: 12px;
+        right: 12px;
+        bottom: 84px; /* para no tapar el botón flotante de WhatsApp */
+    }
+    .toast-alert {
+        max-width: 100%;
+        min-width: auto;
+    }
+}
+
+/* ==============================================================================
+   7. BOTÓN FLOTANTE PERSISTENTE DE WHATSAPP UNIVERSAL
+   ============================================================================== */
+.whatsapp-floating-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #25D366;
+    color: #FFFFFF;
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.whatsapp-floating-btn:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 12px 30px rgba(37, 211, 102, 0.65);
+    background: #20BA5A;
+    color: #FFFFFF;
+}
+
+.whatsapp-floating-btn svg {
+    width: 32px;
+    height: 32px;
+    fill: #FFFFFF;
+    color: #FFFFFF;
+}
+
+.whatsapp-floating-btn .floating-tooltip {
+    position: absolute;
+    right: 74px;
+    background: #1A3A26;
+    color: #FFFFFF;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.5rem 0.95rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+.whatsapp-floating-btn .floating-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50% !important;
+    right: -6px;
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent #1A3A26;
+}
+
+.whatsapp-floating-btn:hover .floating-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.whatsapp-floating-btn::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(37, 211, 102, 0.35);
+    z-index: -1;
+    animation: waPulse 2.4s infinite;
+}
+
+@keyframes waPulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    70% { transform: scale(1.3); opacity: 0; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .whatsapp-floating-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 54px;
+        height: 54px;
+    }
+
+    .whatsapp-floating-btn svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .whatsapp-floating-btn .floating-tooltip {
+        display: none;
+    }
+}
+

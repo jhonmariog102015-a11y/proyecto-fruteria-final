@@ -1,210 +1,18 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <!-- Metadatos de codificación y renderizado en el panel administrativo -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Al Paso Frutería — Panel de Control Administrativo</title>
+  <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'panel.css' %}">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
-
-  <style>
-    /* Transiciones fluidas entre secciones del Dashboard */
-    .dashboard-section {
-      display: none;
-      animation: fadeInSection 0.22s ease-in-out;
-    }
-    .dashboard-section.active {
-      display: block;
-    }
-    @keyframes fadeInSection {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .navigation a {
-      cursor: pointer;
-      user-select: none;
-    }
-    .btn-role-tab {
-      background: #f1f5f9;
-      color: #475569;
-      border: 1px solid #e2e8f0;
-      padding: 5px 13px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .btn-role-tab:hover {
-      background: #e2e8f0;
-      color: #1e293b;
-    }
-    .btn-role-tab.active {
-      background: #0284c7;
-      color: #ffffff;
-      border-color: #0284c7;
-      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
-    }
-
-    /* Estilos globales y modernos para las tarjetas de estadísticas KPI */
-    .stats-row,
-    .dashboard-products .stats-row {
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
-      gap: 1.25rem !important;
-      margin-bottom: 1.75rem !important;
-    }
-
-    .dash-card,
-    .dashboard-products .dash-card {
-      position: relative !important;
-      background: #ffffff !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 16px !important;
-      padding: 1.35rem 1.45rem !important;
-      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02) !important;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      overflow: hidden !important;
-    }
-
-    .dash-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--card-accent, #0284c7);
-      border-radius: 16px 16px 0 0;
-    }
-
-    .dash-card:hover,
-    .dashboard-products .dash-card:hover {
-      transform: translateY(-3px) !important;
-      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.03) !important;
-      border-color: #cbd5e1 !important;
-    }
-
-    .dash-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .dash-card h5,
-    .dashboard-products .dash-card h5 {
-      margin: 0 !important;
-      color: #64748b !important;
-      font-size: 0.8rem !important;
-      font-weight: 700 !important;
-      text-transform: uppercase !important;
-      letter-spacing: 0.6px !important;
-    }
-
-    .dash-card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .dash-card h3,
-    .dashboard-products .dash-card h3 {
-      margin: 0.2rem 0 0.3rem !important;
-      color: #0f172a !important;
-      font-size: 2.1rem !important;
-      font-weight: 800 !important;
-      letter-spacing: -0.8px !important;
-      line-height: 1.1 !important;
-      font-feature-settings: "tnum" !important;
-    }
-
-    .dash-card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 0.65rem;
-      padding-top: 0.65rem;
-      border-top: 1px solid #f1f5f9;
-      font-size: 0.78rem;
-    }
-
-    .kpi-subtext {
-      font-size: 0.8rem !important;
-      color: #64748b !important;
-      margin: 0 !important;
-    }
-
-    .kpi-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .kpi-badge-red {
-      background: #fef2f2;
-      color: #b91c1c;
-      border: 1px solid #fecaca;
-    }
-
-    .kpi-badge-green {
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
-    }
-
-    .kpi-badge-purple {
-      background: #faf5ff;
-      color: #7e22ce;
-      border: 1px solid #e9d5ff;
-    }
-
-    .kpi-badge-blue {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 1px solid #bfdbfe;
-    }
-
-    .kpi-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: currentColor;
-      display: inline-block;
-      animation: pulseDot 2s infinite ease-in-out;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js para analítica interactiva y gráficos financieros del catálogo -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -216,18 +24,18 @@
     <!-- ====================================================================== -->
     <aside class="sidebar">
       <!-- Marca corporativa del panel -->
-      <div class="logo">El Paso Frutería</div>
+      <div class="logo">Al Paso Frutería</div>
 
       <!-- Menú principal de enlaces del administrador -->
       <nav class="navigation" aria-label="Main navigation">
-        <a class="active" href="#inventario" id="nav-inventario" data-section="inventario" onclick="mostrarSeccion('inventario', this); return false;" aria-current="page">
+        <a class="active" onclick="mostrarSeccion('inventario', this)" data-section="inventario" id="nav-inventario" aria-current="page">
           <span class="nav-icon">▪</span> Resumen e Inventario
         </a>
-        <a href="#usuarios" id="nav-usuarios" data-section="usuarios" onclick="mostrarSeccion('usuarios', this); return false;">
-          <span class="nav-icon">▪</span> Registros y Roles
+        <a onclick="mostrarSeccion('usuarios', this)" data-section="usuarios" id="nav-usuarios">
+          <span class="nav-icon">▪</span> Administradores
         </a>
-        <a href="#finanzas" id="nav-finanzas" data-section="finanzas" onclick="mostrarSeccion('finanzas', this); return false;">
-          <span class="nav-icon">▪</span> Finanzas y Categorías
+        <a onclick="mostrarSeccion('proveedores', this)" data-section="proveedores" id="nav-proveedores">
+          <span class="nav-icon">▪</span> Proveedores Aliados
         </a>
         <a href="{% url 'catalogo_frutas' %}" target="_blank">
           <span class="nav-icon">▪</span> Catálogo de Frutas ↗
@@ -242,16 +50,15 @@
 
       <!-- Pie de la barra lateral: Botón de Logout y perfil del usuario activo -->
       <div class="sidebar-bottom">
-        <form action="{% url 'logout' %}" method="post" style="margin: 0; width: 100%;">
+        <form action="{% url 'logout' %}" method="post" class="sidebar-logout-form">
           {% csrf_token %}
-          <button type="submit" class="logout"
-            style="background:none; border:none; width: 100%; text-align: left; cursor: pointer; color: inherit; font: inherit;">
+          <button type="submit" class="logout logout-btn">
             <span class="nav-icon">▪</span> Cerrar Sesión
           </button>
         </form>
 
         <!-- Tarjeta de perfil: Iniciales y nombre del usuario autenticado -->
-        <div class="profile" style="margin-top: 10px;">
+        <div class="profile profile-mt">
           <div class="avatar">{{ request.user.username|slice:":2"|upper }}</div>
           <div>
             <strong>{{ request.user.username|capfirst }}</strong>
@@ -270,13 +77,18 @@
       <header class="topbar">
         <div class="greeting">
           <h1>Hola, {{ request.user.username|capfirst }}</h1>
-          <span class="date" id="topbarBreadcrumb">» &nbsp; El Paso Frutería • <strong>Resumen e Inventario de Frutas</strong></span>
+          <span class="date" id="topbarBreadcrumb">» &nbsp; Al Paso Frutería • Panel de Control Integral</span>
         </div>
 
         <div class="header-actions">
-          <label class="search" style="width: 280px;">
-            <input type="search" id="inputBuscarProducto" placeholder="Buscar en la sección activa..."
-              aria-label="Buscar" onkeyup="ejecutarBusquedaActiva()">
+          <label class="search search-w-280">
+            <input
+              type="search"
+              id="inputBuscarProducto"
+              placeholder="Buscar producto o categoría..."
+              aria-label="Buscar en el catálogo"
+              onkeyup="ejecutarBusquedaActiva()"
+            >
             <span aria-hidden="true">⌕</span>
           </label>
         </div>
@@ -288,561 +100,632 @@
         <!-- MENSAJES FLASH Y NOTIFICACIONES                                   -->
         <!-- ================================================================== -->
         {% if messages %}
-        <div class="dash-alerts-container">
-          {% for message in messages %}
-          <div class="dash-alert dash-alert-{{ message.tags|default:'success' }}">
-            <span>{{ message }}</span>
-            <button type="button" onclick="this.parentElement.remove()"
-              style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:inherit; line-height:1;">✕</button>
+          <div class="dash-alerts-container">
+            {% for message in messages %}
+              <div class="dash-alert dash-alert-{{ message.tags|default:'success' }}">
+                <span>{{ message }}</span>
+                <button type="button" onclick="this.parentElement.remove()" class="toast-close-btn">✕</button>
+              </div>
+            {% endfor %}
           </div>
-          {% endfor %}
-        </div>
         {% endif %}
 
+        <div id="seccion-inventario" class="dashboard-section active">
         <!-- ================================================================== -->
         <!-- 3. MÉTRICAS CLAVE (KPI Cards)                                      -->
         <!-- Conteo dinámico y rentabilidad global en tiempo real              -->
         <!-- ================================================================== -->
-        <!-- ================================================================== -->
-        <!-- SECCIÓN 1: RESUMEN GENERAL E INVENTARIO DE FRUTAS                  -->
-        <!-- ================================================================== -->
-        <div id="seccion-inventario" class="dashboard-section active">
-          <!-- 3. MÉTRICAS CLAVE (KPI Cards) FRUTAS -->
-          <section class="dashboard-products" aria-labelledby="products-heading">
-            <div class="stats-row">
-              <!-- 1. Productos Registrados -->
-              <div class="dash-card" style="--card-accent: #059669;">
-                <div class="dash-card-header">
-                  <h5>Productos Registrados</h5>
-                  <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                  </span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                  <h3 style="color: #0f172a;">{{ total_productos }}</h3>
-                  <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Catálogo</span>
-                </div>
-                <div class="dash-card-footer">
-                  <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
-                  <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">Disponible</span>
-                </div>
-              </div>
+        <section class="dashboard-products" aria-labelledby="products-heading">
+          <div class="stats-row">
+            <div class="dash-card">
+              <h5>Productos Registrados</h5>
+              <h3>{{ total_productos }}</h3>
+              <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
+            </div>
+            <div class="dash-card">
+              <h5>Ofertas Activas</h5>
+              <h3 class="kpi-val-rose">{{ total_ofertas }}</h3>
+              <span class="kpi-subtext">Precios promocionales vigentes</span>
+            </div>
+            <div class="dash-card">
+              <h5>Inversión en Inventario</h5>
+              <h3 class="kpi-val-blue">${{ inversion_total|floatformat:0 }}</h3>
+              <span class="kpi-subtext">Costo total de compra en bodega</span>
+            </div>
+            <div class="dash-card">
+              <h5>Ganancia Proyectada</h5>
+              <h3 class="kpi-val-green">+${{ ganancia_potencial|floatformat:0 }}</h3>
+              <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
+            </div>
+          </div>
 
-              <!-- 2. Ofertas Activas -->
-              <div class="dash-card" style="--card-accent: #e11d48;">
-                <div class="dash-card-header">
-                  <h5>Ofertas Activas</h5>
-                  <span class="dash-card-icon" style="background: #ffe4e6; color: #e11d48;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                  </span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                  <h3 style="color: #e11d48;">{{ total_ofertas }}</h3>
-                  <span class="kpi-badge kpi-badge-red">Promociones</span>
-                </div>
-                <div class="dash-card-footer">
-                  <span class="kpi-subtext">Precios promocionales vigentes</span>
-                  <span style="font-weight: 700; color: #e11d48; font-size: 0.75rem;">Descuentos</span>
-                </div>
+          <!-- ================================================================ -->
+          <!-- 3.1. ANALÍTICA VISUAL Y GRÁFICOS EJECUTIVOS (Chart.js)             -->
+          <!-- ================================================================ -->
+          <div class="dash-charts-grid">
+            <div class="dash-chart-card">
+              <div class="dash-chart-header">
+                <h4>Distribución por Categorías</h4>
+                <span class="dash-chart-sub">Volumen de productos clasificados por grupo taxonómico</span>
               </div>
-
-              <!-- 3. Inversión en Inventario -->
-              <div class="dash-card" style="--card-accent: #2563eb;">
-                <div class="dash-card-header">
-                  <h5>Inversión en Bodega</h5>
-                  <span class="dash-card-icon" style="background: #eff6ff; color: #2563eb;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                  </span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                  <h3 style="color: #2563eb;">${{ inversion_total|floatformat:0 }}</h3>
-                  <span class="kpi-badge kpi-badge-blue">Costo Base</span>
-                </div>
-                <div class="dash-card-footer">
-                  <span class="kpi-subtext">Costo total de existencias</span>
-                  <span style="font-weight: 700; color: #2563eb; font-size: 0.75rem;">COP</span>
-                </div>
+              <div class="dash-chart-canvas-wrap">
+                <canvas id="chartCategorias"></canvas>
               </div>
+            </div>
+            <div class="dash-chart-card">
+              <div class="dash-chart-header">
+                <h4>Rentabilidad y Márgenes de Ganancia</h4>
+                <span class="dash-chart-sub">Comparativa Costo de Compra vs Precio de Venta ($ COP)</span>
+              </div>
+              <div class="dash-chart-canvas-wrap">
+                <canvas id="chartMargenes"></canvas>
+              </div>
+            </div>
+          </div>
 
-              <!-- 4. Ganancia Proyectada -->
-              <div class="dash-card" style="--card-accent: #15803d;">
-                <div class="dash-card-header">
-                  <h5>Ganancia Proyectada</h5>
-                  <span class="dash-card-icon" style="background: #f0fdf4; color: #15803d;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                  </span>
-                </div>
-                <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                  <h3 style="color: #15803d;">+${{ ganancia_potencial|floatformat:0 }}</h3>
-                  <span class="kpi-badge kpi-badge-green">+{{ margen_promedio|floatformat:1 }}%</span>
-                </div>
-                <div class="dash-card-footer">
-                  <span class="kpi-subtext">Margen promedio de ganancia</span>
-                  <span style="font-weight: 700; color: #15803d; font-size: 0.75rem;">Rentable</span>
-                </div>
+          <!-- ================================================================ -->
+          <!-- 4. TABLA DE INVENTARIO Y GESTIÓN CRUD EN TIEMPO REAL              -->
+          <!-- ================================================================ -->
+          <div class="products-table-container">
+            <div class="catalog-inv-header">
+              <div>
+                <h2 id="products-heading" class="catalog-inv-title">Catálogo e Inventario en Tiempo Real</h2>
+                <p class="catalog-inv-subtitle">Administra precios de venta, costos de compra, promociones y existencias directamente aquí.</p>
+              </div>
+              <div class="catalog-inv-actions">
+                <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProducto()">
+                  <span>+</span> Nuevo Producto
+                </button>
+                <button type="button" class="btn-secondary-dash" onclick="abrirModalNuevaCategoria()">
+                  <span>+</span> Nueva Categoría
+                </button>
+                <a href="{% url 'dashboard_exportar_inventario_csv' %}" class="btn-secondary-dash" title="Descargar inventario compatible con Excel (CSV)">
+                  <span>↓</span> Exportar CSV
+                </a>
+                <a href="/admin/principal/producto/" target="_blank" class="btn-secondary-dash" title="Abrir Django Admin">
+                  Admin Técnico ↗
+                </a>
               </div>
             </div>
 
-            <!-- 4. TABLA DE INVENTARIO Y GESTIÓN CRUD EN TIEMPO REAL -->
-            <div class="products-table-container">
-              <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+            <!-- Filtros Rápidos de Inventario -->
+            <div class="quick-filters-row">
+              <span class="quick-filters-label">Filtro rápido:</span>
+              <button type="button" class="quick-filter-btn active" data-filter="todos" onclick="filtrarPorEstado('todos', this)">
+                Todos <span class="pill-count">{{ total_productos }}</span>
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="oferta" onclick="filtrarPorEstado('oferta', this)">
+                En Oferta <span class="pill-count">{{ total_ofertas }}</span>
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="bajo_stock" onclick="filtrarPorEstado('bajo_stock', this)">
+                Bajo Stock <span class="pill-count">{{ total_bajo_stock }}</span>
+              </button>
+              <button type="button" class="quick-filter-btn" data-filter="agotado" onclick="filtrarPorEstado('agotado', this)">
+                Agotados <span class="pill-count">{{ total_agotados }}</span>
+              </button>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Producto</th>
+                  <th scope="col">Categoría</th>
+                  <th scope="col">Costo Compra</th>
+                  <th scope="col">Precio Venta</th>
+                  <th scope="col">Margen Ganancia</th>
+                  <th scope="col">Oferta</th>
+                  <th scope="col">Stock Disponible</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col" class="table-col-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaProductosBody">
+                {% for producto in productos %}
+                <tr class="fila-producto"
+                    data-busqueda="{{ producto.nombre|lower }} {{ producto.categoria.nombre|lower }} {{ producto.estado|lower }}"
+                    data-oferta="{% if producto.en_oferta %}1{% else %}0{% endif %}"
+                    data-bajo-stock="{% if producto.stock_actual <= producto.stock_minimo %}1{% else %}0{% endif %}"
+                    data-agotado="{% if producto.stock_actual <= 0 or producto.estado == 'Agotado' %}1{% else %}0{% endif %}">
+                  <td>
+                    <div class="table-prod-info">
+                      <span class="table-prod-icon">{{ producto.nombre|slice:":1"|upper }}</span>
+                      <div>
+                        <strong>{{ producto.nombre }}</strong>
+                        <div class="prod-origen-sub">{{ producto.origen|truncatechars:35 }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge-cat">{{ producto.categoria.nombre|default:"General" }}</span>
+                  </td>
+                  <td>${{ producto.costo_compra|floatformat:0 }}</td>
+                  <td>
+                    {% if producto.en_oferta and producto.precio_oferta %}
+                      <strong class="prod-price-offer">${{ producto.precio_oferta|floatformat:0 }}</strong>
+                      <span class="prod-price-old">${{ producto.precio_venta_unitario|floatformat:0 }}</span>
+                    {% else %}
+                      ${{ producto.precio_venta_unitario|floatformat:0 }}
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge-margen">
+                      +${{ producto.margen_ganancia|floatformat:0 }} ({{ producto.porcentaje_margen|floatformat:1 }}%)
+                    </span>
+                  </td>
+                  <td>
+                    {% if producto.en_oferta %}
+                      <span class="badge-oferta">-{{ producto.porcentaje_descuento|floatformat:0 }}%</span>
+                    {% else %}
+                      <span class="badge-normal">Normal</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <strong>{{ producto.stock_actual }}</strong> {{ producto.unidad_medida|default:"kg" }}
+                    {% if producto.stock_actual <= producto.stock_minimo %}
+                      <br><span class="stock-badge-low">Bajo Stock</span>
+                    {% endif %}
+                  </td>
+                  <td><span class="badge-status">{{ producto.estado|default:"Disponible" }}</span></td>
+                  <td class="table-col-actions">
+                    <button type="button" class="btn-action-edit"
+                      data-id="{{ producto.id_producto }}"
+                      data-nombre="{{ producto.nombre }}"
+                      data-categoria="{{ producto.categoria.id_categoria }}"
+                      data-costo="{{ producto.costo_compra }}"
+                      data-precio="{{ producto.precio_venta_unitario }}"
+                      data-oferta="{% if producto.en_oferta %}true{% else %}false{% endif %}"
+                      data-precio-oferta="{{ producto.precio_oferta|default:'' }}"
+                      data-stock="{{ producto.stock_actual }}"
+                      data-stock-min="{{ producto.stock_minimo }}"
+                      data-unidad="{{ producto.unidad_medida }}"
+                      data-origen="{{ producto.origen }}"
+                      data-imagen="{{ producto.imagen_url|default:'' }}"
+                      data-estado="{{ producto.estado }}"
+                      onclick="abrirModalEditar(this)">
+                      Editar
+                    </button>
+                    <button type="button" class="btn-action-delete"
+                      data-id="{{ producto.id_producto }}"
+                      data-nombre="{{ producto.nombre }}"
+                      onclick="abrirModalEliminar(this)">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td class="empty-products" colspan="9">No hay productos registrados en el catálogo. ¡Crea el primero usando el botón superior!</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================================================================== -->
+        <!-- 5. PANELES DE GESTIÓN Y RESUMEN FINANCIERO                        -->
+        <!-- ================================================================== -->
+        <div class="finanzas-grid-2">
+
+          <!-- Panel: Rentabilidad & Valoración de Inventario -->
+          <div class="finanzas-card">
+            <div class="finanzas-header">
+              <h3>Rentabilidad y Finanzas</h3>
+              <span class="finanzas-badge-pill">
+                Margen Promedio: {{ margen_promedio|floatformat:1 }}%
+              </span>
+            </div>
+            <div>
+              <div class="finanzas-metric-row">
+                <span class="finanzas-metric-label">Inversión Total en Compras:</span>
+                <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
+              </div>
+              <div class="finanzas-metric-row">
+                <span class="finanzas-metric-label">Valor Comercial de Venta:</span>
+                <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
+              </div>
+              <div class="finanzas-metric-row">
+                <span class="finanzas-metric-label">Utilidad Bruta Estimada:</span>
+                <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
+              </div>
+              <div class="finanzas-metric-row">
+                <span class="finanzas-metric-label">Promoción / Descuentos:</span>
+                <span class="val finanzas-val-rebajados">{{ total_ofertas }} productos rebajados</span>
+              </div>
+            </div>
+            <div class="finanzas-note-box">
+              <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
+            </div>
+          </div>
+
+          <!-- Panel: Gestión de Categorías del Catálogo -->
+          <div class="finanzas-card">
+            <div class="finanzas-header">
+              <h3>Categorías del Catálogo ({{ categorias.count }})</h3>
+              <button type="button" class="btn-primary-dash btn-cat-add" onclick="abrirModalNuevaCategoria()">
+                + Crear
+              </button>
+            </div>
+            <div class="cat-scroll-container">
+              {% for cat in categorias %}
+              <div class="cat-item-pill">
                 <div>
-                  <h2 id="products-heading" style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700;">
-                    Catálogo e Inventario en Tiempo Real</h2>
-                  <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">Administra precios de venta, costos de
-                    compra, promociones y existencias directamente aquí.</p>
+                  <strong class="cat-pill-title">{{ cat.nombre }}</strong>
+                  <span class="cat-chip-count cat-chip-count-ml">{{ cat.num_productos }} prod.</span>
                 </div>
-                <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-                  <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProducto()">
-                    <span>+</span> Nuevo Producto
-                  </button>
-                  <button type="button" class="btn-secondary-dash" onclick="abrirModalNuevaCategoria()">
-                    <span>+</span> Nueva Categoría
-                  </button>
-                  <a href="/admin/principal/producto/" target="_blank" class="btn-secondary-dash"
-                    title="Abrir Django Admin">
-                    Admin Técnico ↗
-                  </a>
+                <div class="cat-item-actions">
+                  {% if cat.num_productos == 0 %}
+                    <form action="{% url 'dashboard_eliminar_categoria' cat.id_categoria %}" method="post" class="cat-delete-form" onsubmit="return confirm('¿Eliminar la categoría {{ cat.nombre }}?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-action-delete btn-delete-cat-sm" title="Eliminar categoría vacía">
+                        Borrar
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="cat-active-tag">En catálogo</span>
+                  {% endif %}
                 </div>
               </div>
+              {% empty %}
+                <p class="cat-empty-text">No hay categorías registradas.</p>
+              {% endfor %}
+            </div>
+          </div>
 
+          <!-- Panel: Gestión de Proveedores Agrícolas y Fincas Productoras -->
+          <div class="finanzas-card finanzas-card-full" id="proveedores">
+            <div class="finanzas-header">
+              <div>
+                <h3 class="card-title-lg">Proveedores y Fincas Productoras ({{ total_proveedores }})</h3>
+                <span class="dash-chart-sub">Directorio de productores campesinos aliados de Boyacá y Cundinamarca</span>
+              </div>
+              <button type="button" class="btn-primary-dash btn-prov-add" onclick="abrirModalNuevoProveedor()">
+                <span>+</span> Registrar Proveedor
+              </button>
+            </div>
+            
+            <div class="table-scroll-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th scope="col">Producto</th>
-                    <th scope="col">Categoría</th>
-                    <th scope="col">Costo Compra</th>
-                    <th scope="col">Precio Venta</th>
-                    <th scope="col">Margen Ganancia</th>
-                    <th scope="col">Oferta</th>
-                    <th scope="col">Stock Disponible</th>
+                    <th scope="col">Finca / Razón Social</th>
+                    <th scope="col">NIT / RUT</th>
+                    <th scope="col">Contacto</th>
+                    <th scope="col">Teléfono / Pedido Rápido</th>
+                    <th scope="col">Calificación</th>
                     <th scope="col">Estado</th>
-                    <th scope="col" style="text-align: center;">Acciones</th>
+                    <th scope="col" class="table-col-center">Acciones</th>
                   </tr>
                 </thead>
-                <tbody id="tablaProductosBody">
-                  {% for producto in productos %}
-                  <tr class="fila-producto"
-                    data-busqueda="{{ producto.nombre|lower }} {{ producto.categoria.nombre|lower }} {{ producto.estado|lower }}">
+                <tbody>
+                  {% for prov in proveedores %}
+                  <tr>
                     <td>
-                      <div class="table-prod-info">
-                        <span class="table-prod-icon">{{ producto.nombre|slice:":1"|upper }}</span>
-                        <div>
-                          <strong>{{ producto.nombre }}</strong>
-                          <div style="font-size: 0.75rem; color: #94a3b8;">{{ producto.origen|truncatechars:35 }}</div>
-                        </div>
-                      </div>
+                      <strong class="prov-name">{{ prov.razon_social }}</strong>
+                      {% if prov.email %}<div class="prov-email">{{ prov.email }}</div>{% endif %}
                     </td>
+                    <td><code class="prov-nit">{{ prov.nit_rut }}</code></td>
+                    <td>{{ prov.contacto_nombre|default:"Sin asignar" }}</td>
                     <td>
-                      <span class="badge-cat">{{ producto.categoria.nombre|default:"General" }}</span>
-                    </td>
-                    <td>${{ producto.costo_compra|floatformat:0 }}</td>
-                    <td>
-                      {% if producto.en_oferta and producto.precio_oferta %}
-                      <strong style="color: #e11d48;">${{ producto.precio_oferta|floatformat:0 }}</strong>
-                      <span
-                        style="font-size: 0.75rem; text-decoration: line-through; color: #94a3b8; margin-left: 4px;">${{
-                        producto.precio_venta_unitario|floatformat:0 }}</span>
+                      {% if prov.telefono %}
+                        <a href="https://wa.me/57{{ prov.telefono|cut:' '|cut:'-' }}?text=Buen%20d%C3%ADa%2C%20requerimos%20pedido%20de%20reposici%C3%B3n%20para%20Al%20Paso%20Fruter%C3%ADa" target="_blank" class="prov-wa-link" title="Pedir reposición de stock por WhatsApp">
+                          {{ prov.telefono }} ↗
+                        </a>
                       {% else %}
-                      ${{ producto.precio_venta_unitario|floatformat:0 }}
+                        <span class="prov-no-phone">Sin teléfono</span>
                       {% endif %}
                     </td>
                     <td>
-                      <span class="badge-margen">
-                        +${{ producto.margen_ganancia|floatformat:0 }} ({{ producto.porcentaje_margen|floatformat:1 }}%)
+                      <span class="prov-rating">{{ prov.calificacion_estrellas }} / 5.0</span>
+                    </td>
+                    <td>
+                      <span class="badge-status {% if prov.estado == 'Activo' %}badge-status-activo{% else %}badge-status-inactivo{% endif %}">
+                        {{ prov.estado }}
                       </span>
                     </td>
-                    <td>
-                      {% if producto.en_oferta %}
-                      <span class="badge-oferta">-{{ producto.porcentaje_descuento|floatformat:0 }}%</span>
-                      {% else %}
-                      <span style="color: #94a3b8; font-size: 0.8rem;">Normal</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <strong>{{ producto.stock_actual }}</strong> {{ producto.unidad_medida|default:"kg" }}
-                      {% if producto.stock_actual <= producto.stock_minimo %} <br><span class="stock-badge-low">Bajo
-                          Stock</span>
-                        {% endif %}
-                    </td>
-                    <td><span class="badge-status">{{ producto.estado|default:"Disponible" }}</span></td>
-                    <td style="text-align: center; white-space: nowrap;">
-                      <button type="button" class="btn-action-edit" data-id="{{ producto.id_producto }}"
-                        data-nombre="{{ producto.nombre }}" data-categoria="{{ producto.categoria.id_categoria }}"
-                        data-costo="{{ producto.costo_compra }}" data-precio="{{ producto.precio_venta_unitario }}"
-                        data-oferta="{% if producto.en_oferta %}true{% else %}false{% endif %}"
-                        data-precio-oferta="{{ producto.precio_oferta|default:'' }}"
-                        data-stock="{{ producto.stock_actual }}" data-stock-min="{{ producto.stock_minimo }}"
-                        data-unidad="{{ producto.unidad_medida }}" data-origen="{{ producto.origen }}"
-                        data-imagen="{{ producto.imagen_url|default:'' }}" data-estado="{{ producto.estado }}"
-                        onclick="abrirModalEditar(this)">
+                    <td class="table-col-actions">
+                      <button type="button" class="btn-action-edit"
+                        data-id="{{ prov.id_proveedor }}"
+                        data-razon="{{ prov.razon_social }}"
+                        data-nit="{{ prov.nit_rut }}"
+                        data-contacto="{{ prov.contacto_nombre|default:'' }}"
+                        data-telefono="{{ prov.telefono|default:'' }}"
+                        data-email="{{ prov.email|default:'' }}"
+                        data-calificacion="{{ prov.calificacion_estrellas }}"
+                        data-estado="{{ prov.estado }}"
+                        onclick="abrirModalEditarProveedor(this)">
                         Editar
                       </button>
-                      <button type="button" class="btn-action-delete" data-id="{{ producto.id_producto }}"
-                        data-nombre="{{ producto.nombre }}" onclick="abrirModalEliminar(this)">
+                      <button type="button" class="btn-action-delete"
+                        data-id="{{ prov.id_proveedor }}"
+                        data-razon="{{ prov.razon_social }}"
+                        onclick="abrirModalEliminarProveedor(this)">
                         Eliminar
                       </button>
                     </td>
                   </tr>
                   {% empty %}
                   <tr>
-                    <td class="empty-products" colspan="9">No hay productos registrados en el catálogo. ¡Crea el primero
-                      usando el botón superior!</td>
+                    <td colspan="7" class="empty-products">No hay proveedores registrados aún. ¡Registra al primer productor aliado!</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div> <!-- Fin #proveedores -->
+        </div> <!-- Fin .finanzas-grid-2 -->
+      </div> <!-- Fin #seccion-inventario -->
+
+      <!-- ================================================================== -->
+      <!-- SECCIÓN DE ADMINISTRADORES DEL SISTEMA (CÓDIGO DE GUTIÉRREZ)       -->
+      <!-- ================================================================== -->
+      <div id="seccion-usuarios" class="dashboard-section" style="display: none;">
+        <section class="dashboard-products" style="margin-bottom: 1.5rem;">
+          <!-- MÉTRICAS CLAVE ESPECÍFICAS DE ADMINISTRADORES -->
+          <div class="stats-row">
+            <!-- 1. Total Administradores -->
+            <div class="dash-card" style="--card-accent: #dc2626;">
+              <div class="dash-card-header">
+                <h5>Total Administradores</h5>
+                <span class="dash-card-icon" style="background: #fee2e2; color: #dc2626;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #dc2626;">{{ total_admins }}</h3>
+                <span class="kpi-badge kpi-badge-red"><span class="kpi-dot"></span> Equipo</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Cuentas administradoras oficiales</span>
+                <span style="font-weight: 700; color: #dc2626; font-size: 0.75rem;">100%</span>
+              </div>
+            </div>
+
+            <!-- 2. Administradores Activos -->
+            <div class="dash-card" style="--card-accent: #059669;">
+              <div class="dash-card-header">
+                <h5>Cuentas Activas</h5>
+                <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #059669;">{{ total_admins_activos }}</h3>
+                <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Operativo</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Acceso vigente a la plataforma</span>
+                <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">Habilitado</span>
+              </div>
+            </div>
+
+            <!-- 3. Superadministradores -->
+            <div class="dash-card" style="--card-accent: #7c3aed;">
+              <div class="dash-card-header">
+                <h5>Superadministradores</h5>
+                <span class="dash-card-icon" style="background: #ede9fe; color: #7c3aed;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-6 6 7 7-4 4-7-7m-4-4a5 5 0 1 1 7-7 5 5 0 0 1-7 7Z"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #7c3aed;">{{ total_superadmins }}</h3>
+                <span class="kpi-badge kpi-badge-purple">Control Total</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Acceso maestro y Django Admin</span>
+                <span style="font-weight: 700; color: #7c3aed; font-size: 0.75rem;">Root</span>
+              </div>
+            </div>
+
+            <!-- 4. Staff Técnico -->
+            <div class="dash-card" style="--card-accent: #0284c7;">
+              <div class="dash-card-header">
+                <h5>Staff Técnico</h5>
+                <span class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #0284c7;">{{ total_staff }}</h3>
+                <span class="kpi-badge kpi-badge-blue">Staff Django</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Gestión de catálogo y auditoría</span>
+                <span style="font-weight: 700; color: #0284c7; font-size: 0.75rem;">Activo</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABLA COMPLETA DE REGISTROS ACTIVOS POR ROLES -->
+        <section class="dashboard-products" style="margin-top: 0;">
+            <div class="products-table-container">
+              <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                <div>
+                  <h2 style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; color: #dc2626;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </span>
+                    Registros Activos por Roles
+                  </h2>
+                  <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">
+                    Control de cuentas con acceso activo al sistema ordenadas jerárquicamente: Super Admin, Bodeguero y Cajero.
+                  </p>
+                </div>
+                <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                  <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
+                    <input type="search" id="inputBuscarUsuario" placeholder="Buscar usuario, rol o email..."
+                      aria-label="Buscar usuario" onkeyup="filtrarTablaUsuarios()" style="font-size: 0.85rem;">
+                    <span aria-hidden="true">⌕</span>
+                  </label>
+                  <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
+                    Total: {{ total_activos }} activos
+                  </span>
+                  {% if es_admin %}
+                  <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoUsuario()"
+                    style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nuevo usuario">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    + Nuevo Usuario
+                  </button>
+                  {% else %}
+                  <span style="font-size: 0.8rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Gestión solo para Administradores
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if not es_admin %}
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #64748b; border-radius: 8px; padding: 0.85rem 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span style="font-size: 0.85rem; color: #475569;">
+                  <strong>Modo de solo lectura:</strong> Tu rol actual ({{ request.user.perfil.nombre_rol|default:'Empleado' }}) te permite consultar la lista de usuarios activos. Las acciones de registro, modificación y eliminación están reservadas exclusivamente para <strong>Super Administradores</strong>.
+                </span>
+              </div>
+              {% endif %}
+
+              <!-- Pestañas de filtrado rápido por roles -->
+              <div style="display: flex; gap: 8px; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center;">
+                <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Filtrar por Rol:</span>
+                <button type="button" class="btn-role-tab active" onclick="filtrarPorRol('todos', this)">Todos ({{ total_activos }})</button>
+                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('super admin', this)">Super Admin ({{ total_superadmins }})</button>
+                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('bodeguero', this)">Bodeguero ({{ total_bodegueros }})</button>
+                <button type="button" class="btn-role-tab" onclick="filtrarPorRol('cajero', this)">Cajero ({{ total_cajeros }})</button>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Correo Electrónico</th>
+                    <th scope="col">Teléfono</th>
+                    <th scope="col">Rol Asignado</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha de Registro</th>
+                    <th scope="col" style="text-align: center;">Nivel de Acceso</th>
+                    <th scope="col" style="text-align: center;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaUsuariosBody">
+                  {% for perfil in perfiles_usuarios %}
+                  <tr class="fila-usuario"
+                    data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} {{ perfil.rol|lower }} {{ perfil.nombre_rol|lower }} {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }} {% if perfil.usuario.is_superuser %}superadmin{% endif %} {% if perfil.usuario.is_staff %}staff{% endif %}">
+                    <td>
+                      <div class="table-prod-info">
+                        <span class="table-prod-icon" style="background: {% if perfil.nombre_rol == 'Super Admin' %}#fee2e2; color: #b91c1c;{% elif perfil.nombre_rol == 'Bodeguero' %}#fef3c7; color: #b45309;{% else %}#d1fae5; color: #047857;{% endif %} font-weight: 800;">
+                          {{ perfil.usuario.username|slice:":2"|upper }}
+                        </span>
+                        <div>
+                          <strong style="color: #1e293b;">{{ perfil.usuario.username }}</strong>
+                          <div style="font-size: 0.75rem; color: #64748b;">
+                            {% if perfil.usuario.first_name %}
+                              {{ perfil.usuario.first_name }} {{ perfil.usuario.last_name }}
+                            {% else %}
+                              {{ perfil.nombre_rol }}
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {% if perfil.usuario.email %}
+                      <span style="color: #334155; font-size: 0.88rem;">{{ perfil.usuario.email }}</span>
+                      {% else %}
+                      <span style="color: #94a3b8; font-style: italic; font-size: 0.82rem;">No registrado</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if perfil.telefono %}
+                      <span style="font-weight: 500; color: #047857; font-size: 0.85rem;">
+                        {{ perfil.telefono }}
+                      </span>
+                      {% else %}
+                      <span style="color: #94a3b8; font-size: 0.82rem;">—</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span class="badge-oferta" style="{% if perfil.nombre_rol == 'Super Admin' %}background: #fee2e2; color: #b91c1c; border-color: #fca5a5;{% elif perfil.nombre_rol == 'Bodeguero' %}background: #fef3c7; color: #b45309; border-color: #fde68a;{% else %}background: #d1fae5; color: #047857; border-color: #a7f3d0;{% endif %} font-weight: 700;">
+                        {{ perfil.nombre_rol }}
+                      </span>
+                    </td>
+                    <td>
+                      {% if perfil.estado == 'activo' %}
+                      <span class="badge-status">Activo</span>
+                      {% else %}
+                      <span class="badge-oferta">Inactivo</span>
+                      {% endif %}
+                    </td>
+                    <td style="color: #64748b; font-size: 0.82rem;">
+                      {{ perfil.fecha_creacion|date:"d/m/Y H:i" }}
+                    </td>
+                    <td style="text-align: center;">
+                      {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}
+                      <span style="font-size: 0.75rem; font-weight: 700; color: #b91c1c; background: #fff1f2; padding: 3px 8px; border-radius: 6px; border: 1px solid #fecdd3;">Jerarquía 1</span>
+                      {% elif perfil.rol == 'bodeguero' %}
+                      <span style="font-size: 0.75rem; font-weight: 600; color: #b45309; background: #fef3c7; padding: 3px 8px; border-radius: 6px; border: 1px solid #fde68a;">Jerarquía 2</span>
+                      {% else %}
+                      <span style="font-size: 0.75rem; font-weight: 600; color: #047857; background: #ecfdf5; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">Jerarquía 3</span>
+                      {% endif %}
+                    </td>
+                    <td style="text-align: center; white-space: nowrap;">
+                      {% if es_admin %}
+                      <!-- Botón de Editar (Modal Nativo en Dashboard) -->
+                      <button type="button" class="btn-action-edit"
+                        data-id="{{ perfil.usuario.id }}"
+                        data-username="{{ perfil.usuario.username }}"
+                        data-firstname="{{ perfil.usuario.first_name|default:'' }}"
+                        data-lastname="{{ perfil.usuario.last_name|default:'' }}"
+                        data-email="{{ perfil.usuario.email|default:'' }}"
+                        data-telefono="{{ perfil.telefono|default:'' }}"
+                        data-rol="{{ perfil.rol }}"
+                        data-estado="{{ perfil.estado }}"
+                        onclick="abrirModalEditarUsuario(this)"
+                        style="margin-right: 6px; cursor: pointer; border: none; background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                        title="Editar usuario y rol">
+                        Editar
+                      </button>
+
+                      <!-- Botón de Eliminar (Confirmación POST Nativa en Dashboard) -->
+                      {% if perfil.usuario.id == request.user.id %}
+                      <button type="button" class="btn-action-delete"
+                        style="color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; opacity: 0.5; cursor: not-allowed; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                        title="No puedes eliminar tu propia cuenta en sesión" disabled>
+                        Eliminar
+                      </button>
+                      {% else %}
+                      <button type="button" class="btn-action-delete"
+                        data-id="{{ perfil.usuario.id }}"
+                        data-username="{{ perfil.usuario.username }}"
+                        data-rol="{{ perfil.nombre_rol }}"
+                        onclick="abrirModalEliminarUsuario(this)"
+                        style="color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; cursor: pointer; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                        title="Eliminar usuario del sistema">
+                        Eliminar
+                      </button>
+                      {% endif %}
+                      {% else %}
+                      <span style="font-size: 0.78rem; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 10px; border-radius: 9999px; border: 1px solid #e2e8f0;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Solo Administrador
+                      </span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td class="empty-products" colspan="8">
+                      No hay registros activos por roles en el sistema.
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>
               </table>
             </div>
           </section>
-
-          <!-- 5. PANELES DE GESTIÓN Y RESUMEN FINANCIERO -->
-          <div id="finanzas"
-            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-
-            <!-- Panel: Rentabilidad & Valoración de Inventario -->
-            <div class="finanzas-card">
-              <div class="finanzas-header">
-                <h3>Rentabilidad y Finanzas</h3>
-                <span
-                  style="font-size: 0.78rem; color: #15803d; font-weight: 700; background: #f0fdf4; padding: 4px 8px; border-radius: 6px;">
-                  Margen Promedio: {{ margen_promedio|floatformat:1 }}%
-                </span>
-              </div>
-              <div>
-                <div class="finanzas-metric-row">
-                  <span style="color: #64748b;">Inversión Total en Compras:</span>
-                  <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
-                </div>
-                <div class="finanzas-metric-row">
-                  <span style="color: #64748b;">Valor Comercial de Venta:</span>
-                  <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
-                </div>
-                <div class="finanzas-metric-row">
-                  <span style="color: #64748b;">Utilidad Bruta Estimada:</span>
-                  <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
-                </div>
-                <div class="finanzas-metric-row">
-                  <span style="color: #64748b;">Promoción / Descuentos:</span>
-                  <span class="val" style="color: #e11d48;">{{ total_ofertas }} productos rebajados</span>
-                </div>
-              </div>
-              <div
-                style="margin-top: 1rem; padding: 0.85rem; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; color: #475569;">
-                <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes
-                  multiplicados por las existencias en bodega.</em>
-              </div>
-            </div>
-
-            <!-- Panel: Gestión de Categorías del Catálogo -->
-            <div class="finanzas-card">
-              <div class="finanzas-header">
-                <h3>Categorías del Catálogo ({{ categorias.count }})</h3>
-                <button type="button" class="btn-primary-dash" style="padding: 4px 10px; font-size: 0.78rem;"
-                  onclick="abrirModalNuevaCategoria()">
-                  + Crear
-                </button>
-              </div>
-              <div style="max-height: 250px; overflow-y: auto;">
-                {% for cat in categorias %}
-                <div class="cat-item-pill">
-                  <div>
-                    <strong style="color: #1e293b; font-size: 0.9rem;">{{ cat.nombre }}</strong>
-                    <span class="cat-chip-count" style="margin-left: 6px;">{{ cat.num_productos }} prod.</span>
-                  </div>
-                  <div class="cat-item-actions">
-                    {% if cat.num_productos == 0 %}
-                    <form action="{% url 'dashboard_eliminar_categoria' cat.id_categoria %}" method="post"
-                      style="margin: 0;" onsubmit="return confirm('¿Eliminar la categoría {{ cat.nombre }}?');">
-                      {% csrf_token %}
-                      <button type="submit" class="btn-action-delete" style="padding: 3px 8px; font-size: 0.75rem;"
-                        title="Eliminar categoría vacía">
-                        Borrar
-                      </button>
-                    </form>
-                    {% else %}
-                    <span style="font-size: 0.75rem; color: #94a3b8;">En catálogo</span>
-                    {% endif %}
-                  </div>
-                </div>
-                {% empty %}
-                <p style="font-size: 0.85rem; color: #94a3b8;">No hay categorías registradas.</p>
-                {% endfor %}
-              </div>
-            </div>
-
-          </div>
         </div>
 
-       <!-- ================================================================== -->
-<!-- SECCIÓN 2: GESTIÓN DE USUARIOS Y ROLES DEL SISTEMA -->
-<!-- ================================================================== -->
-<div id="seccion-usuarios" class="dashboard-section" style="display: none;">
-  <!-- MÉTRICAS CLAVE POR ROLES DEL SISTEMA -->
-  <div class="stats-row">
-    <!-- 1. Total Cuentas Activas -->
-    <div class="dash-card" style="--card-accent: #059669;">
-      <div class="dash-card-header">
-        <h5>Registros Activos</h5>
-        <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        </span>
-      </div>
-      <div style="display: flex; align-items: baseline; justify-content: space-between;">
-        <h3 style="color: #059669;">{{ total_activos }}</h3>
-        <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Operativo</span>
-      </div>
-      <div class="dash-card-footer">
-        <span class="kpi-subtext">Cuentas con acceso activo</span>
-        <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">100% Activo</span>
-      </div>
-    </div>
-
-    <!-- 2. Super Admin -->
-    <div class="dash-card" style="--card-accent: #dc2626;">
-      <div class="dash-card-header">
-        <h5>Super Admin</h5>
-        <span class="dash-card-icon" style="background: #fee2e2; color: #dc2626;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        </span>
-      </div>
-      <div style="display: flex; align-items: baseline; justify-content: space-between;">
-        <h3 style="color: #dc2626;">{{ total_superadmins }}</h3>
-        <span class="kpi-badge kpi-badge-red"><span class="kpi-dot"></span> Control Total</span>
-      </div>
-      <div class="dash-card-footer">
-        <span class="kpi-subtext">Administración general y root</span>
-        <span style="font-weight: 700; color: #dc2626; font-size: 0.75rem;">Jerarquía 1</span>
-      </div>
-    </div>
-
-    <!-- 3. Bodegueros -->
-    <div class="dash-card" style="--card-accent: #d97706;">
-      <div class="dash-card-header">
-        <h5>Bodegueros</h5>
-        <span class="dash-card-icon" style="background: #fef3c7; color: #d97706;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-        </span>
-      </div>
-      <div style="display: flex; align-items: baseline; justify-content: space-between;">
-        <h3 style="color: #d97706;">{{ total_bodegueros }}</h3>
-        <span class="kpi-badge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">Inventario</span>
-      </div>
-      <div class="dash-card-footer">
-        <span class="kpi-subtext">Almacén, stock y cosechas</span>
-        <span style="font-weight: 700; color: #d97706; font-size: 0.75rem;">Jerarquía 2</span>
-      </div>
-    </div>
-
-    <!-- 4. Cajeros -->
-    <div class="dash-card" style="--card-accent: #0284c7;">
-      <div class="dash-card-header">
-        <h5>Cajeros</h5>
-        <span class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
-        </span>
-      </div>
-      <div style="display: flex; align-items: baseline; justify-content: space-between;">
-        <h3 style="color: #0284c7;">{{ total_cajeros }}</h3>
-        <span class="kpi-badge kpi-badge-blue">Ventas</span>
-      </div>
-      <div class="dash-card-footer">
-        <span class="kpi-subtext">Atención a cliente y caja</span>
-        <span style="font-weight: 700; color: #0284c7; font-size: 0.75rem;">Jerarquía 3</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- TABLA COMPLETA DE REGISTROS ACTIVOS -->
-  <section class="dashboard-products" style="margin-top: 0;">
-    <div class="products-table-container">
-      {% if not es_admin %}
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #64748b; border-radius: 8px; padding: 0.85rem 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        <span style="font-size: 0.85rem; color: #475569;">
-          <strong>Modo de solo lectura:</strong> Tu rol actual ({{ request.user.perfil.nombre_rol|default:'Empleado' }}) te permite consultar la lista de usuarios activos. Las acciones de registro, modificación y eliminación están reservadas exclusivamente para <strong>Super Administradores</strong>.
-        </span>
-      </div>
-      {% endif %}
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
-        <div>
-          <h2 style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #d1fae5; color: #059669;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            </span>
-            Registros Activos del Sistema
-          </h2>
-          <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">
-            Cuentas activas organizadas por roles jerárquicos: Super Admin, Bodeguero y Cajero.
-          </p>
-        </div>
-        <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
-          <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
-            <input type="search" id="inputBuscarUsuario" placeholder="Buscar usuario, rol o email..."
-              aria-label="Buscar usuario" onkeyup="filtrarTablaUsuarios()" style="font-size: 0.85rem;">
-            <span aria-hidden="true">⌕</span>
-          </label>
-          <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
-            Total: {{ total_activos }} activos
-          </span>
-          {% if es_admin %}
-          <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoUsuario()"
-            style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nuevo usuario">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            + Nuevo Usuario
-          </button>
-          {% else %}
-          <span style="font-size: 0.8rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            Gestión solo para Administradores
-          </span>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Pestañas de filtrado rápido por roles -->
-      <div style="display: flex; gap: 8px; margin-bottom: 1.1rem; flex-wrap: wrap; align-items: center;">
-        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-right: 4px;">Filtrar por Rol:</span>
-        <button type="button" class="btn-role-tab active" onclick="filtrarPorRol('todos', this)">Todos ({{ total_activos }})</button>
-        <button type="button" class="btn-role-tab" onclick="filtrarPorRol('super admin', this)">Super Admin ({{ total_superadmins }})</button>
-        <button type="button" class="btn-role-tab" onclick="filtrarPorRol('bodeguero', this)">Bodeguero ({{ total_bodegueros }})</button>
-        <button type="button" class="btn-role-tab" onclick="filtrarPorRol('cajero', this)">Cajero ({{ total_cajeros }})</button>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Usuario</th>
-            <th scope="col">Correo Electrónico</th>
-            <th scope="col">Teléfono</th>
-            <th scope="col" style="text-align: center;">Rol en el Sistema</th>
-            <th scope="col" style="text-align: center;">Estado</th>
-            <th scope="col">Fecha de Registro</th>
-            {% if es_admin %}
-            <th scope="col" style="text-align: center;">Acciones</th>
-            {% else %}
-            <th scope="col" style="text-align: center;">Permisos</th>
-            {% endif %}
-          </tr>
-        </thead>
-        <tbody id="tablaUsuariosBody">
-          {% for perfil in perfiles_usuarios %}
-          <tr class="fila-usuario"
-            data-busqueda="{{ perfil.usuario.username|lower }} {{ perfil.usuario.email|lower }} {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}super admin superadmin{% elif perfil.rol == 'bodeguero' %}bodeguero bodega{% elif perfil.rol == 'cajero' %}cajero caja{% endif %} {{ perfil.estado|lower }} {{ perfil.telefono|default:''|lower }}">
-            <td>
-              <div class="table-prod-info">
-                <span class="table-prod-icon"
-                  style="{% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}background: #fee2e2; color: #b91c1c;{% elif perfil.rol == 'bodeguero' %}background: #fef3c7; color: #b45309;{% else %}background: #d1fae5; color: #047857;{% endif %} font-weight: 800;">
-                  {{ perfil.usuario.username|slice:":2"|upper }}
-                </span>
-                <div>
-                  <strong style="color: #1e293b;">{{ perfil.usuario.username }}</strong>
-                  <div style="font-size: 0.75rem; color: #64748b;">
-                    {% if perfil.usuario.first_name %}
-                      {{ perfil.usuario.first_name }} {{ perfil.usuario.last_name }}
-                    {% else %}
-                      {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}Super Administrador{% elif perfil.rol == 'bodeguero' %}Encargado de Bodega{% else %}Cajero de Tienda{% endif %}
-                    {% endif %}
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td>
-              {% if perfil.usuario.email %}
-              <span style="color: #334155; font-size: 0.88rem;">{{ perfil.usuario.email }}</span>
-              {% else %}
-              <span style="color: #94a3b8; font-style: italic; font-size: 0.82rem;">No registrado</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if perfil.telefono %}
-              <span style="font-weight: 500; color: #047857; font-size: 0.85rem;">
-                {{ perfil.telefono }}
-              </span>
-              {% else %}
-              <span style="color: #94a3b8; font-size: 0.82rem;">—</span>
-              {% endif %}
-            </td>
-            <td style="text-align: center;">
-              {% if perfil.usuario.is_superuser or perfil.rol == 'admin' %}
-              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                Super Admin
-              </span>
-              {% elif perfil.rol == 'bodeguero' %}
-              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                Bodeguero
-              </span>
-              {% else %}
-              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; background: #d1fae5; color: #047857; border: 1px solid #a7f3d0;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
-                Cajero
-              </span>
-              {% endif %}
-            </td>
-            <td style="text-align: center;">
-              <span class="badge-status">Activo</span>
-            </td>
-            <td style="color: #64748b; font-size: 0.82rem;">
-              {{ perfil.fecha_creacion|date:"d/m/Y H:i" }}
-            </td>
-            <td style="text-align: center; white-space: nowrap;">
-              {% if es_admin %}
-                <!-- Botón de Editar (Modal Nativo en Dashboard) -->
-                <button type="button" class="btn-action-edit"
-                  data-id="{{ perfil.usuario.id }}"
-                  data-username="{{ perfil.usuario.username }}"
-                  data-firstname="{{ perfil.usuario.first_name|default:'' }}"
-                  data-lastname="{{ perfil.usuario.last_name|default:'' }}"
-                  data-email="{{ perfil.usuario.email|default:'' }}"
-                  data-telefono="{{ perfil.telefono|default:'' }}"
-                  data-rol="{{ perfil.rol }}"
-                  data-estado="{{ perfil.estado }}"
-                  onclick="abrirModalEditarUsuario(this)"
-                  style="margin-right: 6px; cursor: pointer; border: none; background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
-                  title="Editar usuario y rol">
-                  Editar
-                </button>
-
-                <!-- Botón de Eliminar (Confirmación POST Nativa en Dashboard) -->
-                {% if perfil.usuario.id == request.user.id %}
-                <button type="button" class="btn-action-delete"
-                  style="color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; opacity: 0.5; cursor: not-allowed; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
-                  title="No puedes eliminar tu propia cuenta en sesión" disabled>
-                  Eliminar
-                </button>
-                {% else %}
-                <button type="button" class="btn-action-delete"
-                  data-id="{{ perfil.usuario.id }}"
-                  data-username="{{ perfil.usuario.username }}"
-                  data-rol="{{ perfil.nombre_rol }}"
-                  onclick="abrirModalEliminarUsuario(this)"
-                  style="color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; cursor: pointer; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
-                  title="Eliminar usuario del sistema">
-                  Eliminar
-                </button>
-                {% endif %}
-              {% else %}
-                <span style="font-size: 0.78rem; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 10px; border-radius: 9999px; border: 1px solid #e2e8f0;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  Solo Administrador
-                </span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td class="empty-products" colspan="7">
-              No hay registros activos encontrados en el sistema.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-</div>
       </div>
     </main>
   </div>
@@ -861,15 +744,14 @@
         <div class="dash-modal-body">
           <div class="form-group">
             <label for="nuevo_nombre">Nombre del Producto *</label>
-            <input type="text" id="nuevo_nombre" name="nombre" class="form-input" placeholder="Ej: Manzana Royal Gala"
-              required>
+            <input type="text" id="nuevo_nombre" name="nombre" class="form-input" placeholder="Ej: Manzana Royal Gala" required>
           </div>
 
           <div class="form-group">
             <label for="nuevo_categoria">Categoría *</label>
             <select id="nuevo_categoria" name="categoria_id" class="form-select" required>
               {% for cat in categorias %}
-              <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
+                <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
               {% endfor %}
             </select>
           </div>
@@ -877,13 +759,11 @@
           <div class="form-row-2">
             <div class="form-group">
               <label for="nuevo_costo">Costo de Compra ($ COP) *</label>
-              <input type="number" step="0.01" id="nuevo_costo" name="costo_compra" class="form-input"
-                placeholder="2500" required oninput="calcularMargenNuevo()">
+              <input type="number" step="0.01" id="nuevo_costo" name="costo_compra" class="form-input" placeholder="2500" required oninput="calcularMargenNuevo()">
             </div>
             <div class="form-group">
               <label for="nuevo_precio">Precio Venta ($ COP) *</label>
-              <input type="number" step="0.01" id="nuevo_precio" name="precio_venta_unitario" class="form-input"
-                placeholder="4000" required oninput="calcularMargenNuevo()">
+              <input type="number" step="0.01" id="nuevo_precio" name="precio_venta_unitario" class="form-input" placeholder="4000" required oninput="calcularMargenNuevo()">
             </div>
           </div>
 
@@ -893,30 +773,25 @@
             <span class="value" id="calcValNuevo">$0 COP (0%)</span>
           </div>
 
-          <div
-            style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
-            <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
+          <div class="oferta-config-box">
+            <label class="form-check oferta-check-label">
               <input type="checkbox" id="nuevo_en_oferta" name="en_oferta" onchange="toggleOfertaNuevo()">
               Activar Precio de Oferta / Promoción
             </label>
-            <div id="wrapOfertaNuevo" style="display: none; margin-top: 0.6rem;">
-              <label for="nuevo_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de
-                Oferta ($ COP)</label>
-              <input type="number" step="0.01" id="nuevo_precio_oferta" name="precio_oferta" class="form-input"
-                placeholder="3200" oninput="calcularMargenNuevo()">
+            <div id="wrapOfertaNuevo" class="oferta-price-wrap">
+              <label for="nuevo_precio_oferta" class="oferta-price-label">Precio de Oferta ($ COP)</label>
+              <input type="number" step="0.01" id="nuevo_precio_oferta" name="precio_oferta" class="form-input" placeholder="3200" oninput="calcularMargenNuevo()">
             </div>
           </div>
 
           <div class="form-row-2">
             <div class="form-group">
               <label for="nuevo_stock">Stock Inicial *</label>
-              <input type="number" step="0.01" id="nuevo_stock" name="stock_actual" class="form-input" value="50"
-                required>
+              <input type="number" step="0.01" id="nuevo_stock" name="stock_actual" class="form-input" value="50" required>
             </div>
             <div class="form-group">
               <label for="nuevo_stock_min">Stock Mínimo (Alerta) *</label>
-              <input type="number" step="0.01" id="nuevo_stock_min" name="stock_minimo" class="form-input" value="5"
-                required>
+              <input type="number" step="0.01" id="nuevo_stock_min" name="stock_minimo" class="form-input" value="5" required>
             </div>
           </div>
 
@@ -944,14 +819,12 @@
 
           <div class="form-group">
             <label for="nuevo_origen">Origen / Cosecha</label>
-            <input type="text" id="nuevo_origen" name="origen" class="form-input"
-              placeholder="Cosecha: Boyacá • Finca El Campo" value="Cosecha: Hace 1 día • Finca El Campo">
+            <input type="text" id="nuevo_origen" name="origen" class="form-input" placeholder="Cosecha: Boyacá • Finca El Campo" value="Cosecha: Hace 1 día • Finca El Campo">
           </div>
 
           <div class="form-group">
             <label for="nuevo_imagen">URL de Imagen (Opcional)</label>
-            <input type="url" id="nuevo_imagen" name="imagen_url" class="form-input"
-              placeholder="https://images.unsplash.com/...">
+            <input type="url" id="nuevo_imagen" name="imagen_url" class="form-input" placeholder="https://images.unsplash.com/...">
           </div>
         </div>
         <div class="dash-modal-footer">
@@ -983,7 +856,7 @@
             <label for="edit_categoria">Categoría *</label>
             <select id="edit_categoria" name="categoria_id" class="form-select" required>
               {% for cat in categorias %}
-              <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
+                <option value="{{ cat.id_categoria }}">{{ cat.nombre }}</option>
               {% endfor %}
             </select>
           </div>
@@ -991,13 +864,11 @@
           <div class="form-row-2">
             <div class="form-group">
               <label for="edit_costo">Costo de Compra ($ COP) *</label>
-              <input type="number" step="0.01" id="edit_costo" name="costo_compra" class="form-input" required
-                oninput="calcularMargenEditar()">
+              <input type="number" step="0.01" id="edit_costo" name="costo_compra" class="form-input" required oninput="calcularMargenEditar()">
             </div>
             <div class="form-group">
               <label for="edit_precio">Precio Venta ($ COP) *</label>
-              <input type="number" step="0.01" id="edit_precio" name="precio_venta_unitario" class="form-input" required
-                oninput="calcularMargenEditar()">
+              <input type="number" step="0.01" id="edit_precio" name="precio_venta_unitario" class="form-input" required oninput="calcularMargenEditar()">
             </div>
           </div>
 
@@ -1007,17 +878,14 @@
             <span class="value" id="calcValEditar">$0 COP (0%)</span>
           </div>
 
-          <div
-            style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
-            <label class="form-check" style="margin: 0; font-weight: 600; color: #92400e;">
+          <div class="oferta-config-box">
+            <label class="form-check oferta-check-label">
               <input type="checkbox" id="edit_en_oferta" name="en_oferta" onchange="toggleOfertaEditar()">
               Activar Precio de Oferta / Promoción
             </label>
-            <div id="wrapOfertaEditar" style="display: none; margin-top: 0.6rem;">
-              <label for="edit_precio_oferta" style="font-size: 0.8rem; color: #78350f; font-weight: 600;">Precio de
-                Oferta ($ COP)</label>
-              <input type="number" step="0.01" id="edit_precio_oferta" name="precio_oferta" class="form-input"
-                oninput="calcularMargenEditar()">
+            <div id="wrapOfertaEditar" class="oferta-price-wrap">
+              <label for="edit_precio_oferta" class="oferta-price-label">Precio de Oferta ($ COP)</label>
+              <input type="number" step="0.01" id="edit_precio_oferta" name="precio_oferta" class="form-input" oninput="calcularMargenEditar()">
             </div>
           </div>
 
@@ -1076,27 +944,25 @@
   <!-- MODAL 3: CONFIRMACIÓN DE ELIMINACIÓN DE PRODUCTO                       -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalEliminarProducto">
-    <div class="dash-modal" style="max-width: 440px;">
-      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
-        <h3 style="color: #991b1b;">Eliminar Producto</h3>
+    <div class="dash-modal dash-modal-sm">
+      <div class="dash-modal-header dash-modal-header-danger">
+        <h3 class="dash-modal-title-danger">Eliminar Producto</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalEliminar()">✕</button>
       </div>
       <form id="formEliminarProducto" method="post" action="">
         {% csrf_token %}
-        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
-          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+        <div class="dash-modal-body dash-modal-body-danger">
+          <p class="dash-modal-danger-lead">
             ¿Estás seguro de que deseas eliminar permanentemente el producto
           </p>
-          <strong id="eliminarNombreProducto"
-            style="font-size: 1.1rem; color: #0f172a; display: block; margin-bottom: 0.75rem;"></strong>
-          <p style="font-size: 0.8rem; color: #dc2626; margin: 0;">
+          <strong id="eliminarNombreProducto" class="dash-modal-danger-item"></strong>
+          <p class="dash-modal-danger-warn">
             Esta acción no se puede deshacer y el producto ya no aparecerá en la tienda ni en el catálogo.
           </p>
         </div>
-        <div class="dash-modal-footer" style="justify-content: center;">
+        <div class="dash-modal-footer dash-modal-footer-center">
           <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminar()">Cancelar</button>
-          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">Sí,
-            Eliminar Producto</button>
+          <button type="submit" class="btn-action-delete btn-delete-confirm">Sí, Eliminar Producto</button>
         </div>
       </form>
     </div>
@@ -1106,7 +972,7 @@
   <!-- MODAL 4: CREAR NUEVA CATEGORÍA                                         -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalNuevaCategoria">
-    <div class="dash-modal" style="max-width: 480px;">
+    <div class="dash-modal dash-modal-md">
       <div class="dash-modal-header">
         <h3>Registrar Nueva Categoría</h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalNuevaCategoria()">✕</button>
@@ -1116,13 +982,11 @@
         <div class="dash-modal-body">
           <div class="form-group">
             <label for="cat_nombre">Nombre de la Categoría *</label>
-            <input type="text" id="cat_nombre" name="nombre" class="form-input"
-              placeholder="Ej: Frutas Exóticas, Verduras, Cítricos" required>
+            <input type="text" id="cat_nombre" name="nombre" class="form-input" placeholder="Ej: Frutas Exóticas, Verduras, Cítricos" required>
           </div>
           <div class="form-group">
             <label for="cat_desc">Descripción (Opcional)</label>
-            <textarea id="cat_desc" name="descripcion" class="form-textarea" rows="3"
-              placeholder="Breve descripción de los productos que pertenecen a este grupo..."></textarea>
+            <textarea id="cat_desc" name="descripcion" class="form-textarea" rows="3" placeholder="Breve descripción de los productos que pertenecen a este grupo..."></textarea>
           </div>
         </div>
         <div class="dash-modal-footer">
@@ -1134,7 +998,157 @@
   </div>
 
   <!-- ====================================================================== -->
-  <!-- MODAL 5: REGISTRAR NUEVO USUARIO Y ASIGNAR ROL                          -->
+  <!-- MODAL 5: REGISTRAR NUEVO PROVEEDOR AGRÍCOLA                            -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalNuevoProveedor">
+    <div class="dash-modal dash-modal-lg">
+      <div class="dash-modal-header">
+        <h3>Registrar Proveedor / Finca Productora</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalNuevoProveedor()">✕</button>
+      </div>
+      <form action="{% url 'dashboard_crear_proveedor' %}" method="post">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="nuevo_prov_razon">Finca / Razón Social *</label>
+            <input type="text" id="nuevo_prov_razon" name="razon_social" class="form-input" placeholder="Ej: Finca El Recuerdo, Frutas Boyacá S.A.S." required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_prov_nit">NIT / RUT *</label>
+              <input type="text" id="nuevo_prov_nit" name="nit_rut" class="form-input" placeholder="900123456-1" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_prov_contacto">Persona de Contacto</label>
+              <input type="text" id="nuevo_prov_contacto" name="contacto_nombre" class="form-input" placeholder="Nombre del agricultor">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_prov_telefono">Teléfono (WhatsApp)</label>
+              <input type="tel" id="nuevo_prov_telefono" name="telefono" class="form-input" placeholder="3101234567">
+            </div>
+            <div class="form-group">
+              <label for="nuevo_prov_email">Correo Electrónico</label>
+              <input type="email" id="nuevo_prov_email" name="email" class="form-input" placeholder="contacto@finca.co">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nuevo_prov_calif">Calificación (1.0 a 5.0)</label>
+              <input type="number" step="0.1" min="1.0" max="5.0" id="nuevo_prov_calif" name="calificacion_estrellas" class="form-input" value="5.0" required>
+            </div>
+            <div class="form-group">
+              <label for="nuevo_prov_estado">Estado</label>
+              <select id="nuevo_prov_estado" name="estado" class="form-select">
+                <option value="Activo" selected>Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevoProveedor()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Registrar Proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 6: EDITAR PROVEEDOR AGRÍCOLA                                     -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEditarProveedor">
+    <div class="dash-modal dash-modal-lg">
+      <div class="dash-modal-header">
+        <h3>Modificar Proveedor Agrícola</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEditarProveedor()">✕</button>
+      </div>
+      <form id="formEditarProveedor" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-group">
+            <label for="edit_prov_razon">Finca / Razón Social *</label>
+            <input type="text" id="edit_prov_razon" name="razon_social" class="form-input" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_prov_nit">NIT / RUT *</label>
+              <input type="text" id="edit_prov_nit" name="nit_rut" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_prov_contacto">Persona de Contacto</label>
+              <input type="text" id="edit_prov_contacto" name="contacto_nombre" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_prov_telefono">Teléfono (WhatsApp)</label>
+              <input type="tel" id="edit_prov_telefono" name="telefono" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="edit_prov_email">Correo Electrónico</label>
+              <input type="email" id="edit_prov_email" name="email" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_prov_calif">Calificación (1.0 a 5.0)</label>
+              <input type="number" step="0.1" min="1.0" max="5.0" id="edit_prov_calif" name="calificacion_estrellas" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_prov_estado">Estado</label>
+              <select id="edit_prov_estado" name="estado" class="form-select">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEditarProveedor()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 7: ELIMINAR PROVEEDOR AGRÍCOLA                                   -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEliminarProveedor">
+    <div class="dash-modal dash-modal-sm">
+      <div class="dash-modal-header dash-modal-header-danger">
+        <h3 class="dash-modal-title-danger">Eliminar Proveedor</h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEliminarProveedor()">✕</button>
+      </div>
+      <form id="formEliminarProveedor" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body dash-modal-body-danger">
+          <p class="dash-modal-danger-lead">
+            ¿Estás seguro de que deseas eliminar permanentemente el proveedor aliado
+          </p>
+          <strong id="eliminarRazonProveedor" class="dash-modal-danger-item"></strong>
+          <p class="dash-modal-danger-warn">
+            Esta acción no se puede deshacer. Los productos registrados anteriormente conservarán su información.
+          </p>
+        </div>
+        <div class="dash-modal-footer dash-modal-footer-center">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminarProveedor()">Cancelar</button>
+          <button type="submit" class="btn-action-delete btn-delete-confirm">Sí, Eliminar Proveedor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 8: REGISTRAR NUEVO USUARIO Y ROL                                 -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalNuevoUsuario">
     <div class="dash-modal" style="max-width: 520px;">
@@ -1201,7 +1215,7 @@
   </div>
 
   <!-- ====================================================================== -->
-  <!-- MODAL 6: MODIFICAR USUARIO Y ROL                                       -->
+  <!-- MODAL 9: MODIFICAR USUARIO Y ROL                                       -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalEditarUsuario">
     <div class="dash-modal" style="max-width: 520px;">
@@ -1271,7 +1285,7 @@
   </div>
 
   <!-- ====================================================================== -->
-  <!-- MODAL 7: CONFIRMACIÓN DE ELIMINACIÓN DE USUARIO (POST)                 -->
+  <!-- MODAL 10: CONFIRMACIÓN DE ELIMINACIÓN DE USUARIO (POST)                -->
   <!-- ====================================================================== -->
   <div class="dash-modal-overlay" id="modalEliminarUsuario">
     <div class="dash-modal" style="max-width: 440px;">
@@ -1305,6 +1319,16 @@
       </form>
     </div>
   </div>
+
+  <!-- ====================================================================== -->
+  <!-- DATOS SEGUROS PARA ANALÍTICA Y GRÁFICOS (JSON Script Django)            -->
+  <!-- ====================================================================== -->
+  {{ chart_cat_labels|json_script:"data-cat-labels" }}
+  {{ chart_cat_data|json_script:"data-cat-data" }}
+  {{ chart_prod_labels|json_script:"data-prod-labels" }}
+  {{ chart_prod_costos|json_script:"data-prod-costos" }}
+  {{ chart_prod_precios|json_script:"data-prod-precios" }}
+  {{ chart_prod_margenes|json_script:"data-prod-margenes" }}
 
   <!-- ====================================================================== -->
   <!-- JAVASCRIPT: CONTROLADORES DE MODALES, CÁLCULO DE MÁRGENES Y BÚSQUEDA    -->
@@ -1429,21 +1453,59 @@
       document.getElementById('modalNuevaCategoria').classList.remove('open');
     }
 
-    // Funciones para Modal Nuevo Usuario
-    function abrirModalNuevoUsuario() {
-      document.getElementById('modalNuevoUsuario').classList.add('open');
-      document.getElementById('nuevo_usu_username').focus();
+    // 5. Funciones para Modal Proveedores
+    function abrirModalNuevoProveedor() {
+      document.getElementById('modalNuevoProveedor').classList.add('open');
+      const input = document.getElementById('nuevo_prov_razon');
+      if (input) input.focus();
     }
-    function cerrarModalNuevoUsuario() {
-      document.getElementById('modalNuevoUsuario').classList.remove('open');
+    function cerrarModalNuevoProveedor() {
+      document.getElementById('modalNuevoProveedor').classList.remove('open');
+    }
+    function abrirModalEditarProveedor(btn) {
+      const id = btn.getAttribute('data-id');
+      document.getElementById('formEditarProveedor').action = `/dashboard/proveedor/${id}/editar/`;
+      document.getElementById('edit_prov_razon').value = btn.getAttribute('data-razon') || '';
+      document.getElementById('edit_prov_nit').value = btn.getAttribute('data-nit') || '';
+      document.getElementById('edit_prov_contacto').value = btn.getAttribute('data-contacto') || '';
+      document.getElementById('edit_prov_telefono').value = btn.getAttribute('data-telefono') || '';
+      document.getElementById('edit_prov_email').value = btn.getAttribute('data-email') || '';
+      document.getElementById('edit_prov_calif').value = btn.getAttribute('data-calificacion') || '5.0';
+      document.getElementById('edit_prov_estado').value = btn.getAttribute('data-estado') || 'Activo';
+      document.getElementById('modalEditarProveedor').classList.add('open');
+    }
+    function cerrarModalEditarProveedor() {
+      document.getElementById('modalEditarProveedor').classList.remove('open');
+    }
+    function abrirModalEliminarProveedor(btn) {
+      const id = btn.getAttribute('data-id');
+      document.getElementById('formEliminarProveedor').action = `/dashboard/proveedor/${id}/eliminar/`;
+      document.getElementById('eliminarRazonProveedor').textContent = `"${btn.getAttribute('data-razon')}"`;
+      document.getElementById('modalEliminarProveedor').classList.add('open');
+    }
+    function cerrarModalEliminarProveedor() {
+      document.getElementById('modalEliminarProveedor').classList.remove('open');
     }
 
-    // Funciones para Modal Editar Usuario
+    // 5.1 Funciones para Modales de Usuarios y Roles (RBAC)
+    function abrirModalNuevoUsuario() {
+      const modal = document.getElementById('modalNuevoUsuario');
+      if (modal) {
+        modal.classList.add('open');
+        const input = document.getElementById('nuevo_usu_username');
+        if (input) input.focus();
+      }
+    }
+    function cerrarModalNuevoUsuario() {
+      const modal = document.getElementById('modalNuevoUsuario');
+      if (modal) modal.classList.remove('open');
+    }
+
     function abrirModalEditarUsuario(btn) {
       const id = btn.getAttribute('data-id');
       const username = btn.getAttribute('data-username');
-      const firstName = btn.getAttribute('data-firstname');
-      const lastName = btn.getAttribute('data-lastname');
+      const firstname = btn.getAttribute('data-firstname');
+      const lastname = btn.getAttribute('data-lastname');
       const email = btn.getAttribute('data-email');
       const telefono = btn.getAttribute('data-telefono');
       const rol = btn.getAttribute('data-rol');
@@ -1451,8 +1513,8 @@
 
       document.getElementById('formEditarUsuario').action = `/dashboard/usuario/${id}/editar/`;
       document.getElementById('edit_usu_username').value = username || '';
-      document.getElementById('edit_usu_firstname').value = firstName || '';
-      document.getElementById('edit_usu_lastname').value = lastName || '';
+      document.getElementById('edit_usu_firstname').value = firstname || '';
+      document.getElementById('edit_usu_lastname').value = lastname || '';
       document.getElementById('edit_usu_email').value = email || '';
       document.getElementById('edit_usu_telefono').value = telefono || '';
       document.getElementById('edit_usu_rol').value = rol || 'cajero';
@@ -1462,42 +1524,70 @@
       document.getElementById('modalEditarUsuario').classList.add('open');
     }
     function cerrarModalEditarUsuario() {
-      document.getElementById('modalEditarUsuario').classList.remove('open');
+      const modal = document.getElementById('modalEditarUsuario');
+      if (modal) modal.classList.remove('open');
     }
 
-    // Funciones para Modal Eliminar Usuario
     function abrirModalEliminarUsuario(btn) {
       const id = btn.getAttribute('data-id');
       const username = btn.getAttribute('data-username');
       const rol = btn.getAttribute('data-rol');
 
       document.getElementById('formEliminarUsuario').action = `/dashboard/usuario/${id}/eliminar/`;
-      document.getElementById('eliminarNombreUsuario').textContent = `"${username}"`;
-      document.getElementById('eliminarRolUsuario').textContent = `Rol actual: ${rol}`;
+      document.getElementById('eliminarNombreUsuario').textContent = `@${username}`;
+      document.getElementById('eliminarRolUsuario').textContent = `Rol asignado: ${rol ? rol.toUpperCase() : 'USUARIO'}`;
+
       document.getElementById('modalEliminarUsuario').classList.add('open');
     }
     function cerrarModalEliminarUsuario() {
-      document.getElementById('modalEliminarUsuario').classList.remove('open');
+      const modal = document.getElementById('modalEliminarUsuario');
+      if (modal) modal.classList.remove('open');
     }
 
-    // 5. Control de Secciones SPA en el Dashboard
+    // 6. Filtros combinados (Búsqueda por texto + Filtro rápido por estado)
+    let filtroEstadoActual = 'todos';
+
+    function filtrarPorEstado(tipo, btn) {
+      filtroEstadoActual = tipo;
+      document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      aplicarFiltrosCombinados();
+    }
+
+    // Control de Secciones SPA en el Dashboard
     function mostrarSeccion(seccionId, navEl) {
       const secKey = seccionId.replace('seccion-', '');
 
-      // A. Ocultar todas las secciones
+      if (secKey === 'proveedores') {
+        mostrarSeccion('inventario');
+        setTimeout(() => {
+          const el = document.getElementById('proveedores');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 120);
+
+        document.querySelectorAll('.navigation a[data-section]').forEach(link => {
+          link.classList.remove('active');
+          link.removeAttribute('aria-current');
+        });
+        const navActivo = navEl || document.querySelector('.navigation a[data-section="proveedores"]');
+        if (navActivo) {
+          navActivo.classList.add('active');
+          navActivo.setAttribute('aria-current', 'page');
+        }
+        return;
+      }
+
       document.querySelectorAll('.dashboard-section').forEach(sec => {
         sec.classList.remove('active');
         sec.style.display = 'none';
       });
 
-      // B. Mostrar la sección seleccionada
       const secDestino = document.getElementById('seccion-' + secKey);
       if (secDestino) {
         secDestino.classList.add('active');
         secDestino.style.display = 'block';
       }
 
-      // C. Actualizar enlaces en la barra lateral
       document.querySelectorAll('.navigation a[data-section]').forEach(link => {
         link.classList.remove('active');
         link.removeAttribute('aria-current');
@@ -1509,23 +1599,21 @@
         navActivo.setAttribute('aria-current', 'page');
       }
 
-      // D. Actualizar breadcrumb / título superior
       const breadcrumb = document.getElementById('topbarBreadcrumb');
       const inputBuscar = document.getElementById('inputBuscarProducto');
       if (breadcrumb) {
         if (secKey === 'usuarios') {
-          breadcrumb.innerHTML = '» &nbsp; El Paso Frutería • <strong>Registros Activos por Roles</strong>';
-          if (inputBuscar) inputBuscar.placeholder = 'Buscar usuario, rol o email...';
-        } else if (secKey === 'finanzas') {
-          breadcrumb.innerHTML = '» &nbsp; El Paso Frutería • <strong>Rentabilidad y Categorías</strong>';
-          if (inputBuscar) inputBuscar.placeholder = 'Buscar en finanzas...';
+          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Administradores del Sistema</strong>';
+          if (inputBuscar) inputBuscar.placeholder = 'Buscar administrador o email...';
+        } else if (secKey === 'proveedores') {
+          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Productores y Proveedores Aliados</strong>';
+          if (inputBuscar) inputBuscar.placeholder = 'Buscar proveedor, contacto o NIT...';
         } else {
-          breadcrumb.innerHTML = '» &nbsp; El Paso Frutería • <strong>Resumen e Inventario de Frutas</strong>';
+          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Resumen e Inventario de Frutas</strong>';
           if (inputBuscar) inputBuscar.placeholder = 'Buscar producto o categoría...';
         }
       }
 
-      // E. Sincronizar hash en URL sin recargar
       if (history.replaceState) {
         history.replaceState(null, null, '#' + secKey);
       }
@@ -1533,51 +1621,31 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Buscador adaptativo según la sección activa
     function ejecutarBusquedaActiva() {
-      const termino = document.getElementById('inputBuscarProducto').value.toLowerCase().trim();
       const secUsuarios = document.getElementById('seccion-usuarios');
       const esUsuarios = secUsuarios && secUsuarios.classList.contains('active');
+      const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
 
       if (esUsuarios) {
         const inputUsu = document.getElementById('inputBuscarUsuario');
         if (inputUsu) inputUsu.value = termino;
         filtrarTablaUsuarios(termino);
       } else {
-        filtrarTablaProductos(termino);
+        filtrarTablaProductos();
       }
     }
 
-    // 6. Filtros de búsqueda instantáneos
-    function filtrarTablaProductos(terminoDirecto) {
-      const termino = terminoDirecto !== undefined ? terminoDirecto : document.getElementById('inputBuscarProducto').value.toLowerCase().trim();
-      const filas = document.querySelectorAll('#tablaProductosBody tr.fila-producto');
-
-      filas.forEach(fila => {
-        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
-        if (busquedaTexto.includes(termino)) {
-          fila.style.display = '';
-        } else {
-          fila.style.display = 'none';
-        }
-      });
-    }
-
     function filtrarTablaUsuarios(terminoDirecto) {
-      const termino = terminoDirecto !== undefined ? terminoDirecto : document.getElementById('inputBuscarUsuario').value.toLowerCase().trim();
+      const input = document.getElementById('inputBuscarUsuario');
+      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
       const filas = document.querySelectorAll('#tablaUsuariosBody tr.fila-usuario');
 
       filas.forEach(fila => {
         const busquedaTexto = fila.getAttribute('data-busqueda') || '';
-        if (busquedaTexto.includes(termino)) {
-          fila.style.display = '';
-        } else {
-          fila.style.display = 'none';
-        }
+        fila.style.display = busquedaTexto.includes(termino) ? '' : 'none';
       });
     }
 
-    // 7. Filtro rápido de Administradores (Todos, Activos, Superadmin, Staff)
     function filtrarPorRol(filtro, btn) {
       document.querySelectorAll('.btn-role-tab').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
@@ -1593,17 +1661,12 @@
       });
     }
 
-    // 7. Sincronizar sección según URL al cargar o cambiar hash
     function sincronizarSeccionUrl() {
       const hash = (window.location.hash || '').replace('#', '');
       if (hash === 'usuarios') {
         mostrarSeccion('usuarios');
-      } else if (hash === 'finanzas') {
-        mostrarSeccion('inventario');
-        setTimeout(() => {
-          const el = document.getElementById('finanzas');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 150);
+      } else if (hash === 'proveedores') {
+        mostrarSeccion('proveedores');
       } else {
         mostrarSeccion('inventario');
       }
@@ -1612,13 +1675,45 @@
     window.addEventListener('DOMContentLoaded', sincronizarSeccionUrl);
     window.addEventListener('hashchange', sincronizarSeccionUrl);
 
-    // 6. Cerrar modales con tecla Escape o clic fuera
-    document.addEventListener('keydown', function (e) {
+    function filtrarTablaProductos() {
+      aplicarFiltrosCombinados();
+    }
+
+    function aplicarFiltrosCombinados() {
+      const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
+      const filas = document.querySelectorAll('#tablaProductosBody tr.fila-producto');
+
+      filas.forEach(fila => {
+        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
+        const coincideTexto = busquedaTexto.includes(termino);
+
+        let coincideEstado = true;
+        if (filtroEstadoActual === 'oferta') {
+          coincideEstado = fila.getAttribute('data-oferta') === '1';
+        } else if (filtroEstadoActual === 'bajo_stock') {
+          coincideEstado = fila.getAttribute('data-bajo-stock') === '1';
+        } else if (filtroEstadoActual === 'agotado') {
+          coincideEstado = fila.getAttribute('data-agotado') === '1';
+        }
+
+        if (coincideTexto && coincideEstado) {
+          fila.style.display = '';
+        } else {
+          fila.style.display = 'none';
+        }
+      });
+    }
+
+    // 7. Cerrar modales con tecla Escape o clic fuera
+    document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         cerrarModalNuevoProducto();
         cerrarModalEditar();
         cerrarModalEliminar();
         cerrarModalNuevaCategoria();
+        cerrarModalNuevoProveedor();
+        cerrarModalEditarProveedor();
+        cerrarModalEliminarProveedor();
         cerrarModalNuevoUsuario();
         cerrarModalEditarUsuario();
         cerrarModalEliminarUsuario();
@@ -1626,13 +1721,144 @@
     });
 
     document.querySelectorAll('.dash-modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', function (e) {
+      overlay.addEventListener('click', function(e) {
         if (e.target === this) {
           this.classList.remove('open');
         }
       });
     });
+
+    // 7. Inicialización de Gráficos Ejecutivos con Chart.js
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        const parseJsonSafe = (id, fallback) => {
+          const el = document.getElementById(id);
+          if (!el) return fallback;
+          try { return JSON.parse(el.textContent); } catch (e) { return fallback; }
+        };
+
+        const catLabels = parseJsonSafe('data-cat-labels', []);
+        const catData = parseJsonSafe('data-cat-data', []);
+        const prodLabels = parseJsonSafe('data-prod-labels', []);
+        const prodCostos = parseJsonSafe('data-prod-costos', []);
+        const prodPrecios = parseJsonSafe('data-prod-precios', []);
+        const prodMargenes = parseJsonSafe('data-prod-margenes', []);
+
+        // Paleta moderna, vibrante y limpia
+        const coloresCategorias = [
+          '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
+        ];
+
+        // Gráfico 1: Doughnut Categorías
+        const ctxCat = document.getElementById('chartCategorias');
+        if (ctxCat && catLabels.length > 0 && typeof Chart !== 'undefined') {
+          new Chart(ctxCat, {
+            type: 'doughnut',
+            data: {
+              labels: catLabels,
+              datasets: [{
+                data: catData,
+                backgroundColor: coloresCategorias.slice(0, catLabels.length),
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                hoverOffset: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'right',
+                  labels: {
+                    boxWidth: 12,
+                    font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
+                    padding: 8
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return ` ${context.label}: ${context.raw} productos`;
+                    }
+                  }
+                }
+              },
+              cutout: '62%'
+            }
+          });
+        }
+
+        // Gráfico 2: Barras Rentabilidad y Precios
+        const ctxMargenes = document.getElementById('chartMargenes');
+        if (ctxMargenes && prodLabels.length > 0 && typeof Chart !== 'undefined') {
+          new Chart(ctxMargenes, {
+            type: 'bar',
+            data: {
+              labels: prodLabels,
+              datasets: [
+                {
+                  label: 'Costo Compra',
+                  data: prodCostos,
+                  backgroundColor: '#94a3b8',
+                  borderRadius: 6
+                },
+                {
+                  label: 'Precio Venta',
+                  data: prodPrecios,
+                  backgroundColor: '#10b981',
+                  borderRadius: 6
+                },
+                {
+                  label: 'Margen Bruto',
+                  data: prodMargenes,
+                  backgroundColor: '#0284c7',
+                  borderRadius: 6
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'top',
+                  labels: {
+                    boxWidth: 12,
+                    font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
+                    padding: 10
+                  }
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return ` ${context.dataset.label}: $${Number(context.raw).toLocaleString('es-CO')} COP`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: { font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
+                },
+                y: {
+                  grid: { color: '#f1f5f9' },
+                  ticks: {
+                    font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+                    callback: function(value) {
+                      return '$' + Number(value).toLocaleString('es-CO');
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error al inicializar Chart.js:', err);
+      }
+    });
   </script>
 </body>
-
 </html>
