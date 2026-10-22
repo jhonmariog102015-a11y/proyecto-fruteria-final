@@ -136,9 +136,6 @@ def dashboard_view(request):
     total_prov_inactivos = total_proveedores - total_prov_activos
     total_prov_con_telefono = proveedores.exclude(telefono__isnull=True).exclude(telefono='').count()
 
-    prom_calif_agg = proveedores.aggregate(prom=Avg('calificacion_estrellas'))['prom']
-    promedio_calificacion_fincas = round(float(prom_calif_agg), 1) if prom_calif_agg else 5.0
-
     # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
     # Sincronización de perfiles administrativos y métricas del equipo de gestión
     for u in User.objects.filter(perfil__isnull=True):
@@ -186,7 +183,6 @@ def dashboard_view(request):
         'total_prov_activos': total_prov_activos,
         'total_prov_inactivos': total_prov_inactivos,
         'total_prov_con_telefono': total_prov_con_telefono,
-        'promedio_calificacion_fincas': promedio_calificacion_fincas,
         'total_activos': total_activos,
         'total_superadmins': total_superadmins,
         'total_bodegueros': total_bodegueros,
