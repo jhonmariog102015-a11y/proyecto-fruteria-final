@@ -1,96 +1,112 @@
 {% extends 'principal/base.html' %}
 {% load static %}
 
-{% block title %}Al Paso Frutería — Mercado Campesino{% endblock %}
-{% block meta_description %}Al Paso Frutería — Frutas y verduras frescas directas del campo a tu mesa.{% endblock %}
+{% block title %}Al Paso Frutería — Mercado Campesino Boyacense{% endblock %}
+{% block meta_description %}Al Paso Frutería — Frutas frescas y de temporada directas del campo a tu mesa en Sogamoso. Cosecha campesina diaria sin intermediarios.{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/index.css' %}?v=2.3">
+<link rel="stylesheet" href="{% static 'css/index.css' %}?v=2.5">
 {% endblock %}
 
 {% block content %}
+    <!-- ====================================================================== -->
+    <!-- 1. PORTADA HERO ASIMÉTRICA CON BUSCADOR INTEGRADO                      -->
+    <!-- ====================================================================== -->
     <section class="hero">
         <div class="hero-image-container">
-            <img src="{% static 'img/team/header.avif' %}" alt="Mercado de frutas y verduras">
+            <img src="{% static 'img/team/header.avif' %}" alt="Mercado de frutas y verduras campesinas">
             <div class="hero-overlay"></div>
         </div>
 
         <div class="hero-content">
             <!-- Logo oficial transparente de Al Paso Frutería -->
             <div class="masthead-logo-container">
-                <!-- NOTA PARA EL EQUIPO: Usar el nombre exacto 'logo_Transparente.png' tal como está guardado en static/assets -->
                 <img src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería" class="masthead-logo">
             </div>
             <p class="hero-eyebrow">Frescura que marca la diferencia</p>
-            <p class="hero-desc">Frutas y verduras de temporada, seleccionadas cada mañana en las mejores fincas de la
-                región.</p>
+            <p class="hero-desc">
+                Frutas seleccionadas cada mañana en las mejores fincas campesinas de la región boyacense. Directo del agricultor a tu hogar con la máxima frescura.
+            </p>
+
+            <!-- Buscador rápido directo en la portada (Propuesta Claude) -->
+            <form action="{% url 'catalogo_frutas' %}" method="get" class="hero-search-bar" role="search">
+                <input type="text" name="q" placeholder="¿Qué fruta fresca buscas hoy? (ej. Mango, Cítricos, Fresa...)" autocomplete="off" aria-label="Buscar frutas">
+                <button type="submit">Buscar Fruta</button>
+            </form>
+
             <!-- Botones de conversión principales -->
             <div class="hero-cta">
-                <a href="{% url 'catalogo_frutas' %}" class="btn-main">Ver Catálogo</a>
-                <a href="#carrusel-frutas" class="btn-secondary">Frutas Frescas ↓</a>
+                <a href="{% url 'catalogo_frutas' %}" class="btn-main">Ver Catálogo Completo</a>
+                <a href="#ofertas" class="btn-secondary">Ofertas de la Semana ↓</a>
             </div>
+
             <!-- Insignias de confianza que avalan el origen campesino -->
             <div class="hero-badges">
-                <span>✓ 100% Natural</span>
-                <span>✓ Cosecha diaria</span>
+                <span>✓ 100% Cosecha Natural</span>
+                <span>✓ Recolección diaria 6:00 AM</span>
                 <span>✓ Sin intermediarios</span>
+                <span>✓ Dulzor Óptimo °Brix</span>
             </div>
         </div>
     </section>
 
     <!-- ====================================================================== -->
-    <!-- 4. TABLERO DE CATEGORÍAS ("LO QUE TENEMOS")                          -->
-    <!-- Cuadrícula con las 4 familias de alimentos que ofrece la frutería      -->
+    <!-- 2. TABLERO DE CATEGORÍAS ("LO QUE TENEMOS")                          -->
+    <!-- Ahora cada tarjeta enlaza directamente a su filtro en el catálogo     -->
+    <!-- Corrigiendo el problema de que llevaban erróneamente al carrusel       -->
     <!-- ====================================================================== -->
     <section class="categories" id="lo-que-tenemos">
         <div class="section-header">
             <p class="section-label">LO QUE TENEMOS</p>
-            <h2>Categorías de<br>Productos</h2>
+            <h2>Categorías de<br>Productos Frescos</h2>
         </div>
 
         <div class="cat-grid">
-            <!-- Tarjeta 1: Frutas (enlaza al catálogo reactivo) -->
-            <a href="{% url 'catalogo_frutas' %}" class="cat-card cat-frutas">
+            <!-- Tarjeta 1: Cítricos (Enlace filtrado en catálogo) -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=citricos" class="cat-card cat-citricos">
                 <div class="cat-img">
                     <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop"
-                        alt="Frutas">
+                        alt="Cítricos frescos">
                 </div>
                 <div class="cat-info">
-                    <h3>Frutas</h3>
-                    <p>Ver productos</p>
+                    <h3>Cítricos</h3>
+                    <p>Naranjas, limones y mandarinas →</p>
                 </div>
             </a>
-            <!-- Tarjeta 2: Verduras -->
-            <a href="#carrusel-frutas" class="cat-card cat-verduras">
+
+            <!-- Tarjeta 2: Tropicales (Enlace filtrado en catálogo) -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=tropicales" class="cat-card cat-tropicales">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=600&auto=format&fit=crop"
-                        alt="Verduras">
+                    <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?q=80&w=600&auto=format&fit=crop"
+                        alt="Frutas tropicales">
                 </div>
                 <div class="cat-info">
-                    <h3>Verduras</h3>
-                    <p>Ver productos</p>
+                    <h3>Tropicales</h3>
+                    <p>Mangos, piñas y papayas dulces →</p>
                 </div>
             </a>
-            <!-- Tarjeta 3: Tubérculos -->
-            <a href="#carrusel-frutas" class="cat-card cat-tuberculos">
+
+            <!-- Tarjeta 3: Berries y Silvestres (Enlace filtrado en catálogo) -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=berries" class="cat-card cat-berries">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?q=80&w=600&auto=format&fit=crop"
-                        alt="Tubérculos">
+                    <img src="https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=600&auto=format&fit=crop"
+                        alt="Berries y frutos rojos">
                 </div>
                 <div class="cat-info">
-                    <h3>Tubérculos</h3>
-                    <p>Ver productos</p>
+                    <h3>Berries</h3>
+                    <p>Fresas y moras de altura →</p>
                 </div>
             </a>
-            <!-- Tarjeta 4: Hortalizas -->
-            <a href="#carrusel-frutas" class="cat-card cat-hortalizas">
+
+            <!-- Tarjeta 4: Catálogo Completo / Importadas y Exóticas -->
+            <a href="{% url 'catalogo_frutas' %}" class="cat-card cat-general">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1498579397066-22750a3cb424?q=80&w=600&auto=format&fit=crop"
-                        alt="Hortalizas">
+                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=600&auto=format&fit=crop"
+                        alt="Todas las frutas">
                 </div>
                 <div class="cat-info">
-                    <h3>Hortalizas</h3>
-                    <p>Ver productos</p>
+                    <h3>Ver Todo</h3>
+                    <p>Explorar {{ total_productos }} referencias →</p>
                 </div>
             </a>
         </div>
@@ -98,16 +114,16 @@
 
 
     <!-- ====================================================================== -->
-    <!-- 5. SECCIÓN CARRUSEL DE FRUTAS CON FILTRADO REACTIVO                   -->
-    <!-- Muestra los productos traídos desde la base de datos por Django        -->
-    <!-- Permite filtrar por categorías y deslizar tarjetas con touch o flechas -->
+    <!-- 3. OFERTAS DE LA SEMANA Y SELECCIÓN DE TEMPORADA (#ofertas)           -->
+    <!-- Enfoque prioritario en promociones, ahorro y precios destacados        -->
     <!-- ====================================================================== -->
-    <section class="fruits-carousel-section" id="carrusel-frutas">
+    <section class="fruits-carousel-section" id="ofertas">
         <!-- Encabezado del carrusel: Título a la izquierda y enlace al catálogo completo a la derecha -->
         <div class="carousel-header-wrap">
             <div class="carousel-header-left">
-                <span class="section-label">SELECCIÓN DEL DÍA</span>
+                <span class="section-label">SELECCIÓN Y OFERTAS DE LA SEMANA</span>
                 <h2>Frutas Frescas de <span>Temporada</span></h2>
+                <p class="carousel-subtext">Precios promocionales directos de cosecha campesina con descuentos imperdibles.</p>
             </div>
             <!-- Botón que muestra dinámicamente el número total de referencias registradas -->
             <a href="{% url 'catalogo_frutas' %}" class="btn-view-all-fruits">
@@ -118,7 +134,7 @@
         <!-- Pestañas de filtrado (Tabs): carrusel.js detecta 'data-filter' para mostrar/ocultar tarjetas -->
         <div class="carousel-tabs-bar" role="tablist">
             <button class="carousel-tab active" data-filter="all" role="tab">Todas</button>
-            <button class="carousel-tab tab-oferta" data-filter="ofertas" role="tab">En Oferta</button>
+            <button class="carousel-tab tab-oferta" data-filter="ofertas" role="tab">🔥 En Oferta</button>
             <button class="carousel-tab" data-filter="citricos" role="tab">Cítricos</button>
             <button class="carousel-tab" data-filter="tropicales" role="tab">Tropicales</button>
             <button class="carousel-tab" data-filter="berries" role="tab">Berries</button>
@@ -137,8 +153,7 @@
 
                 <!-- Ciclo Django Template: Itera sobre la lista 'productos' enviada desde views.py -->
                 {% for producto in productos %}
-                <!-- Tarjeta con etiqueta data-categoria computada dinámicamente para el filtrado en JS (incluye 'ofertas' si aplica) -->
-                <div class="carousel-card" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
+                <div class="carousel-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
                     <div>
                         <!-- Envoltura de imagen con badge de 'Fresco' y etiqueta de 'Oferta' si aplica -->
                         <div class="card-img-wrap">
@@ -185,52 +200,99 @@
     </section>
 
     <!-- ====================================================================== -->
-    <!-- 6. BLOQUE "NUESTRA HISTORIA" (About Strip)                            -->
-    <!-- Imagen campesina con badge flotante (+30 años) y métricas de impacto  -->
+    <!-- 4. NUEVA SECCIÓN: ¿CÓMO PEDIR EN 3 PASOS? (#como-pedir)                -->
+    <!-- Guía clara y sin fricción para el cliente campesino y digital          -->
+    <!-- ====================================================================== -->
+    <section class="how-to-order" id="como-pedir">
+        <div class="section-header text-center">
+            <p class="section-label">SENCILLO, TRANSPARENTE Y RÁPIDO</p>
+            <h2>¿Cómo Hacer tu Pedido en 3 Pasos?</h2>
+        </div>
+
+        <div class="how-steps-grid">
+            <!-- Paso 1 -->
+            <div class="step-card">
+                <span class="step-num-badge">Paso 01</span>
+                <div class="step-icon-circle">🛒</div>
+                <h3>1. Elige tu Fruta Fresca</h3>
+                <p>Explora nuestro catálogo en vivo o las ofertas de la semana. Agrega fácilmente tus frutas favoritas a tu canasta con el botón (+).</p>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="step-card">
+                <span class="step-num-badge">Paso 02</span>
+                <div class="step-icon-circle">🧺</div>
+                <h3>2. Revisa tu Canasta</h3>
+                <p>Ajusta las cantidades por kilo o unidad y verifica tu total estimado en tiempo real. Sin necesidad de crear cuentas ni recordar contraseñas.</p>
+            </div>
+
+            <!-- Paso 3 -->
+            <div class="step-card">
+                <span class="step-num-badge">Paso 03</span>
+                <div class="step-icon-circle">💬</div>
+                <h3>3. Confirma por WhatsApp</h3>
+                <p>Con un solo clic se envía tu pedido detallado a nuestro equipo. Te confirmamos el despacho a tu puerta y pagas contra entrega o transferencia.</p>
+            </div>
+        </div>
+
+        <div class="how-to-order-cta">
+            <a href="{% url 'catalogo_frutas' %}" class="btn-main">Armar Mi Pedido Ahora →</a>
+        </div>
+    </section>
+
+    <!-- ====================================================================== -->
+    <!-- 5. POR QUÉ ELEGIRNOS / NUESTRA HISTORIA (#nosotros)                   -->
+    <!-- Resumen conciso, cifras de impacto y compromiso con el campo boyacense -->
     <!-- ====================================================================== -->
     <section class="about-strip" id="nosotros">
         <!-- Columna izquierda: Imagen de la finca campesina con insignia destacada -->
         <div class="about-image">
             <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=800&auto=format&fit=crop"
-                alt="Finca productora">
+                alt="Finca productora en Boyacá">
             <div class="about-years-badge">+30<br><span>años</span></div>
         </div>
         <!-- Columna derecha: Narrativa del negocio familiar y cifras clave -->
         <div class="about-content">
-            <p class="section-label">NUESTRA HISTORIA</p>
-            <h2>Una familia,<br>una promesa.</h2>
-            <p>Desde 1989 somos la frutería de referencia del barrio. No somos un supermercado: somos vecinos que
-                conocen el nombre de los agricultores que cultivan lo que llevas a tu casa.</p>
-            <!-- Cuadrícula con 3 estadísticas clave -->
+            <p class="section-label">NUESTRA HISTORIA Y COMPROMISO</p>
+            <h2>Frescura con origen campesino,<br>directo a tu mesa.</h2>
+            <p>Desde hace más de tres décadas somos la frutería de referencia de la comunidad. No somos un supermercado corporativo: somos vecinos que conocemos el nombre de cada familia agricultora que cultiva lo que llevas a tu casa.</p>
+            
+            <!-- Cuadrícula con 4 estadísticas clave -->
             <div class="about-stats">
                 <div class="stat">
                     <strong>+50</strong>
-                    <span>Fincas aliadas</span>
+                    <span>Fincas campesinas aliadas</span>
                 </div>
                 <div class="stat">
-                    <strong>6am</strong>
-                    <span>Hora de cosecha</span>
+                    <strong>6:00 AM</strong>
+                    <span>Cosecha matutina diaria</span>
+                </div>
+                <div class="stat">
+                    <strong>12°-14°</strong>
+                    <span>Grados Brix de dulzor óptimo</span>
                 </div>
                 <div class="stat">
                     <strong>0</strong>
-                    <span>Intermediarios</span>
+                    <span>Intermediarios abusivos</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ====================================================================== -->
-    <!-- 7. HORARIOS DE ATENCIÓN Y CONTACTO DIRECTO                            -->
-    <!-- Cuadro con jornada laboral semanal y botón para llamadas telefónicas  -->
+    <!-- 6. HORARIOS DE ATENCIÓN Y CONTACTO DIRECTO (#contacto)                 -->
+    <!-- Unifica jornada laboral, teléfono real, WhatsApp y ubicación física    -->
     <!-- ====================================================================== -->
-    <section class="schedule" id="horarios">
+    <section class="schedule" id="contacto">
         <div class="schedule-bg">
             <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=1600&auto=format&fit=crop"
-                alt="Fondo mercado">
+                alt="Mercado de frutas">
             <div class="schedule-overlay"></div>
         </div>
         <div class="schedule-content">
-            <h2>Horario de Atención</h2>
+            <p class="section-label" style="color: #4CAF70;">ESTAMOS PARA SERVIRTE</p>
+            <h2>Horario y Canales de Atención</h2>
+            
             <div class="schedule-grid">
                 <div class="schedule-item">
                     <strong>Lunes — Sábado</strong>
@@ -238,12 +300,21 @@
                 </div>
                 <div class="divider">|</div>
                 <div class="schedule-item">
-                    <strong>Domingo</strong>
+                    <strong>Domingo y Festivos</strong>
                     <p>7:00 AM — 1:00 PM</p>
                 </div>
+                <div class="divider">|</div>
+                <div class="schedule-item">
+                    <strong>Ubicación</strong>
+                    <p>Sogamoso, Boyacá • Sector Mercado Campesino</p>
+                </div>
             </div>
-            <!-- Enlace tel: directo para discado en teléfonos móviles -->
-            <a href="tel:+573001234567" class="schedule-phone">Llámanos: 300 123 4567</a>
+
+            <!-- Botones de contacto directo telefónico y WhatsApp -->
+            <div class="schedule-cta-group">
+                <a href="tel:+573001234567" class="schedule-phone">📞 Llámanos: 300 123 4567</a>
+                <a href="https://wa.me/573001234567?text=Hola%20Al%20Paso%20Fruter%C3%ADa,%20quisiera%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="schedule-whatsapp-btn">💬 Escribir al WhatsApp</a>
+            </div>
         </div>
     </section>
 {% endblock %}

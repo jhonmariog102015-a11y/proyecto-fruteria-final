@@ -518,6 +518,13 @@
         right: 20px;
         width: 54px;
         height: 54px;
+        transition: bottom 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Cuando la barra móvil está visible, el botón de WhatsApp se eleva para no tapar */
+    body.has-mobile-cart .whatsapp-floating-btn,
+    .mobile-floating-cart-bar.visible ~ .whatsapp-floating-btn {
+        bottom: 84px;
     }
 
     .whatsapp-floating-btn svg {
@@ -529,4 +536,407 @@
         display: none;
     }
 }
+
+/* ==============================================================================
+   7. MENÚ DESPLEGABLE DE CATÁLOGO (Navbar Dropdown)
+   ============================================================================== */
+.nav-item-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-link-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.nav-link-dropdown .dropdown-arrow {
+    display: inline-block;
+    transition: transform 0.25s ease;
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.nav-item-dropdown:hover .dropdown-arrow,
+.nav-item-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    min-width: 230px;
+    background: #ffffff;
+    border: 1px solid #e2ece3;
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgba(26, 58, 38, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+    padding: 0.6rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 200;
+}
+
+.nav-item-dropdown:hover .dropdown-menu,
+.nav-item-dropdown:focus-within .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #2e382e;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-item .item-icon {
+    font-size: 1.05rem;
+    width: 22px;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background: #f0f7f2;
+    color: #1e3a29;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #edf2ee;
+    margin: 4px 6px;
+}
+
+.dropdown-item.featured {
+    font-weight: 700;
+    color: #1e3a29;
+    background: #f4faf5;
+}
+
+/* Badge de Ofertas en Navbar */
+.nav-badge-oferta {
+    display: inline-block;
+    background: #e11d48;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* ==============================================================================
+   8. BUSCADOR INTEGRADO EN EL NAVBAR
+   ============================================================================== */
+.nav-search-form {
+    display: flex;
+    align-items: center;
+    background: #f3f5f3;
+    border: 1px solid #dfe5df;
+    border-radius: 999px;
+    padding: 3px 6px 3px 14px;
+    transition: all 0.25s ease;
+    width: 200px;
+}
+
+.nav-search-form:focus-within {
+    width: 240px;
+    background: #ffffff;
+    border-color: #2e6b43;
+    box-shadow: 0 0 0 3px rgba(46, 107, 67, 0.12);
+}
+
+.nav-search-input {
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    color: #1a1a1a;
+    width: 100%;
+    outline: none;
+}
+
+.nav-search-input::placeholder {
+    color: #8c9b90;
+    font-size: 0.82rem;
+}
+
+.nav-search-btn {
+    border: none;
+    background: #1e3a29;
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.nav-search-btn:hover {
+    background: #2e6b43;
+    transform: scale(1.05);
+}
+
+@media (max-width: 992px) {
+    .nav-search-form {
+        display: none;
+    }
+}
+
+/* ==============================================================================
+   9. BARRA FLOTANTE MÓVIL INFERIOR DE CANASTA (Mobile Bottom Bar)
+   ============================================================================== */
+.mobile-floating-cart-bar {
+    position: fixed;
+    bottom: -80px;
+    left: 14px;
+    right: 14px;
+    background: #1e3a29;
+    color: #ffffff;
+    padding: 0.8rem 1.2rem;
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 998;
+    cursor: pointer;
+    transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.mobile-floating-cart-bar.visible {
+    bottom: 14px;
+}
+
+.cart-bar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cart-bar-count {
+    font-size: 0.78rem;
+    color: #a4c7b0;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.cart-bar-total {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.cart-bar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #4caf70;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+@media (min-width: 769px) {
+    .mobile-floating-cart-bar {
+        display: none !important;
+    }
+}
+
+/* ==============================================================================
+   10. PIE DE PÁGINA PROFESIONAL (Footer con Acceso Empleados)
+   ============================================================================== */
+.footer-main {
+    background: #13271a;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: 'DM Sans', sans-serif;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 2rem;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1.2fr 1fr;
+    gap: 2.5rem;
+}
+
+.footer-col h4 {
+    font-family: 'Syne', sans-serif;
+    color: #ffffff;
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    position: relative;
+    padding-bottom: 0.4rem;
+}
+
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #4caf70;
+}
+
+.footer-brand-desc {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.footer-badge-campesino {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(76, 175, 112, 0.15);
+    border: 1px solid rgba(76, 175, 112, 0.3);
+    color: #79d698;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    margin-top: 1.1rem;
+}
+
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.footer-links-list a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s, transform 0.2s;
+    display: inline-block;
+}
+
+.footer-links-list a:hover {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.footer-contact-info p {
+    font-size: 0.86rem;
+    line-height: 1.55;
+    margin-bottom: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-contact-info strong {
+    color: #ffffff;
+}
+
+.footer-contact-info a {
+    color: #79d698;
+    text-decoration: none;
+}
+
+.footer-contact-info a:hover {
+    text-decoration: underline;
+}
+
+.footer-employee-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.1rem;
+}
+
+.footer-employee-card p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
+}
+
+.btn-footer-employee {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-footer-employee:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.footer-bottom-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1.2rem 2rem;
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 900px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        padding: 2.5rem 1.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 580px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    .footer-bottom-bar {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
 

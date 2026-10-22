@@ -1724,3 +1724,229 @@ body {
     color: #9ca3af;
     font-size: 0.85rem;
 }
+
+/* ==========================================================================
+   ESTILOS ADICIONALES PARA DISEÑO DE PRUEBA: BUSCADOR HERO, CÓMO PEDIR, CONTACTO
+   ========================================================================== */
+.hero-search-bar {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 6px 8px 6px 20px;
+    width: min(100%, 560px);
+    margin: 1.5rem auto 2.2rem;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-search-bar:focus-within {
+    border-color: var(--green-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.hero-search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text);
+    background: transparent;
+    padding: 0.4rem 0.5rem;
+}
+
+.hero-search-bar input::placeholder {
+    color: #8c9b90;
+    font-size: 0.88rem;
+}
+
+.hero-search-bar button {
+    background: var(--green-deep);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.7rem 1.6rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.hero-search-bar button:hover {
+    background: var(--green-mid);
+    transform: scale(1.02);
+}
+
+@media (max-width: 580px) {
+    .hero-search-bar {
+        flex-direction: column;
+        border-radius: 16px;
+        padding: 10px;
+        gap: 8px;
+    }
+    .hero-search-bar button {
+        width: 100%;
+        border-radius: 10px;
+        padding: 0.65rem 1rem;
+    }
+}
+
+.carousel-subtext {
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+}
+
+/* ─── CÓMO PEDIR EN 3 PASOS ─── */
+.how-to-order {
+    padding: 6rem 4rem;
+    background: #ffffff;
+    border-top: 1px solid #eef2ef;
+    border-bottom: 1px solid #eef2ef;
+}
+
+.how-to-order .text-center {
+    text-align: center;
+}
+
+.how-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.2rem;
+    margin-top: 3.5rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step-card {
+    background: #fafaf7;
+    border: 1px solid #e8ede9;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.step-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(26, 58, 38, 0.08);
+    border-color: var(--green-accent);
+    background: #ffffff;
+}
+
+.step-num-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--green-mid);
+    background: #eef6f0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+}
+
+.step-icon-circle {
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    background: var(--green-deep);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    margin-bottom: 1.6rem;
+    box-shadow: 0 8px 18px rgba(26, 58, 38, 0.22);
+}
+
+.step-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--green-deep);
+    margin-bottom: 0.8rem;
+}
+
+.step-card p {
+    font-size: 0.94rem;
+    line-height: 1.65;
+    color: var(--muted);
+    flex-grow: 1;
+}
+
+.how-to-order-cta {
+    margin-top: 3.5rem;
+    text-align: center;
+}
+
+.schedule-cta-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.schedule-whatsapp-btn {
+    display: inline-block;
+    background: #25D366;
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 1rem 2.2rem;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+}
+
+.schedule-whatsapp-btn:hover {
+    background: #20BA5A;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.45);
+}
+
+@media (max-width: 900px) {
+    .how-to-order {
+        padding: 4rem 1.8rem;
+    }
+    .how-steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .categories {
+        padding: 4rem 1.5rem;
+    }
+    .cat-grid {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+    }
+    .cat-card {
+        height: 220px;
+    }
+}
+
+@media (max-width: 580px) {
+    .cat-grid {
+        grid-template-columns: 1fr;
+    }
+    .schedule-grid {
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .divider {
+        display: none;
+    }
+}
+

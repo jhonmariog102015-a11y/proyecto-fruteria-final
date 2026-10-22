@@ -52,13 +52,16 @@ def inicio(request):
     categorias = Categoria.objects.all()
     # Producto destacado para el Hero dinámico asimétrico
     producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
+    productos_oferta = productos.filter(en_oferta=True)
 
     context = {
         'titulo': 'Al Paso Frutería — Mercado Campesino',
         'productos': productos,
+        'productos_oferta': productos_oferta,
         'categorias': categorias,
         'producto_destacado': producto_destacado,
         'total_productos': productos.count(),
+        'total_ofertas': productos_oferta.count(),
     }
     return render(request, 'principal/index.html', context)
 
@@ -104,8 +107,9 @@ def dashboard_view(request):
     total_ofertas = productos.filter(en_oferta=True).count()
     total_usuarios = User.objects.count()
 
-    # Conteo para filtros rápidos
-    total_bajo_stock = sum(1 for p in productos if p.stock_actual <= p.stock_minimo)
+    # Conteo y lista para alertas de inventario
+    productos_bajo_stock = [p for p in productos if p.stock_actual <= p.stock_minimo]
+    total_bajo_stock = len(productos_bajo_stock)
     total_agotados = sum(1 for p in productos if p.stock_actual <= 0 or p.estado == 'Agotado')
 
     # Métricas financieras del catálogo
@@ -169,6 +173,7 @@ def dashboard_view(request):
         'total_productos': total_productos,
         'total_ofertas': total_ofertas,
         'total_bajo_stock': total_bajo_stock,
+        'productos_bajo_stock': productos_bajo_stock,
         'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,

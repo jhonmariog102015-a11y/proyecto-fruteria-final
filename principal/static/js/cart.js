@@ -217,14 +217,30 @@
         });
     }
 
-    // Actualizar Contadores en la Barra de Navegación
+    // Actualizar Contadores en la Barra de Navegación y Barra Móvil
     function updateCartUI() {
         const badge = document.getElementById('cartBadge');
         const count = getCartCount();
+        const total = getCartTotal();
 
         if (badge) {
             badge.textContent = count;
             badge.style.display = count > 0 ? 'inline-flex' : 'none';
+        }
+
+        // Barra flotante inferior fija para dispositivos móviles
+        const mobileBar = document.getElementById('mobileCartBar');
+        const mobileCount = document.getElementById('mobileCartCount');
+        const mobileTotal = document.getElementById('mobileCartTotal');
+
+        if (mobileBar) {
+            if (count > 0) {
+                mobileBar.classList.add('visible');
+                if (mobileCount) mobileCount.textContent = count;
+                if (mobileTotal) mobileTotal.textContent = '$' + Math.round(total).toLocaleString('es-CO');
+            } else {
+                mobileBar.classList.remove('visible');
+            }
         }
 
         renderCartItems();
@@ -240,7 +256,7 @@
 
             const total = getCartTotal();
             let lineas = [];
-            lineas.push('¡Hola, El Paso Frutería! Deseo realizar el siguiente pedido campesino:');
+            lineas.push('¡Hola, Al Paso Frutería! Deseo realizar el siguiente pedido campesino:');
             lineas.push('');
 
             cart.forEach((item, index) => {
@@ -299,10 +315,12 @@
                 const card = btnCarousel.closest('.carousel-card');
                 if (card) {
                     const id = btnCarousel.dataset.id || card.dataset.id;
-                    const nombre = btnCarousel.dataset.nombre || card.querySelector('.card-fruit-title')?.textContent.trim();
-                    const precioRaw = card.querySelector('.card-price-value')?.textContent.replace(/[^0-9]/g, '');
+                    const nombre = btnCarousel.dataset.nombre || card.querySelector('h3')?.textContent.trim() || 'Fruta Fresca';
+                    const priceEl = card.querySelector('.carousel-price.price-oferta, .carousel-price, .card-price-value');
+                    const precioRaw = priceEl ? priceEl.textContent.replace(/[^0-9]/g, '') : '0';
                     const precio = parseFloat(precioRaw) || 0;
-                    const unidad = card.querySelector('.card-price-unit')?.textContent.replace('/', '').trim() || 'kg';
+                    const unitEl = card.querySelector('.carousel-unit, .card-price-unit');
+                    const unidad = unitEl ? unitEl.textContent.replace(/desde\s*\/\s*|\//gi, '').trim() : 'kg';
                     const imagen = card.querySelector('img')?.src || '';
 
                     window.addToCart({ id, nombre, precio, unidad, imagen });

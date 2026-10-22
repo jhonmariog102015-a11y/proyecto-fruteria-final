@@ -92,10 +92,95 @@ button {
   color: white;
 }
 
+.nav-section-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #718096;
+  padding: 12px 14px 4px;
+}
+
+.nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 10px 14px;
+}
+
 .nav-icon {
   width: 17px;
   text-align: center;
-  font-size: 17px;
+  font-size: 15px;
+}
+
+/* Alerta de Stock Bajo en Dashboard */
+.dash-stock-alert-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 5px solid #d97706;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08);
+}
+
+.dash-stock-alert-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.dash-stock-alert-content {
+  flex-grow: 1;
+}
+
+.dash-stock-alert-content h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: 4px;
+}
+
+.dash-stock-alert-content p {
+  font-size: 13px;
+  color: #b45309;
+  margin-bottom: 8px;
+}
+
+.dash-stock-alert-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stock-tag-item {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  color: #78350f;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.btn-alert-action {
+  background: #d97706;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-alert-action:hover {
+  background: #b45309;
+  transform: translateY(-1px);
 }
 
 .sidebar-bottom {
