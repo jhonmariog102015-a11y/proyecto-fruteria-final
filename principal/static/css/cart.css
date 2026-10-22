@@ -1124,24 +1124,18 @@
     justify-content: center;
 }
 
-.user-popover-action-btn {
-    width: 100%;
-    box-sizing: border-box;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-}
-
+.user-popover-action-btn,
 .user-popover-register-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 7px;
     width: 100%;
     padding: 0.55rem 0.85rem;
     border-radius: 999px;
     background: #f1f5f9;
-    color: #334155;
-    text-decoration: none;
+    color: #334155 !important;
+    text-decoration: none !important;
     font-size: 0.82rem;
     font-weight: 700;
     border: 1px solid #e2e8f0;
@@ -1149,9 +1143,23 @@
     transition: all 0.18s ease;
 }
 
+.user-popover-action-btn {
+    margin-bottom: 0.55rem;
+}
+
+.user-popover-action-btn svg,
+.user-popover-register-btn svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    color: inherit;
+}
+
+.user-popover-action-btn:hover,
 .user-popover-register-btn:hover {
     background: #e2e8f0;
-    color: #0f172a;
+    color: #0f172a !important;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
 }
 
 .user-popover-logout-form {

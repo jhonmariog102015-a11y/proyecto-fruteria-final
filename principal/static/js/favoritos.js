@@ -216,11 +216,11 @@
                 return;
             }
 
-            // Popover de Usuario (Hombre en móviles o pantallas táctiles)
+            // Popover de Usuario (Hombre)
             const userTrigger = e.target.closest('#navUserTrigger');
             const userWrap = document.getElementById('navUserWrap');
             if (userTrigger && userWrap) {
-                if (window.innerWidth <= 992) {
+                if (userTrigger.tagName.toLowerCase() === 'button' || window.innerWidth <= 992) {
                     e.preventDefault();
                     e.stopPropagation();
                     userWrap.classList.toggle('active');
