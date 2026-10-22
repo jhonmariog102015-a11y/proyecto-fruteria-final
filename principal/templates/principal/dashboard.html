@@ -121,88 +121,161 @@
           </div>
         {% endif %}
 
-        <div id="seccion-inventario" class="dashboard-section active">
         <!-- ================================================================== -->
-        <!-- 3. MÉTRICAS CLAVE (KPI Cards) Y ALERTAS OPERATIVAS                 -->
-        <!-- Conteo dinámico, alertas de stock mínimo y rentabilidad en vivo    -->
+        <!-- 3. SECCIÓN 1: RESUMEN Y ALERTAS (INDEPENDIENTE)                   -->
         <!-- ================================================================== -->
-        <section class="dashboard-products" id="overview-section" aria-labelledby="products-heading">
-          
-          <!-- Alerta Operativa de Stock Bajo (Sugerencia de diseño y funcionalidad) -->
-          {% if total_bajo_stock > 0 %}
-          <div class="dash-stock-alert-banner" id="dashStockAlertBanner">
-            <div class="dash-stock-alert-icon">⚠️</div>
-            <div class="dash-stock-alert-content">
-              <h4>Alerta de Inventario: {{ total_bajo_stock }} producto(s) en o por debajo del stock mínimo</h4>
-              <p>Se recomienda coordinar reabastecimiento con los proveedores para evitar agotados en la tienda:</p>
-              <div class="dash-stock-alert-tags">
-                {% for p in productos_bajo_stock %}
-                  <span class="stock-tag-item">
-                    <strong>{{ p.nombre }}</strong>: {{ p.stock_actual }} {{ p.unidad_medida }} (Mín: {{ p.stock_minimo }})
+        <div id="seccion-resumen" class="dashboard-section active">
+          <section class="dashboard-products" id="overview-section" aria-labelledby="overview-heading">
+            
+            <!-- Alerta Operativa de Stock Bajo -->
+            {% if total_bajo_stock > 0 %}
+            <div class="dash-stock-alert-banner" id="dashStockAlertBanner">
+              <div class="dash-stock-alert-icon">⚠️</div>
+              <div class="dash-stock-alert-content">
+                <h4>Alerta de Inventario: {{ total_bajo_stock }} producto(s) en o por debajo del stock mínimo</h4>
+                <p>Se recomienda coordinar reabastecimiento con los proveedores para evitar agotados en la tienda:</p>
+                <div class="dash-stock-alert-tags">
+                  {% for p in productos_bajo_stock %}
+                    <span class="stock-tag-item">
+                      <strong>{{ p.nombre }}</strong>: {{ p.stock_actual }} {{ p.unidad_medida }} (Mín: {{ p.stock_minimo }})
+                    </span>
+                  {% endfor %}
+                </div>
+              </div>
+              <button type="button" class="btn-alert-action" onclick="mostrarSeccion('inventario'); setTimeout(() => { const b = document.querySelector('[data-filter=bajo_stock]'); if(b) b.click(); }, 150);">
+                Ver en Inventario →
+              </button>
+            </div>
+            {% endif %}
+
+            <!-- KPIs Clave de Operación -->
+            <div class="stats-row">
+              <div class="dash-card">
+                <h5>Productos Registrados</h5>
+                <h3>{{ total_productos }}</h3>
+                <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
+              </div>
+              <div class="dash-card">
+                <h5>Ofertas Activas</h5>
+                <h3 class="kpi-val-rose">{{ total_ofertas }}</h3>
+                <span class="kpi-subtext">Precios promocionales vigentes</span>
+              </div>
+              <div class="dash-card">
+                <h5>Inversión en Inventario</h5>
+                <h3 class="kpi-val-blue">${{ inversion_total|floatformat:0 }}</h3>
+                <span class="kpi-subtext">Costo total de compra en bodega</span>
+              </div>
+              <div class="dash-card">
+                <h5>Ganancia Proyectada</h5>
+                <h3 class="kpi-val-green">+${{ ganancia_potencial|floatformat:0 }}</h3>
+                <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
+              </div>
+            </div>
+
+            <!-- Analítica Visual (Chart.js) -->
+            <div class="dash-charts-grid">
+              <div class="dash-chart-card">
+                <div class="dash-chart-header">
+                  <h4>Distribución por Categorías</h4>
+                  <span class="dash-chart-sub">Volumen de productos clasificados por grupo taxonómico</span>
+                </div>
+                <div class="dash-chart-canvas-wrap">
+                  <canvas id="chartCategorias"></canvas>
+                </div>
+              </div>
+              <div class="dash-chart-card">
+                <div class="dash-chart-header">
+                  <h4>Rentabilidad y Márgenes de Ganancia</h4>
+                  <span class="dash-chart-sub">Comparativa Costo de Compra vs Precio de Venta ($ COP)</span>
+                </div>
+                <div class="dash-chart-canvas-wrap">
+                  <canvas id="chartMargenes"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resumen Financiero y Accesos Rápidos de Operación -->
+            <div class="finanzas-grid-2">
+              <!-- Panel: Rentabilidad & Valoración de Inventario -->
+              <div class="finanzas-card">
+                <div class="finanzas-header">
+                  <h3>Rentabilidad y Finanzas</h3>
+                  <span class="finanzas-badge-pill">
+                    Margen Promedio: {{ margen_promedio|floatformat:1 }}%
                   </span>
-                {% endfor %}
+                </div>
+                <div>
+                  <div class="finanzas-metric-row">
+                    <span class="finanzas-metric-label">Inversión Total en Compras:</span>
+                    <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
+                  </div>
+                  <div class="finanzas-metric-row">
+                    <span class="finanzas-metric-label">Valor Comercial de Venta:</span>
+                    <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
+                  </div>
+                  <div class="finanzas-metric-row">
+                    <span class="finanzas-metric-label">Utilidad Bruta Estimada:</span>
+                    <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
+                  </div>
+                  <div class="finanzas-metric-row">
+                    <span class="finanzas-metric-label">Promoción / Descuentos:</span>
+                    <span class="val finanzas-val-rebajados">{{ total_ofertas }} productos rebajados</span>
+                  </div>
+                </div>
+                <div class="finanzas-note-box">
+                  <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
+                </div>
               </div>
-            </div>
-            <button type="button" class="btn-alert-action" onclick="mostrarSeccion('inventario'); setTimeout(() => { const b = document.querySelector('[data-filter=bajo_stock]'); if(b) b.click(); }, 150);">
-              Ver en Inventario →
-            </button>
-          </div>
-          {% endif %}
 
-          <div class="stats-row">
-            <div class="dash-card">
-              <h5>Productos Registrados</h5>
-              <h3>{{ total_productos }}</h3>
-              <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
+              <!-- Panel: Accesos Directos a los demás módulos -->
+              <div class="finanzas-card">
+                <div class="finanzas-header">
+                  <h3>Gestión Operativa</h3>
+                  <span class="finanzas-badge-pill">Módulos Directos</span>
+                </div>
+                <div class="dash-quick-actions-grid">
+                  <button type="button" class="quick-action-card" onclick="mostrarSeccion('inventario')">
+                    <span class="action-icon">📦</span>
+                    <div>
+                      <strong>Ir a Inventario y Catálogo</strong>
+                      <small>{{ total_productos }} referencias disponibles</small>
+                    </div>
+                    <span class="action-arrow">→</span>
+                  </button>
+                  <button type="button" class="quick-action-card" onclick="mostrarSeccion('proveedores')">
+                    <span class="action-icon">🚜</span>
+                    <div>
+                      <strong>Directorio de Proveedores</strong>
+                      <small>{{ total_proveedores }} fincas productoras</small>
+                    </div>
+                    <span class="action-arrow">→</span>
+                  </button>
+                  {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
+                  <button type="button" class="quick-action-card" onclick="mostrarSeccion('usuarios')">
+                    <span class="action-icon">👥</span>
+                    <div>
+                      <strong>Administradores y Roles</strong>
+                      <small>{{ total_activos }} cuentas con acceso</small>
+                    </div>
+                    <span class="action-arrow">→</span>
+                  </button>
+                  {% endif %}
+                </div>
+              </div>
             </div>
-            <div class="dash-card">
-              <h5>Ofertas Activas</h5>
-              <h3 class="kpi-val-rose">{{ total_ofertas }}</h3>
-              <span class="kpi-subtext">Precios promocionales vigentes</span>
-            </div>
-            <div class="dash-card">
-              <h5>Inversión en Inventario</h5>
-              <h3 class="kpi-val-blue">${{ inversion_total|floatformat:0 }}</h3>
-              <span class="kpi-subtext">Costo total de compra en bodega</span>
-            </div>
-            <div class="dash-card">
-              <h5>Ganancia Proyectada</h5>
-              <h3 class="kpi-val-green">+${{ ganancia_potencial|floatformat:0 }}</h3>
-              <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
-            </div>
-          </div>
 
-          <!-- ================================================================ -->
-          <!-- 3.1. ANALÍTICA VISUAL Y GRÁFICOS EJECUTIVOS (Chart.js)             -->
-          <!-- ================================================================ -->
-          <div class="dash-charts-grid">
-            <div class="dash-chart-card">
-              <div class="dash-chart-header">
-                <h4>Distribución por Categorías</h4>
-                <span class="dash-chart-sub">Volumen de productos clasificados por grupo taxonómico</span>
-              </div>
-              <div class="dash-chart-canvas-wrap">
-                <canvas id="chartCategorias"></canvas>
-              </div>
-            </div>
-            <div class="dash-chart-card">
-              <div class="dash-chart-header">
-                <h4>Rentabilidad y Márgenes de Ganancia</h4>
-                <span class="dash-chart-sub">Comparativa Costo de Compra vs Precio de Venta ($ COP)</span>
-              </div>
-              <div class="dash-chart-canvas-wrap">
-                <canvas id="chartMargenes"></canvas>
-              </div>
-            </div>
-          </div>
+          </section>
+        </div> <!-- Fin #seccion-resumen -->
 
-          <!-- ================================================================ -->
-          <!-- 4. TABLA DE INVENTARIO Y GESTIÓN CRUD EN TIEMPO REAL              -->
-          <!-- ================================================================ -->
-          <div class="products-table-container">
-            <div class="catalog-inv-header">
-              <div>
-                <h2 id="products-heading" class="catalog-inv-title">Catálogo e Inventario en Tiempo Real</h2>
+        <!-- ================================================================== -->
+        <!-- 4. SECCIÓN 2: INVENTARIO Y CATÁLOGO (INDEPENDIENTE)               -->
+        <!-- ================================================================== -->
+        <div id="seccion-inventario" class="dashboard-section" style="display: none;">
+          <section class="dashboard-products" id="inventario-section" aria-labelledby="products-heading">
+            <div class="products-table-container">
+              <div class="catalog-inv-header">
+                <div>
+                  <h2 id="products-heading" class="catalog-inv-title">Catálogo e Inventario en Tiempo Real</h2>
                 <p class="catalog-inv-subtitle">Administra precios de venta, costos de compra, promociones y existencias directamente aquí.</p>
               </div>
               <div class="catalog-inv-actions">
@@ -335,48 +408,15 @@
           </div>
         </section>
 
-        <!-- ================================================================== -->
-        <!-- 5. PANELES DE GESTIÓN Y RESUMEN FINANCIERO                        -->
-        <!-- ================================================================== -->
-        <div class="finanzas-grid-2">
-
-          <!-- Panel: Rentabilidad & Valoración de Inventario -->
-          <div class="finanzas-card">
-            <div class="finanzas-header">
-              <h3>Rentabilidad y Finanzas</h3>
-              <span class="finanzas-badge-pill">
-                Margen Promedio: {{ margen_promedio|floatformat:1 }}%
-              </span>
-            </div>
-            <div>
-              <div class="finanzas-metric-row">
-                <span class="finanzas-metric-label">Inversión Total en Compras:</span>
-                <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
-              </div>
-              <div class="finanzas-metric-row">
-                <span class="finanzas-metric-label">Valor Comercial de Venta:</span>
-                <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
-              </div>
-              <div class="finanzas-metric-row">
-                <span class="finanzas-metric-label">Utilidad Bruta Estimada:</span>
-                <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
-              </div>
-              <div class="finanzas-metric-row">
-                <span class="finanzas-metric-label">Promoción / Descuentos:</span>
-                <span class="val finanzas-val-rebajados">{{ total_ofertas }} productos rebajados</span>
-              </div>
-            </div>
-            <div class="finanzas-note-box">
-              <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
-            </div>
-          </div>
-
           <!-- Panel: Gestión de Categorías del Catálogo -->
-          <div class="finanzas-card">
+          <div class="finanzas-card finanzas-card-full" style="margin-top: 1.5rem;">
             <div class="finanzas-header">
-              <h3>Categorías del Catálogo ({{ categorias.count }})</h3>
+              <div>
+                <h3 class="card-title-lg">Categorías del Catálogo ({{ categorias.count }})</h3>
+                <span class="dash-chart-sub">Clasificación de productos exhibidos en la tienda y catálogo web</span>
+              </div>
               <button type="button" class="btn-primary-dash btn-cat-add" onclick="abrirModalNuevaCategoria()">
-                + Crear
+                <span>+</span> Crear Categoría
               </button>
             </div>
             <div class="cat-scroll-container">
@@ -404,90 +444,126 @@
               {% endfor %}
             </div>
           </div>
+        </div> <!-- Fin #seccion-inventario -->
 
-          <!-- Panel: Gestión de Proveedores Agrícolas y Fincas Productoras -->
-          <div class="finanzas-card finanzas-card-full" id="proveedores">
-            <div class="finanzas-header">
-              <div>
-                <h3 class="card-title-lg">Proveedores y Fincas Productoras ({{ total_proveedores }})</h3>
-                <span class="dash-chart-sub">Directorio de productores campesinos aliados de Boyacá y Cundinamarca</span>
-              </div>
-              <button type="button" class="btn-primary-dash btn-prov-add" onclick="abrirModalNuevoProveedor()">
-                <span>+</span> Registrar Proveedor
-              </button>
-            </div>
+        <!-- ================================================================== -->
+        <!-- 5. SECCIÓN 3: PROVEEDORES Y FINCAS ALIADAS (INDEPENDIENTE)         -->
+        <!-- ================================================================== -->
+        <div id="seccion-proveedores" class="dashboard-section" style="display: none;">
+          <section class="dashboard-products" id="proveedores-section" aria-labelledby="proveedores-heading">
             
-            <div class="table-scroll-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Finca / Razón Social</th>
-                    <th scope="col">NIT / RUT</th>
-                    <th scope="col">Contacto</th>
-                    <th scope="col">Teléfono / Pedido Rápido</th>
-                    <th scope="col">Calificación</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col" class="table-col-center">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for prov in proveedores %}
-                  <tr>
-                    <td>
-                      <strong class="prov-name">{{ prov.razon_social }}</strong>
-                      {% if prov.email %}<div class="prov-email">{{ prov.email }}</div>{% endif %}
-                    </td>
-                    <td><code class="prov-nit">{{ prov.nit_rut }}</code></td>
-                    <td>{{ prov.contacto_nombre|default:"Sin asignar" }}</td>
-                    <td>
-                      {% if prov.telefono %}
-                        <a href="https://wa.me/57{{ prov.telefono|cut:' '|cut:'-' }}?text=Buen%20d%C3%ADa%2C%20requerimos%20pedido%20de%20reposici%C3%B3n%20para%20Al%20Paso%20Fruter%C3%ADa" target="_blank" class="prov-wa-link" title="Pedir reposición de stock por WhatsApp">
-                          {{ prov.telefono }} ↗
-                        </a>
-                      {% else %}
-                        <span class="prov-no-phone">Sin teléfono</span>
-                      {% endif %}
-                    </td>
-                    <td>
-                      <span class="prov-rating">{{ prov.calificacion_estrellas }} / 5.0</span>
-                    </td>
-                    <td>
-                      <span class="badge-status {% if prov.estado == 'Activo' %}badge-status-activo{% else %}badge-status-inactivo{% endif %}">
-                        {{ prov.estado }}
-                      </span>
-                    </td>
-                    <td class="table-col-actions">
-                      <button type="button" class="btn-action-edit"
-                        data-id="{{ prov.id_proveedor }}"
-                        data-razon="{{ prov.razon_social }}"
-                        data-nit="{{ prov.nit_rut }}"
-                        data-contacto="{{ prov.contacto_nombre|default:'' }}"
-                        data-telefono="{{ prov.telefono|default:'' }}"
-                        data-email="{{ prov.email|default:'' }}"
-                        data-calificacion="{{ prov.calificacion_estrellas }}"
-                        data-estado="{{ prov.estado }}"
-                        onclick="abrirModalEditarProveedor(this)">
-                        Editar
-                      </button>
-                      <button type="button" class="btn-action-delete"
-                        data-id="{{ prov.id_proveedor }}"
-                        data-razon="{{ prov.razon_social }}"
-                        onclick="abrirModalEliminarProveedor(this)">
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                  {% empty %}
-                  <tr>
-                    <td colspan="7" class="empty-products">No hay proveedores registrados aún. ¡Registra al primer productor aliado!</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+            <!-- Resumen de Métricas de Proveedores -->
+            <div class="stats-row" style="margin-bottom: 1.5rem;">
+              <div class="dash-card">
+                <h5>Productores Aliados</h5>
+                <h3 style="color: #0d9488;">{{ total_proveedores }}</h3>
+                <span class="kpi-subtext">Fincas en Boyacá y Cundinamarca</span>
+              </div>
+              <div class="dash-card">
+                <h5>Alianzas Activas</h5>
+                <h3 style="color: #059669;">100%</h3>
+                <span class="kpi-subtext">Convenios vigentes del campo</span>
+              </div>
+              <div class="dash-card">
+                <h5>Pedido Rápido</h5>
+                <h3 style="color: #2563eb;">WhatsApp</h3>
+                <span class="kpi-subtext">Reposición directa 1-clic</span>
+              </div>
+              <div class="dash-card">
+                <h5>Calificación Promedio</h5>
+                <h3 style="color: #eab308;">★ 4.9</h3>
+                <span class="kpi-subtext">Evaluación de frescura y entrega</span>
+              </div>
             </div>
-          </div> <!-- Fin #proveedores -->
-        </div> <!-- Fin .finanzas-grid-2 -->
-      </div> <!-- Fin #seccion-inventario -->
+
+            <div class="products-table-container">
+              <div class="catalog-inv-header">
+                <div>
+                  <h2 id="proveedores-heading" class="catalog-inv-title">Proveedores y Fincas Productoras</h2>
+                  <p class="catalog-inv-subtitle">Directorio de productores campesinos aliados para reposición de inventario y trazabilidad directa del campo.</p>
+                </div>
+                <div class="catalog-inv-actions">
+                  <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProveedor()">
+                    <span>+</span> Registrar Proveedor
+                  </button>
+                  <a href="/admin/principal/proveedor/" target="_blank" class="btn-secondary-dash" title="Abrir en Django Admin">
+                    Admin Técnico ↗
+                  </a>
+                </div>
+              </div>
+
+              <div class="table-scroll-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Finca / Razón Social</th>
+                      <th scope="col">NIT / RUT</th>
+                      <th scope="col">Contacto</th>
+                      <th scope="col">Teléfono / Pedido Rápido</th>
+                      <th scope="col">Calificación</th>
+                      <th scope="col">Estado</th>
+                      <th scope="col" class="table-col-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for prov in proveedores %}
+                    <tr>
+                      <td>
+                        <strong class="prov-name">{{ prov.razon_social }}</strong>
+                        {% if prov.email %}<div class="prov-email">{{ prov.email }}</div>{% endif %}
+                      </td>
+                      <td><code class="prov-nit">{{ prov.nit_rut }}</code></td>
+                      <td>{{ prov.contacto_nombre|default:"Sin asignar" }}</td>
+                      <td>
+                        {% if prov.telefono %}
+                          <a href="https://wa.me/57{{ prov.telefono|cut:' '|cut:'-' }}?text=Buen%20d%C3%ADa%2C%20requerimos%20pedido%20de%20reposici%C3%B3n%20para%20Al%20Paso%20Fruter%C3%ADa" target="_blank" class="prov-wa-link" title="Pedir reposición de stock por WhatsApp">
+                            {{ prov.telefono }} ↗
+                          </a>
+                        {% else %}
+                          <span class="prov-no-phone">Sin teléfono</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <span class="prov-rating">{{ prov.calificacion_estrellas }} / 5.0</span>
+                      </td>
+                      <td>
+                        <span class="badge-status {% if prov.estado == 'Activo' %}badge-status-activo{% else %}badge-status-inactivo{% endif %}">
+                          {{ prov.estado }}
+                        </span>
+                      </td>
+                      <td class="table-col-actions">
+                        <button type="button" class="btn-action-edit"
+                          data-id="{{ prov.id_proveedor }}"
+                          data-razon="{{ prov.razon_social }}"
+                          data-nit="{{ prov.nit_rut }}"
+                          data-contacto="{{ prov.contacto_nombre|default:'' }}"
+                          data-telefono="{{ prov.telefono|default:'' }}"
+                          data-email="{{ prov.email|default:'' }}"
+                          data-calificacion="{{ prov.calificacion_estrellas }}"
+                          data-estado="{{ prov.estado }}"
+                          onclick="abrirModalEditarProveedor(this)">
+                          Editar
+                        </button>
+                        <button type="button" class="btn-action-delete"
+                          data-id="{{ prov.id_proveedor }}"
+                          data-razon="{{ prov.razon_social }}"
+                          onclick="abrirModalEliminarProveedor(this)">
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="7" class="empty-products">No hay proveedores registrados aún. ¡Registra al primer productor aliado!</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </section>
+        </div> <!-- Fin #seccion-proveedores -->
 
       <!-- ================================================================== -->
       <!-- SECCIÓN DE ADMINISTRADORES DEL SISTEMA (CÓDIGO DE GUTIÉRREZ)       -->
@@ -1587,112 +1663,24 @@
       aplicarFiltrosCombinados();
     }
 
-    // Control de Secciones SPA en el Dashboard
+    // Control de Secciones SPA en el Dashboard (Aislamiento Total de Módulos)
     function mostrarSeccion(seccionId, navEl) {
       const secKey = seccionId.replace('seccion-', '');
 
-      if (secKey === 'resumen') {
-        document.querySelectorAll('.dashboard-section').forEach(sec => {
-          sec.classList.remove('active');
-          sec.style.display = 'none';
-        });
-        const secInv = document.getElementById('seccion-inventario');
-        if (secInv) {
-          secInv.classList.add('active');
-          secInv.style.display = 'block';
-        }
-        document.querySelectorAll('.navigation a[data-section]').forEach(link => {
-          link.classList.remove('active');
-          link.removeAttribute('aria-current');
-        });
-        const navActivo = navEl || document.querySelector('.navigation a[data-section="resumen"]');
-        if (navActivo) {
-          navActivo.classList.add('active');
-          navActivo.setAttribute('aria-current', 'page');
-        }
-        const breadcrumb = document.getElementById('topbarBreadcrumb');
-        if (breadcrumb) {
-          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Resumen Ejecutivo y Alertas de Inventario</strong>';
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (history.replaceState) history.replaceState(null, null, '#resumen');
-        return;
-      }
-
-      if (secKey === 'inventario') {
-        document.querySelectorAll('.dashboard-section').forEach(sec => {
-          sec.classList.remove('active');
-          sec.style.display = 'none';
-        });
-        const secInv = document.getElementById('seccion-inventario');
-        if (secInv) {
-          secInv.classList.add('active');
-          secInv.style.display = 'block';
-        }
-        document.querySelectorAll('.navigation a[data-section]').forEach(link => {
-          link.classList.remove('active');
-          link.removeAttribute('aria-current');
-        });
-        const navActivo = navEl || document.querySelector('.navigation a[data-section="inventario"]');
-        if (navActivo) {
-          navActivo.classList.add('active');
-          navActivo.setAttribute('aria-current', 'page');
-        }
-        const breadcrumb = document.getElementById('topbarBreadcrumb');
-        if (breadcrumb) {
-          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Catálogo e Inventario en Tiempo Real</strong>';
-        }
-        setTimeout(() => {
-          const el = document.querySelector('.products-table-container');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 80);
-        if (history.replaceState) history.replaceState(null, null, '#inventario');
-        return;
-      }
-
-      if (secKey === 'proveedores') {
-        document.querySelectorAll('.dashboard-section').forEach(sec => {
-          sec.classList.remove('active');
-          sec.style.display = 'none';
-        });
-        const secInv = document.getElementById('seccion-inventario');
-        if (secInv) {
-          secInv.classList.add('active');
-          secInv.style.display = 'block';
-        }
-        setTimeout(() => {
-          const el = document.getElementById('proveedores');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 120);
-
-        document.querySelectorAll('.navigation a[data-section]').forEach(link => {
-          link.classList.remove('active');
-          link.removeAttribute('aria-current');
-        });
-        const navActivo = navEl || document.querySelector('.navigation a[data-section="proveedores"]');
-        if (navActivo) {
-          navActivo.classList.add('active');
-          navActivo.setAttribute('aria-current', 'page');
-        }
-        const breadcrumb = document.getElementById('topbarBreadcrumb');
-        if (breadcrumb) {
-          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Productores y Proveedores Aliados</strong>';
-        }
-        if (history.replaceState) history.replaceState(null, null, '#proveedores');
-        return;
-      }
-
+      // 1. Ocultar todas las secciones del dashboard
       document.querySelectorAll('.dashboard-section').forEach(sec => {
         sec.classList.remove('active');
         sec.style.display = 'none';
       });
 
+      // 2. Mostrar exclusivamente la sección seleccionada
       const secDestino = document.getElementById('seccion-' + secKey);
       if (secDestino) {
         secDestino.classList.add('active');
         secDestino.style.display = 'block';
       }
 
+      // 3. Actualizar enlaces de navegación lateral
       document.querySelectorAll('.navigation a[data-section]').forEach(link => {
         link.classList.remove('active');
         link.removeAttribute('aria-current');
@@ -1704,37 +1692,60 @@
         navActivo.setAttribute('aria-current', 'page');
       }
 
+      // 4. Actualizar título/breadcrumb superior y placeholder del buscador según sección
       const breadcrumb = document.getElementById('topbarBreadcrumb');
       const inputBuscar = document.getElementById('inputBuscarProducto');
-      if (breadcrumb) {
-        if (secKey === 'usuarios') {
-          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Administradores del Sistema y Roles</strong>';
-          if (inputBuscar) inputBuscar.placeholder = 'Buscar administrador o email...';
-        } else {
-          breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Panel de Control Integral</strong>';
-          if (inputBuscar) inputBuscar.placeholder = 'Buscar producto o categoría...';
-        }
+
+      if (secKey === 'resumen') {
+        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Resumen Ejecutivo y Alertas de Inventario</strong>';
+        if (inputBuscar) inputBuscar.placeholder = 'Buscar en el catálogo...';
+      } else if (secKey === 'inventario') {
+        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Catálogo e Inventario en Tiempo Real</strong>';
+        if (inputBuscar) inputBuscar.placeholder = 'Buscar producto o categoría...';
+      } else if (secKey === 'proveedores') {
+        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Directorio de Productores y Proveedores</strong>';
+        if (inputBuscar) inputBuscar.placeholder = 'Buscar razón social, NIT o contacto...';
+      } else if (secKey === 'usuarios') {
+        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Administradores del Sistema y Roles</strong>';
+        if (inputBuscar) inputBuscar.placeholder = 'Buscar administrador o email...';
       }
 
+      // 5. Scroll suave al inicio del contenido
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // 6. Actualizar URL hash de forma limpia
       if (history.replaceState) {
         history.replaceState(null, null, '#' + secKey);
       }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function ejecutarBusquedaActiva() {
-      const secUsuarios = document.getElementById('seccion-usuarios');
-      const esUsuarios = secUsuarios && secUsuarios.classList.contains('active');
       const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
+      const secUsuarios = document.getElementById('seccion-usuarios');
+      const secProveedores = document.getElementById('seccion-proveedores');
+      const esUsuarios = secUsuarios && secUsuarios.classList.contains('active');
+      const esProveedores = secProveedores && secProveedores.classList.contains('active');
 
       if (esUsuarios) {
         const inputUsu = document.getElementById('inputBuscarUsuario');
         if (inputUsu) inputUsu.value = termino;
         filtrarTablaUsuarios(termino);
+      } else if (esProveedores) {
+        filtrarTablaProveedores(termino);
       } else {
         filtrarTablaProductos();
       }
+    }
+
+    function filtrarTablaProveedores(terminoDirecto) {
+      const input = document.getElementById('inputBuscarProducto');
+      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
+      const filas = document.querySelectorAll('#seccion-proveedores tbody tr');
+
+      filas.forEach(fila => {
+        const texto = fila.textContent.toLowerCase();
+        fila.style.display = texto.includes(termino) ? '' : 'none';
+      });
     }
 
     function filtrarTablaUsuarios(terminoDirecto) {
@@ -1764,13 +1775,12 @@
     }
 
     function sincronizarSeccionUrl() {
-      const hash = (window.location.hash || '').replace('#', '');
-      if (hash === 'usuarios') {
-        mostrarSeccion('usuarios');
-      } else if (hash === 'proveedores') {
-        mostrarSeccion('proveedores');
+      const hash = (window.location.hash || '').replace('#', '').trim();
+      const seccionesValidas = ['resumen', 'inventario', 'proveedores', 'usuarios'];
+      if (seccionesValidas.includes(hash)) {
+        mostrarSeccion(hash);
       } else {
-        mostrarSeccion('inventario');
+        mostrarSeccion('resumen');
       }
     }
 

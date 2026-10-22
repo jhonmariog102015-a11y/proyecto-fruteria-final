@@ -183,6 +183,57 @@ button {
   transform: translateY(-1px);
 }
 
+/* Tarjetas de Accesos Rápidos en Sección Resumen */
+.dash-quick-actions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.quick-action-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.quick-action-card:hover {
+  background: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+  transform: translateX(4px);
+}
+
+.quick-action-card .action-icon {
+  font-size: 22px;
+}
+
+.quick-action-card strong {
+  display: block;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.quick-action-card small {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.quick-action-card .action-arrow {
+  margin-left: auto;
+  font-size: 16px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
 .sidebar-bottom {
   margin-top: auto;
   padding-top: 60px;
