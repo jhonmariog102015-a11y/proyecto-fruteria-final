@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count, Case, When, Value, IntegerField
+from django.db.models import Count, Case, When, Value, IntegerField, Avg
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -129,9 +129,15 @@ def dashboard_view(request):
     chart_prod_precios = [float(p.precio_efectivo) for p in top_prods]
     chart_prod_margenes = [float(p.margen_ganancia) for p in top_prods]
 
-    # Proveedores y productores aliados
+    # Proveedores y productores aliados (Métricas de Abastecimiento)
     proveedores = Proveedor.objects.all().order_by('razon_social')
     total_proveedores = proveedores.count()
+    total_prov_activos = proveedores.filter(estado='Activo').count()
+    total_prov_inactivos = total_proveedores - total_prov_activos
+    total_prov_con_telefono = proveedores.exclude(telefono__isnull=True).exclude(telefono='').count()
+
+    prom_calif_agg = proveedores.aggregate(prom=Avg('calificacion_estrellas'))['prom']
+    promedio_calificacion_fincas = round(float(prom_calif_agg), 1) if prom_calif_agg else 5.0
 
     # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
     # Sincronización de perfiles administrativos y métricas del equipo de gestión
@@ -177,6 +183,10 @@ def dashboard_view(request):
         'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,
+        'total_prov_activos': total_prov_activos,
+        'total_prov_inactivos': total_prov_inactivos,
+        'total_prov_con_telefono': total_prov_con_telefono,
+        'promedio_calificacion_fincas': promedio_calificacion_fincas,
         'total_activos': total_activos,
         'total_superadmins': total_superadmins,
         'total_bodegueros': total_bodegueros,
@@ -185,6 +195,7 @@ def dashboard_view(request):
         'total_admins_activos': total_activos,
         'total_staff': total_staff,
         'inversion_total': inversion_total,
+        'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
         'valor_venta_potencial': valor_venta_potencial,
         'ganancia_potencial': ganancia_potencial,
         'margen_promedio': margen_promedio,

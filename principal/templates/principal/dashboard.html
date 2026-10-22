@@ -452,27 +452,41 @@
         <div id="seccion-proveedores" class="dashboard-section" style="display: none;">
           <section class="dashboard-products" id="proveedores-section" aria-labelledby="proveedores-heading">
             
-            <!-- Resumen de Métricas de Proveedores -->
+            <!-- Métricas Operativas de Abastecimiento para el Dueño -->
             <div class="stats-row" style="margin-bottom: 1.5rem;">
               <div class="dash-card">
                 <h5>Productores Aliados</h5>
                 <h3 style="color: #0d9488;">{{ total_proveedores }}</h3>
-                <span class="kpi-subtext">Fincas en Boyacá y Cundinamarca</span>
+                <span class="kpi-subtext">Calidad promedio: ★ {{ promedio_calificacion_fincas|floatformat:1 }} / 5.0</span>
               </div>
               <div class="dash-card">
-                <h5>Alianzas Activas</h5>
-                <h3 style="color: #059669;">100%</h3>
-                <span class="kpi-subtext">Convenios vigentes del campo</span>
+                <h5>Proveedores Activos</h5>
+                <h3 style="color: #059669;">{{ total_prov_activos }} <small style="font-size: 0.95rem; color: #64748b; font-weight: normal;">/ {{ total_proveedores }}</small></h3>
+                <span class="kpi-subtext">
+                  {% if total_prov_inactivos > 0 %}
+                    <strong style="color: #dc2626;">{{ total_prov_inactivos }} inactivo(s)</strong> • {{ total_prov_con_telefono }} con WhatsApp
+                  {% else %}
+                    {{ total_prov_con_telefono }} fincas con línea WhatsApp activa
+                  {% endif %}
+                </span>
               </div>
               <div class="dash-card">
-                <h5>Pedido Rápido</h5>
-                <h3 style="color: #2563eb;">WhatsApp</h3>
-                <span class="kpi-subtext">Reposición directa 1-clic</span>
+                <h5>Alertas de Reposición</h5>
+                <h3 style="color: {% if total_bajo_stock > 0 %}#dc2626{% else %}#059669{% endif %};">
+                  {{ total_bajo_stock }} <small style="font-size: 0.95rem; color: #64748b; font-weight: normal;">ref.</small>
+                </h3>
+                <span class="kpi-subtext">
+                  {% if total_bajo_stock > 0 %}
+                    <strong style="color: #dc2626;">Stock crítico</strong> ({{ total_agotados }} agotados) para pedir hoy
+                  {% else %}
+                    Stock óptimo en tienda • Sin faltantes
+                  {% endif %}
+                </span>
               </div>
               <div class="dash-card">
-                <h5>Calificación Promedio</h5>
-                <h3 style="color: #eab308;">★ 4.9</h3>
-                <span class="kpi-subtext">Evaluación de frescura y entrega</span>
+                <h5>Inversión en Compras</h5>
+                <h3 style="color: #2563eb;">${{ inversion_total_cop|default:inversion_total }} <small style="font-size: 0.85rem; color: #64748b; font-weight: 600;">COP</small></h3>
+                <span class="kpi-subtext">Costo total de mercancía adquirida a fincas</span>
               </div>
             </div>
 
