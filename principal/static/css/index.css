@@ -791,10 +791,17 @@ body {
     transform: scale(1.08);
 }
 
-.badge-tag-fresh {
+.card-img-badges-row {
     position: absolute;
     top: 10px;
     left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 3;
+}
+
+.badge-tag-fresh {
     background: rgba(26, 58, 38, 0.88);
     backdrop-filter: blur(4px);
     color: #fff;
@@ -1703,9 +1710,6 @@ body {
    ESTILOS PARA OFERTAS Y PROMOCIONES (CONTROL DE MARGEN Y DESCUENTOS)
    ========================================================================== */
 .badge-tag-oferta {
-    position: absolute;
-    top: 10px;
-    right: 10px;
     background: #d32f2f;
     color: #fff;
     font-size: 0.72rem;
@@ -1713,7 +1717,6 @@ body {
     padding: 3px 8px;
     border-radius: 20px;
     box-shadow: 0 2px 6px rgba(211, 47, 47, 0.4);
-    z-index: 2;
     display: inline-flex;
     align-items: center;
     gap: 3px;

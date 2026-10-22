@@ -1410,13 +1410,10 @@
 
 /* 4. Botón Corazón en Tarjeta de Frutas */
 .btn-card-fav {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(4px);
     border: 1px solid rgba(0, 0, 0, 0.08);
     display: inline-flex;
@@ -1426,8 +1423,22 @@
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 5;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     padding: 0;
+    flex-shrink: 0;
+}
+
+/* En el catálogo de frutas: alinea limpiamente a la derecha sin superponerse a badges */
+.card-top .btn-card-fav {
+    position: static;
+    margin-left: auto;
+}
+
+/* En el carrusel principal: esquina superior derecha sobre el banner */
+.card-img-wrap .btn-card-fav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
 .btn-card-fav:hover {

@@ -663,6 +663,21 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.1rem;
+    gap: 10px;
+}
+
+.card-top-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.card-badges-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
 }
 
 .fruit-visual {
@@ -727,7 +742,7 @@ body {
     color: #ffffff;
     border-color: #d32f2f;
     font-weight: 700;
-    margin-left: 6px;
+    margin-left: 0;
 }
 
 .fruit-category {
