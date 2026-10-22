@@ -1,7 +1,16 @@
 from pathlib import Path
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Optimización técnica para pruebas automatizadas:
+# Al ejecutar 'manage.py test', se emplea MD5PasswordHasher para acelerar la suite
+# de pruebas (evitando los cálculos costosos de PBKDF2 que retrasan la ejecución).
+if 'test' in sys.argv:
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'
