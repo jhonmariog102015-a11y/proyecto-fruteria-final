@@ -940,206 +940,46 @@
 }
 
 /* ==============================================================================
-   BARRA SUPERIOR DE ADMINISTRACIÓN (ADMIN STRIP FOR LOGGED-IN STAFF)
-   Reemplaza los botones desubicados en el navbar por una barra elegante superior
+   BOTÓN ÚNICO DE ACCESO AL PANEL ADMINISTRATIVO EN NAVBAR
+   Diseño minimalista, directo y unificado junto a las acciones principales
    ============================================================================== */
-.store-admin-bar {
+.btn-nav-admin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: #0f172a;
-    color: #e2e8f0;
-    font-size: 0.82rem;
-    padding: 0.42rem 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    z-index: 1010;
+    color: #f8fafc !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
 }
 
-.store-admin-container {
-    max-width: 1320px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.store-admin-left {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-}
-
-.admin-badge-mode {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: rgba(16, 185, 129, 0.16);
+.btn-nav-admin svg {
+    flex-shrink: 0;
     color: #34d399;
-    border: 1px solid rgba(52, 211, 153, 0.35);
-    padding: 0.2rem 0.65rem;
-    border-radius: 9999px;
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
 }
 
-.admin-session-info {
-    color: #cbd5e1;
-    font-size: 0.82rem;
-}
-
-.admin-session-info strong {
-    color: #ffffff;
-}
-
-.admin-role-badge {
-    color: #94a3b8;
-    font-size: 0.75rem;
-}
-
-.store-admin-right {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-left: auto;
-}
-
-.btn-store-admin-dash {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: #2e7d32;
+.btn-nav-admin:hover {
+    background: #1e293b;
     color: #ffffff !important;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.78rem;
-    padding: 0.32rem 0.85rem;
-    border-radius: 6px;
-    transition: all 0.18s ease;
-}
-
-.btn-store-admin-dash:hover {
-    background: #1b5e20;
+    border-color: rgba(52, 211, 153, 0.45);
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.link-store-admin-django {
-    color: #94a3b8 !important;
-    text-decoration: none;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.32rem 0.55rem;
-    border-radius: 4px;
-    transition: color 0.18s ease;
-}
-
-.link-store-admin-django:hover {
-    color: #ffffff !important;
-}
-
-.store-admin-logout-form {
-    margin: 0;
-    display: inline-flex;
-}
-
-.btn-store-admin-logout {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: rgba(239, 68, 68, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.35);
-    color: #fca5a5;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.28rem 0.75rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.18s ease;
-}
-
-.btn-store-admin-logout:hover {
-    background: rgba(239, 68, 68, 0.28);
-    color: #fee2e2;
-    border-color: #ef4444;
-}
-
-/* Sección de administración en el menú desplegable móvil */
-.mobile-nav-admin-box {
-    margin-top: 1.25rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.mobile-admin-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.mobile-admin-info span {
-    font-size: 0.75rem;
-    font-weight: 800;
-    color: #059669;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.mobile-admin-info small {
-    color: #64748b;
-    font-size: 0.8rem;
-}
-
-.mobile-admin-dash-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #1e3a29;
-    color: #ffffff !important;
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    text-decoration: none;
-    text-align: center;
-    justify-content: center;
-}
-
-.mobile-admin-logout-form {
-    margin: 0;
-}
-
-.mobile-admin-logout-btn {
-    width: 100%;
-    padding: 0.5rem;
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fca5a5;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 640px) {
-    .store-admin-bar {
-        padding: 0.35rem 0.85rem;
-    }
-    .store-admin-container {
-        font-size: 0.74rem;
-        gap: 0.4rem;
-    }
-    .admin-session-info {
-        display: none;
-    }
-    .link-store-admin-django {
-        display: none;
+    .btn-nav-admin {
+        padding: 0.5rem 0.65rem;
+        font-size: 0.75rem;
+        gap: 4px;
     }
 }
 
