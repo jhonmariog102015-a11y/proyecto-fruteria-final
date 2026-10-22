@@ -1,7 +1,19 @@
+import os
 from pathlib import Path
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# --- 1. INICIALIZAR DJANGO-ENVIRON PRIMERO ---
+env = environ.Env(
+    # Valores por defecto si no encuentra el archivo .env
+    DEBUG=(bool, False)
+)
+
+# Lee el archivo .env ubicado en la raíz del proyecto
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'
@@ -97,15 +109,15 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Configuración SMTP real para envío de correos (Gmail)
+# --- 2. CONFIGURACIÓN SMTP USANDO 'env' (AHORA SÍ FUNCIONARÁ) ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = 'alpasofruteria029@gmail.com'
-EMAIL_HOST_PASSWORD = 'vktffozswhhlegag'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
-DEFAULT_FROM_EMAIL = 'Al Paso Frutería <alpasofruteria029@gmail.com>'
-SERVER_EMAIL = 'alpasofruteria029@gmail.com'
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+SERVER_EMAIL = env('EMAIL_HOST_USER')
