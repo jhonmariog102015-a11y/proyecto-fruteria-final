@@ -8,7 +8,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout, login as auth_login
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count, Case, When, Value, IntegerField, Avg
@@ -613,42 +613,33 @@ def logout_view(request):
     return redirect('index')
 
 
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
 def admin_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: PANEL GENERAL
-    Permite generar reportes técnicos y capturas del estado del admin.
+    Permite generar reportes técnicos y capturas del estado del admin exclusivamente para superusuarios.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
-    user = User.objects.filter(username='admin').first()
-    if user:
-        request.user = user
     return admin.site.index(request)
 
 
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
 def admin_productos_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: APP PRINCIPAL
-    Carga el índice de modelos de la app 'principal' en el panel de Django.
+    Carga el índice de modelos de la app 'principal' en el panel de Django exclusivamente para superusuarios.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
-    user = User.objects.filter(username='admin').first()
-    if user:
-        request.user = user
     return admin.site.app_index(request, 'principal')
 
 
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
 def admin_producto_list_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: LISTADO DE PRODUCTOS
-    Genera la vista de tabla tabular de productos en el admin de Django.
+    Genera la vista de tabla tabular de productos en el admin de Django exclusivamente para superusuarios.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
-    user = User.objects.filter(username='admin').first()
-    if user:
-        request.user = user
     from .models import Producto
     return admin.site._registry[Producto].changelist_view(request)
 

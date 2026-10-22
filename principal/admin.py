@@ -220,3 +220,14 @@ class CustomUserAdmin(BaseUserAdmin):
             return mark_safe('<span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:4px; font-weight:600;">Activo</span>')
         return mark_safe('<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:4px; font-weight:600;">Inactivo</span>')
 
+
+# ==============================================================================
+# RESTRICCIÓN DE SEGURIDAD: DJANGO ADMIN EXCLUSIVO PARA SUPERUSUARIOS
+# Solo los usuarios con is_superuser=True y is_active=True pueden acceder a /admin/
+# ==============================================================================
+def superuser_only_has_permission(request):
+    """Garantiza que el panel nativo de Django (/admin/) sea accesible únicamente para Super Admins."""
+    return bool(request.user and request.user.is_active and request.user.is_superuser)
+
+admin.site.has_permission = superuser_only_has_permission
+

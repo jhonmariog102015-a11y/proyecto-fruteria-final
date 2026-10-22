@@ -983,4 +983,62 @@
     }
 }
 
+/* ==============================================================================
+   BOTÓN DESTACADO DE INICIAR SESIÓN EN NAVBAR
+   Altamente visible para administradores y empleados antes de autenticarse
+   ============================================================================== */
+.btn-nav-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #e65100;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.55rem 1.1rem;
+    border-radius: 999px;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 10px rgba(230, 81, 0, 0.3);
+    white-space: nowrap;
+}
+
+.btn-nav-login svg {
+    flex-shrink: 0;
+    color: #ffffff;
+}
+
+.btn-nav-login:hover {
+    background: #c64000;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(230, 81, 0, 0.45);
+}
+
+.mobile-login-link {
+    display: none;
+    font-weight: 700;
+    color: #e65100 !important;
+}
+
+@media (max-width: 900px) {
+    .mobile-login-link {
+        display: block;
+        padding-top: 0.85rem;
+        margin-top: 0.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+}
+
+@media (max-width: 640px) {
+    .btn-nav-login {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+}
+
 

@@ -288,9 +288,11 @@
                 <a href="{% url 'dashboard_exportar_inventario_csv' %}" class="btn-secondary-dash" title="Descargar inventario compatible con Excel (CSV)">
                   <span>↓</span> Exportar CSV
                 </a>
+                {% if request.user.is_superuser %}
                 <a href="/admin/principal/producto/" target="_blank" class="btn-secondary-dash" title="Abrir Django Admin">
                   Admin Técnico ↗
                 </a>
+                {% endif %}
               </div>
             </div>
 
@@ -500,9 +502,11 @@
                   <button type="button" class="btn-primary-dash" onclick="abrirModalNuevoProveedor()">
                     <span>+</span> Registrar Proveedor
                   </button>
+                  {% if request.user.is_superuser %}
                   <a href="/admin/principal/proveedor/" target="_blank" class="btn-secondary-dash" title="Abrir en Django Admin">
                     Admin Técnico ↗
                   </a>
+                  {% endif %}
                 </div>
               </div>
 
