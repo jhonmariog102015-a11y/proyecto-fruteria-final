@@ -29,7 +29,11 @@ from principal.views import (
     admin_preview,
     admin_productos_preview,
     admin_producto_list_preview,
-    registro_view
+    registro_view,
+    lista_ventas,
+    crear_venta,
+    editar_venta,
+    eliminar_venta,
 )
 from django.contrib.auth import views as auth_views
 
@@ -126,6 +130,11 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     path('404/', error_404_preview, name='error_404_preview'),
     path('500/', error_500_preview, name='error_500_preview'),
+    # Rutas del módulo de ventas por funciones
+    path('dashboard/ventas/', lista_ventas, name='lista_ventas'),
+    path('dashboard/ventas/nueva/', crear_venta, name='crear_venta'),
+    path('dashboard/ventas/editar/<int:pk>/', editar_venta, name='editar_venta'),
+    path('dashboard/ventas/eliminar/<int:pk>/', eliminar_venta, name='eliminar_venta'),
 ]
 
 # Manejadores globales de error HTTP para producción

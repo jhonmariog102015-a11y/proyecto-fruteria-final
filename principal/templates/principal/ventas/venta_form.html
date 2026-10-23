@@ -1,0 +1,252 @@
+<!-- ==============================================================================
+     FORMULARIO DE VENTA (principal/templates/principal/ventas/venta_form.html)
+     Creación y edición de ventas con calculadora de frutas y totales (Guía 4)
+     ============================================================================== -->
+{% extends "principal/base_crud.html" %}
+{% load static %}
+
+{% block titulo_documento %}{{ titulo }} | Al Paso Frutería{% endblock %}
+
+{% block estilos %}
+<style>
+    .calc-box {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+    .total-preview-card {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .total-preview-card .display-val {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{% url 'lista_ventas' %}" class="btn btn-outline-secondary btn-sm">
+                ← Volver al Listado de Ventas
+            </a>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                👤 Cajero activo: <strong>{{ request.user.username|capfirst }}</strong>
+            </span>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-success text-white py-3">
+                <h2 class="h4 mb-0 fw-bold d-flex align-items-center gap-2">
+                    <span>🛒</span> {{ titulo }}
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" id="formVenta" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-4">
+                        <!-- COLUMNA IZQUIERDA: DATOS GENERALES -->
+                        <div class="col-md-7">
+                            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">1. Datos de la Transacción</h5>
+
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label for="origen_venta" class="form-label fw-bold">Origen de la Venta *</label>
+                                    <select name="origen_venta" id="origen_venta" class="form-select" required>
+                                        <option value="Tienda Física" {% if venta and venta.origen_venta == "Tienda Física" or not venta %}selected{% endif %}>🏪 Tienda Física (Mostrador)</option>
+                                        <option value="Domicilio / WhatsApp" {% if venta and venta.origen_venta == "Domicilio / WhatsApp" %}selected{% endif %}>🛵 Domicilio / WhatsApp</option>
+                                        <option value="Tienda Virtual" {% if venta and venta.origen_venta == "Tienda Virtual" %}selected{% endif %}>🌐 Tienda Virtual</option>
+                                        <option value="Venta Mayorista" {% if venta and venta.origen_venta == "Venta Mayorista" %}selected{% endif %}>📦 Venta Mayorista</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label for="id_cliente" class="form-label fw-bold">Cliente / Destinatario</label>
+                                    <select name="id_cliente" id="id_cliente" class="form-select">
+                                        <option value="">👤 Consumidor Final (Ocasional)</option>
+                                        {% for cli in clientes %}
+                                            <option value="{{ cli.id_cliente }}" {% if venta and venta.id_cliente == cli.id_cliente %}selected{% endif %}>
+                                                Cliente #{{ cli.id_cliente }} ({{ cli.get_tipo_cliente_display }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="form-text">Opcional. Por defecto se registra como consumidor final.</div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label for="medio_pago" class="form-label fw-bold">Medio de Pago *</label>
+                                    <select name="medio_pago" id="medio_pago" class="form-select" required>
+                                        <option value="Efectivo" {% if venta and venta.medio_pago == "Efectivo" or not venta %}selected{% endif %}>💵 Efectivo</option>
+                                        <option value="Nequi" {% if venta and venta.medio_pago == "Nequi" %}selected{% endif %}>📱 Nequi</option>
+                                        <option value="Daviplata" {% if venta and venta.medio_pago == "Daviplata" %}selected{% endif %}>🔴 Daviplata</option>
+                                        <option value="Tarjeta Débito/Crédito" {% if venta and venta.medio_pago == "Tarjeta Débito/Crédito" %}selected{% endif %}>💳 Tarjeta Débito / Crédito</option>
+                                        <option value="Transferencia Bancaria" {% if venta and venta.medio_pago == "Transferencia Bancaria" %}selected{% endif %}>🏛️ Transferencia Bancaria</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label for="estado_venta" class="form-label fw-bold">Estado de la Venta *</label>
+                                    <select name="estado_venta" id="estado_venta" class="form-select" required>
+                                        <option value="Completada" {% if venta and venta.estado_venta == "Completada" or not venta %}selected{% endif %}>✅ Completada (Pagada)</option>
+                                        <option value="Pendiente" {% if venta and venta.estado_venta == "Pendiente" %}selected{% endif %}>⏳ Pendiente de Pago</option>
+                                        <option value="Anulada" {% if venta and venta.estado_venta == "Anulada" %}selected{% endif %}>❌ Anulada</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- ASISTENTE / CALCULADORA DE PRODUCTOS -->
+                            <div class="calc-box mt-4">
+                                <h6 class="fw-bold text-success mb-2 d-flex align-items-center gap-2">
+                                    <span>🍎</span> Calculadora Rápida de Frutas por Peso
+                                </h6>
+                                <p class="small text-muted mb-3">Selecciona una fruta del inventario y la cantidad para sumarla automáticamente al subtotal:</p>
+                                
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-sm-6">
+                                        <label for="sel_fruta" class="form-label small fw-semibold">Fruta / Producto</label>
+                                        <select id="sel_fruta" class="form-select form-select-sm">
+                                            <option value="" data-precio="0">-- Seleccionar fruta --</option>
+                                            {% for prod in productos %}
+                                                <option value="{{ prod.id_producto }}" data-precio="{{ prod.precio_efectivo }}" data-nombre="{{ prod.nombre }}" data-unidad="{{ prod.unidad_medida }}">
+                                                    {{ prod.icono_emoji|default:"🍏" }} {{ prod.nombre }} (${{ prod.precio_efectivo|floatformat:0 }} / {{ prod.unidad_medida }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <label for="inp_cant" class="form-label small fw-semibold">Cantidad / Kg</label>
+                                        <input type="number" id="inp_cant" step="0.1" min="0.1" value="1.0" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <button type="button" class="btn btn-sm btn-outline-success w-100 fw-bold" onclick="sumarFrutaASubtotal()">
+                                            + Sumar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="calc_resumen" class="small text-muted mt-2 fst-italic"></div>
+                            </div>
+                        </div>
+
+                        <!-- COLUMNA DERECHA: LIQUIDACIÓN Y TOTALES -->
+                        <div class="col-md-5">
+                            <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">2. Liquidación y Totales</h5>
+
+                            <div class="total-preview-card mb-4 shadow-sm">
+                                <span class="small text-white-50 text-uppercase fw-bold">Total a Cobrar</span>
+                                <div class="display-val" id="lbl_total_neto_display">
+                                    ${{ venta.total_neto|default:"0.00"|floatformat:2 }} COP
+                                </div>
+                                <span class="small text-white-50">Pesos Colombianos</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="subtotal" class="form-label fw-bold">Subtotal ($ COP) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" min="0" name="subtotal" id="subtotal" 
+                                           class="form-control form-control-lg fw-bold" 
+                                           value="{{ venta.subtotal|default:'0.00' }}" 
+                                           oninput="recalcularTotales()" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="descuento" class="form-label fw-bold">Descuento Promocional ($ COP)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text text-danger">-$</span>
+                                    <input type="number" step="0.01" min="0" name="descuento" id="descuento" 
+                                           class="form-control" 
+                                           value="{{ venta.descuento|default:'0.00' }}" 
+                                           oninput="recalcularTotales()">
+                                </div>
+                                <div class="form-text">Si aplica oferta especial o descuento al cliente.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="total_neto" class="form-label fw-bold">Total Neto ($ COP) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success-subtle fw-bold text-success">$</span>
+                                    <input type="number" step="0.01" min="0" name="total_neto" id="total_neto" 
+                                           class="form-control form-control-lg fw-bold text-success bg-light" 
+                                           value="{{ venta.total_neto|default:'0.00' }}" 
+                                           readonly required>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm">
+                                    💾 Guardar Venta
+                                </button>
+                                <a href="{% url 'lista_ventas' %}" class="btn btn-outline-secondary">
+                                    Cancelar y Volver
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function recalcularTotales() {
+        const subtotalInp = document.getElementById('subtotal');
+        const descInp = document.getElementById('descuento');
+        const totalNetoInp = document.getElementById('total_neto');
+        const totalDisplay = document.getElementById('lbl_total_neto_display');
+
+        const subtotal = parseFloat(subtotalInp.value) || 0;
+        const descuento = parseFloat(descInp.value) || 0;
+        const totalNeto = Math.max(0, subtotal - descuento);
+
+        totalNetoInp.value = totalNeto.toFixed(2);
+        if (totalDisplay) {
+            totalDisplay.innerText = '$' + totalNeto.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' COP';
+        }
+    }
+
+    function sumarFrutaASubtotal() {
+        const sel = document.getElementById('sel_fruta');
+        const cantInp = document.getElementById('inp_cant');
+        const subtotalInp = document.getElementById('subtotal');
+        const resumenDiv = document.getElementById('calc_resumen');
+
+        if (!sel.value) {
+            alert('Por favor selecciona una fruta de la lista.');
+            return;
+        }
+
+        const opt = sel.options[sel.selectedIndex];
+        const precioUnit = parseFloat(opt.getAttribute('data-precio')) || 0;
+        const nombre = opt.getAttribute('data-nombre');
+        const unidad = opt.getAttribute('data-unidad') || 'kg';
+        const cant = parseFloat(cantInp.value) || 1;
+
+        const agregado = precioUnit * cant;
+        const subActual = parseFloat(subtotalInp.value) || 0;
+        const nuevoSub = subActual + agregado;
+
+        subtotalInp.value = nuevoSub.toFixed(2);
+        recalcularTotales();
+
+        if (resumenDiv) {
+            resumenDiv.innerHTML = `✓ Sumado: <strong>${nombre}</strong> (${cant} ${unidad} × $${precioUnit.toLocaleString('es-CO')} = <strong>+$${agregado.toLocaleString('es-CO')} COP</strong>)`;
+        }
+    }
+
+    // Inicializar totales al cargar la página
+    document.addEventListener('DOMContentLoaded', recalcularTotales);
+</script>
+{% endblock %}

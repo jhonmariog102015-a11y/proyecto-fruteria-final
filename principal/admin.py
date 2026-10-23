@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Categoria, Proveedor, Producto, Cliente, RegistroLogin, PerfilUsuario
+from .models import Categoria, Proveedor, Producto, Cliente, RegistroLogin, PerfilUsuario, Venta
 
 
 @admin.register(Categoria)
@@ -80,6 +80,24 @@ class ProductoAdmin(admin.ModelAdmin):
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')
     list_filter = ('tipo_cliente',)
+
+
+@admin.register(Venta)
+class VentaAdmin(admin.ModelAdmin):
+    list_display = (
+        'id_venta',
+        'id_usuario_cajero',
+        'fecha_venta',
+        'origen_venta',
+        'medio_pago',
+        'subtotal',
+        'descuento',
+        'total_neto',
+        'estado_venta'
+    )
+    list_filter = ('estado_venta', 'medio_pago', 'origen_venta', 'fecha_venta')
+    search_fields = ('id_venta', 'id_usuario_cajero__username', 'medio_pago')
+    ordering = ('-fecha_venta',)
 
 
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
