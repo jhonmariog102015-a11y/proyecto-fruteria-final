@@ -2,8 +2,10 @@
 venv/
 __pycache__/
 *.pyc
+.env/
 pruebas/
-
+
+
 # Documentación del proyecto excluida de Git
 docuemnto proyecto/
 docuemnto proyecto

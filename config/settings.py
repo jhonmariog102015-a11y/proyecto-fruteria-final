@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import sys
 
@@ -12,6 +13,24 @@ if 'test' in sys.argv:
         'django.contrib.auth.hashers.MD5PasswordHasher',
     ]
 
+# --- 1. GESTIÓN COMPATIBLE DE VARIABLES DE ENTORNO (.env) ---
+# Compatible con django-environ o fallback nativo de os.environ para que cualquier persona pueda ejecutar el proyecto
+try:
+    import environ
+    env = environ.Env(
+        DEBUG=(bool, True),
+        EMAIL_HOST_USER=(str, 'alpasofruteria029@gmail.com'),
+        EMAIL_HOST_PASSWORD=(str, 'vktffozswhhlegag'),
+        DEFAULT_FROM_EMAIL=(str, 'Al Paso Frutería <alpasofruteria029@gmail.com>'),
+    )
+    env_file = os.path.join(BASE_DIR, '.env')
+    if os.path.exists(env_file):
+        environ.Env.read_env(env_file)
+except ImportError:
+    class EnvFallback:
+        def __call__(self, key, default=None):
+            return os.environ.get(key, default)
+    env = EnvFallback()
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4'
 
@@ -116,15 +135,15 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Configuración SMTP real para envío de correos (Gmail)
+# --- 2. CONFIGURACIÓN SMTP USANDO 'env' (AHORA SÍ FUNCIONARÁ) ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = 'alpasofruteria029@gmail.com'
-EMAIL_HOST_PASSWORD = 'vktffozswhhlegag'
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='alpasofruteria029@gmail.com')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='vktffozswhhlegag')
 
-DEFAULT_FROM_EMAIL = 'Al Paso Frutería <alpasofruteria029@gmail.com>'
-SERVER_EMAIL = 'alpasofruteria029@gmail.com'
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Al Paso Frutería <alpasofruteria029@gmail.com>')
+SERVER_EMAIL = EMAIL_HOST_USER
