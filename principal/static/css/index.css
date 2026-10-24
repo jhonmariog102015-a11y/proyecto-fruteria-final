@@ -111,7 +111,7 @@ body {
 
 .nav-links {
     display: flex;
-    gap: 2.5rem;
+    gap: clamp(0.6rem, 1.3vw, 1.7rem);
     align-items: center;
 }
 

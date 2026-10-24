@@ -644,6 +644,114 @@
 }
 
 /* ==============================================================================
+   7.1 CATEGORÍAS ILUSTRADAS EN EL NAVBAR (Frutas, Carnes, Lácteos, Despensa)
+   ============================================================================== */
+.nav-link-cat {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    gap: 4px;
+    padding: 0.25rem 0.45rem;
+    border-radius: 8px;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
+    cursor: pointer;
+}
+
+.nav-link-cat:hover {
+    transform: translateY(-2px);
+    background: #f7faf8;
+}
+
+.nav-link-cat .cat-nav-icon {
+    width: 26px;
+    height: 26px;
+    display: block;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.nav-link-cat:hover .cat-nav-icon {
+    transform: scale(1.1);
+}
+
+.nav-link-cat .nav-cat-label {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+    line-height: 1.1;
+    letter-spacing: -0.15px;
+    transition: color 0.2s ease;
+    text-align: center;
+}
+
+.nav-link-cat:hover .nav-cat-label,
+.nav-link-cat.active .nav-cat-label {
+    color: #1a3a26;
+    font-weight: 700;
+}
+
+/* Adaptación responsive para el menú móvil */
+@media (max-width: 900px) {
+    .nav-link-cat {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 0.65rem 0.85rem;
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .nav-link-cat:hover {
+        background: #f0f7f2;
+        transform: translateX(4px);
+    }
+
+    .nav-link-cat .cat-nav-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-link-cat .nav-cat-label {
+        font-size: 0.95rem;
+        color: #1e293b;
+        white-space: normal;
+        text-align: left;
+    }
+
+    .nav-item-dropdown {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-item-dropdown .nav-link-dropdown {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.65rem 0.85rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .nav-item-dropdown .dropdown-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border: 1px solid #e2ece3;
+        margin-top: 0.4rem;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        padding: 0.5rem;
+        background: #fcfdfc;
+    }
+}
+
+/* ==============================================================================
    8. BUSCADOR INTEGRADO EN EL NAVBAR
    ============================================================================== */
 .nav-search-form {

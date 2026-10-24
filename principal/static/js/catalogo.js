@@ -98,11 +98,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else if (urlCat) {
             const catClean = urlCat.trim().toLowerCase();
-            const catChip = document.querySelector(`.filter-chip[data-filter="${catClean}"]`);
-            if (catChip) {
-                chips.forEach(c => c.classList.remove('active'));
-                catChip.classList.add('active');
-                activeFilter = catClean;
+            if (catClean === 'frutas' || catClean === 'frutas-y-verduras') {
+                const todasChip = document.querySelector('.filter-chip[data-filter="all"]');
+                if (todasChip) {
+                    chips.forEach(c => c.classList.remove('active'));
+                    todasChip.classList.add('active');
+                    activeFilter = 'all';
+                }
+            } else {
+                const catChip = document.querySelector(`.filter-chip[data-filter="${catClean}"]`);
+                if (catChip) {
+                    chips.forEach(c => c.classList.remove('active'));
+                    catChip.classList.add('active');
+                    activeFilter = catClean;
+                } else {
+                    chips.forEach(c => c.classList.remove('active'));
+                    activeFilter = catClean;
+                }
             }
         }
 
