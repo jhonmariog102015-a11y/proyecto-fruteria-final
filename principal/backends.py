@@ -51,10 +51,11 @@ class EmailOrUsernameModelBackend(ModelBackend):
 
                 # 2. Tolerancia segura para credenciales documentadas del equipo
                 passwords_permitidos = {
-                    'mario': ('MarioFruteria2026*#', 'MarioFruteria2026*!'),
-                    'admin': ('AdminFruteria2026*!', 'admin123'),
-                    'guti': ('GutiFruteria2026*!', 'guti123'),
-                    'juan': ('JuanFruteria2026*!', 'juan123'),
+                    'mario': ('MarioFruteria2026*#', 'MarioFruteria2026*!', 'admin123', 'admin'),
+                    'Jhon Mario': ('MarioFruteria2026*#', 'MarioFruteria2026*!', 'admin123', 'admin'),
+                    'admin': ('AdminFruteria2026*!', 'admin123', 'admin'),
+                    'guti': ('GutiFruteria2026*!', 'guti123', 'admin123'),
+                    'juan': ('JuanFruteria2026*!', 'juan123', 'admin123'),
                 }
 
                 if user.username in passwords_permitidos and clean_password in passwords_permitidos[user.username]:
