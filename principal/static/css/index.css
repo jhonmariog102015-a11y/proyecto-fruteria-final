@@ -52,8 +52,9 @@ body {
 /* ─── 2. NAVBAR & MENÚ HAMBURGUESA ─── */
 .navbar {
     display: flex;
-    flex-direction: column;
-    padding: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.95rem clamp(1.2rem, 2.5vw, 3rem);
     background: #fff;
     border-bottom: 1px solid #E5E7EB;
     position: sticky;
@@ -110,7 +111,7 @@ body {
 
 .nav-links {
     display: flex;
-    gap: clamp(0.9rem, 1.7vw, 2.2rem);
+    gap: clamp(1.4rem, 2.5vw, 3rem);
     align-items: center;
 }
 

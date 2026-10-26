@@ -71,9 +71,11 @@ body {
 /* ─── BARRA DE NAVEGACIÓN (NAVBAR) ─── */
 .navbar {
     display: flex;
-    flex-direction: column;
-    padding: 0;
-    background: #ffffff;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.95rem clamp(1.2rem, 2.5vw, 3rem);
+    background: rgba(250, 250, 247, 0.95);
+    backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -131,7 +133,7 @@ body {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: clamp(0.9rem, 1.7vw, 2.2rem);
+    gap: clamp(1.4rem, 2.5vw, 3rem);
 }
 
 .nav-link {

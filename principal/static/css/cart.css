@@ -639,187 +639,49 @@
 }
 
 /* ==============================================================================
-   7. NAVBAR DOBLE ESTILO SUPERMERCADO (Top Bar + Sub-Navbar Departamentos)
-   ============================================================================== */
-.navbar {
-    display: flex !important;
-    flex-direction: column !important;
-    padding: 0 !important;
-    background: #ffffff !important;
-    border-bottom: 1px solid #e2e8f0 !important;
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 100 !important;
-    box-shadow: 0 4px 16px rgba(26, 58, 38, 0.05) !important;
-}
-
-.navbar-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(1rem, 2.5vw, 2.5rem);
-    padding: 0.75rem clamp(1.2rem, 3.5vw, 4rem);
-    width: 100%;
-    background: #ffffff;
-}
-
-/* Buscador central amplio y moderno */
-.navbar-search-center {
-    flex: 1;
-    max-width: 580px;
-    margin: 0 clamp(0.5rem, 1.5vw, 2rem);
-    display: flex;
-    justify-content: center;
-}
-
-.navbar-search-center .nav-search-form {
-    display: flex;
-    align-items: center;
-    background: #f1f5f2;
-    border: 1.5px solid #dce5dd;
-    border-radius: 999px;
-    padding: 4px 6px 4px 18px;
-    transition: all 0.25s ease;
-    width: 100%;
-}
-
-.navbar-search-center .nav-search-form:focus-within {
-    background: #ffffff;
-    border-color: #1e3a29;
-    box-shadow: 0 0 0 4px rgba(30, 58, 41, 0.12);
-}
-
-.navbar-search-center .nav-search-input {
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    font-size: 0.88rem;
-    color: #1a1a1a;
-    width: 100%;
-    outline: none;
-}
-
-.navbar-search-center .nav-search-input::placeholder {
-    color: #7b8e80;
-    font-size: 0.85rem;
-}
-
-.navbar-search-center .nav-search-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #1e3a29;
-    color: #ffffff;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.2s ease, transform 0.15s ease;
-}
-
-.navbar-search-center .nav-search-btn:hover {
-    background: #2a553c;
-    transform: scale(1.05);
-}
-
-/* 2. Sub-Navbar Inferior de Navegación y Departamentos */
-.navbar-subnav-bar {
-    width: 100%;
-    background: #fbfdfb;
-    border-top: 1px solid #edf2ee;
-    padding: 0.35rem clamp(1.2rem, 3.5vw, 4rem);
-    display: flex;
-    align-items: center;
-}
-
-.navbar-subnav-bar .nav-links {
-    display: flex;
-    align-items: center;
-    gap: clamp(1rem, 2vw, 2.6rem);
-    width: 100%;
-    margin: 0;
-}
-
-/* Badge de Ofertas en Navbar */
-.nav-link-oferta {
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    white-space: nowrap !important;
-}
-
-.nav-badge-oferta {
-    display: inline-flex;
-    align-items: center;
-    background: #e11d48;
-    color: #ffffff;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 2px 7px;
-    border-radius: 6px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    line-height: 1.1;
-    white-space: nowrap;
-    box-shadow: 0 1px 4px rgba(225, 29, 72, 0.25);
-}
-
-/* Separador vertical elegante entre navegación general y categorías */
-.nav-divider {
-    width: 1px;
-    height: 22px;
-    background: #d8e2da;
-    margin: 0 clamp(0.2rem, 0.5vw, 0.6rem);
-    flex-shrink: 0;
-}
-
-/* ==============================================================================
-   7.1 CATEGORÍAS ILUSTRADAS EN LA SUB-BARRA (Frutas, Carnes, Lácteos)
+   7.1 CATEGORÍAS ILUSTRADAS EN EL NAVBAR (Frutas, Carnes, Lácteos)
    ============================================================================== */
 .nav-link-cat {
     display: inline-flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    gap: 8px;
-    padding: 0.35rem 0.85rem;
-    border-radius: 999px;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    gap: 5px;
+    padding: 0.4rem 0.85rem;
+    border-radius: 12px;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.15s ease;
     cursor: pointer;
     white-space: nowrap;
-    background: transparent;
 }
 
 .nav-link-cat:hover {
-    background: #eaf4ed;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(30, 58, 41, 0.05);
+    transform: translateY(-2px);
+    background: #f0f7f2;
+    box-shadow: 0 3px 10px rgba(30, 58, 41, 0.06);
 }
 
 .nav-link-cat .cat-nav-icon {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
     display: block;
-    flex-shrink: 0;
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.04));
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
 }
 
 .nav-link-cat:hover .cat-nav-icon {
-    transform: scale(1.15);
+    transform: scale(1.12);
 }
 
 .nav-link-cat .nav-cat-label {
-    font-size: 0.86rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    color: #334155;
+    color: #475569;
     white-space: nowrap;
     line-height: 1.1;
     letter-spacing: -0.15px;
     transition: color 0.2s ease;
+    text-align: center;
 }
 
 .nav-link-cat:hover .nav-cat-label,
@@ -830,43 +692,6 @@
 
 /* Adaptación responsive para el menú móvil */
 @media (max-width: 900px) {
-    .navbar-search-center {
-        display: none;
-    }
-
-    .navbar-subnav-bar {
-        padding: 0;
-        border: none;
-        background: transparent;
-    }
-
-    .navbar-subnav-bar .nav-links {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0.5rem;
-        right: 0.5rem;
-        width: auto;
-        background: #ffffff;
-        padding: 1.25rem;
-        gap: 0.75rem;
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.3s ease;
-        z-index: 109;
-    }
-
-    .navbar-subnav-bar .nav-links.active-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
     .nav-link-cat {
         flex-direction: row;
         justify-content: flex-start;
@@ -925,6 +750,68 @@
         transform: none;
         padding: 0.5rem;
         background: #fcfdfc;
+    }
+}
+
+/* ==============================================================================
+   8. BUSCADOR INTEGRADO EN EL NAVBAR
+   ============================================================================== */
+.nav-search-form {
+    display: flex;
+    align-items: center;
+    background: #f3f5f3;
+    border: 1px solid #dfe5df;
+    border-radius: 999px;
+    padding: 3px 6px 3px 14px;
+    transition: all 0.25s ease;
+    width: 200px;
+}
+
+.nav-search-form:focus-within {
+    width: 240px;
+    background: #ffffff;
+    border-color: #2e6b43;
+    box-shadow: 0 0 0 3px rgba(46, 107, 67, 0.12);
+}
+
+.nav-search-input {
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    color: #1a1a1a;
+    width: 100%;
+    outline: none;
+}
+
+.nav-search-input::placeholder {
+    color: #8c9b90;
+    font-size: 0.82rem;
+}
+
+.nav-search-btn {
+    border: none;
+    background: #1e3a29;
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.nav-search-btn:hover {
+    background: #2e6b43;
+    transform: scale(1.05);
+}
+
+@media (max-width: 992px) {
+    .nav-search-form {
+        display: none;
     }
 }
 
