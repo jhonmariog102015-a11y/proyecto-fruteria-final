@@ -34,6 +34,9 @@ from principal.views import (
     crear_venta,
     editar_venta,
     eliminar_venta,
+    crear_venta_dashboard,
+    editar_venta_dashboard,
+    eliminar_venta_dashboard,
 )
 from django.contrib.auth import views as auth_views
 
@@ -79,6 +82,11 @@ urlpatterns = [
     path('dashboard/proveedor/crear/', crear_proveedor_dashboard, name='dashboard_crear_proveedor'),
     path('dashboard/proveedor/<int:id_proveedor>/editar/', editar_proveedor_dashboard, name='dashboard_editar_proveedor'),
     path('dashboard/proveedor/<int:id_proveedor>/eliminar/', eliminar_proveedor_dashboard, name='dashboard_eliminar_proveedor'),
+
+    # Gestión de ventas directas desde modal en Dashboard
+    path('dashboard/venta/crear/', crear_venta_dashboard, name='dashboard_crear_venta'),
+    path('dashboard/venta/<int:id_venta>/editar/', editar_venta_dashboard, name='dashboard_editar_venta'),
+    path('dashboard/venta/<int:id_venta>/eliminar/', eliminar_venta_dashboard, name='dashboard_eliminar_venta'),
 
     # -------------------------------------------------------------------------
     # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
