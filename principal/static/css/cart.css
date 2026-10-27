@@ -542,8 +542,11 @@
    ============================================================================== */
 .nav-item-dropdown {
     position: relative;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    flex: 0 0 135px;
+    width: 135px;
 }
 
 .nav-link-dropdown {
@@ -568,7 +571,8 @@
 .dropdown-menu {
     position: absolute;
     top: calc(100% + 10px);
-    left: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
     min-width: 230px;
     background: #ffffff;
     border: 1px solid #e2ece3;
@@ -580,7 +584,6 @@
     gap: 3px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(8px);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 200;
 }
@@ -599,7 +602,7 @@
 .nav-item-dropdown:focus-within .dropdown-menu {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .dropdown-item {
@@ -639,20 +642,28 @@
 }
 
 /* ==============================================================================
-   7.1 CATEGORÍAS ILUSTRADAS EN EL NAVBAR (Frutas, Carnes, Lácteos)
+   7.1 CATEGORÍAS ILUSTRADAS EN EL NAVBAR (Frutas, Carnes, Lácteos e Inicio)
    ============================================================================== */
 .nav-link-cat {
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    text-align: center;
     text-decoration: none;
-    gap: 5px;
-    padding: 0.4rem 0.85rem;
+    gap: 4px;
+    padding: 0.35rem 0.4rem;
+    flex: 0 0 135px;
+    width: 135px;
+    box-sizing: border-box;
     border-radius: 12px;
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.15s ease;
     cursor: pointer;
-    white-space: nowrap;
+}
+
+.nav-item-dropdown .nav-link-cat {
+    width: 100%;
+    flex: 1 1 auto;
 }
 
 .nav-link-cat:hover {
@@ -677,17 +688,27 @@
     font-size: 0.82rem;
     font-weight: 600;
     color: #475569;
-    white-space: nowrap;
-    line-height: 1.1;
+    white-space: normal;
+    line-height: 1.15;
+    text-align: center;
+    text-wrap: balance;
+    display: block;
+    margin-top: 2px;
     letter-spacing: -0.15px;
     transition: color 0.2s ease;
-    text-align: center;
 }
 
 .nav-link-cat:hover .nav-cat-label,
-.nav-link-cat.active .nav-cat-label {
+.nav-link-cat.active .nav-cat-label,
+.nav-link-dropdown.active .nav-cat-label {
     color: #1a3a26;
     font-weight: 700;
+}
+
+.nav-link-cat.active .nav-cat-label,
+.nav-link-dropdown.active .nav-cat-label {
+    border-bottom: 2.5px solid var(--orange, #E65100);
+    padding-bottom: 2px;
 }
 
 /* Adaptación responsive para el menú móvil */
@@ -698,6 +719,7 @@
         gap: 12px;
         padding: 0.65rem 0.85rem;
         width: 100%;
+        flex: 1 1 100%;
         border-radius: 10px;
     }
 
@@ -714,6 +736,8 @@
     .nav-link-cat .nav-cat-label {
         font-size: 0.95rem;
         text-align: left;
+        white-space: nowrap;
+        margin-top: 0;
     }
 
     .nav-divider {
@@ -725,6 +749,7 @@
 
     .nav-item-dropdown {
         width: 100%;
+        flex: 1 1 100%;
         display: flex;
         flex-direction: column;
         align-items: flex-start;

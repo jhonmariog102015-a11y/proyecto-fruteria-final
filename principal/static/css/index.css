@@ -113,8 +113,9 @@ body {
 .nav-links {
     justify-self: center;
     display: flex;
-    gap: clamp(1.4rem, 2.5vw, 3rem);
     align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 2vw, 2.5rem);
 }
 
 .nav-link {
@@ -146,6 +147,11 @@ body {
     height: 2.5px;
     background: var(--orange);
     border-radius: 2px;
+}
+
+.nav-link-cat.active::after,
+.nav-link-dropdown.active::after {
+    display: none;
 }
 
 .nav-actions {
