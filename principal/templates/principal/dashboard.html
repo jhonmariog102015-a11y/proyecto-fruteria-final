@@ -966,11 +966,11 @@
                 <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
                   Total: {{ total_ventas_count }} ventas
                 </span>
-                <a href="{% url 'crear_venta' %}" class="btn-primary-dash"
-                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Registrar nueva venta">
+                <button type="button" class="btn-primary-dash" onclick="abrirModalNuevaVenta()"
+                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nueva venta">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   + Nueva Venta
-                </a>
+                </button>
                 <a href="{% url 'lista_ventas' %}" class="btn-secondary-dash"
                   style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Ver módulo completo de ventas">
                   Ver Módulo Completo ↗
@@ -1034,12 +1034,32 @@
                     {% endif %}
                   </td>
                   <td style="text-align: center; white-space: nowrap;">
-                    <a href="{% url 'editar_venta' v.pk %}" class="btn-action-edit" style="text-decoration: none; display: inline-block;">
+                    <!-- Botón de Editar (Modal Nativo en Dashboard) -->
+                    <button type="button" class="btn-action-edit"
+                      data-id="{{ v.id_venta }}"
+                      data-cliente="{{ v.id_cliente|default:'' }}"
+                      data-origen="{{ v.origen_venta }}"
+                      data-medio="{{ v.medio_pago }}"
+                      data-subtotal="{{ v.subtotal }}"
+                      data-descuento="{{ v.descuento|default:'0.00' }}"
+                      data-total="{{ v.total_neto }}"
+                      data-estado="{{ v.estado_venta|default:'Completada' }}"
+                      onclick="abrirModalEditarVenta(this)"
+                      style="margin-right: 6px; cursor: pointer; border: none; background: #f1f5f9; color: #1e293b; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                      title="Modificar venta">
                       Editar
-                    </a>
-                    <a href="{% url 'eliminar_venta' v.pk %}" class="btn-action-delete" style="text-decoration: none; display: inline-block;">
+                    </button>
+
+                    <!-- Botón de Eliminar (Modal Nativo POST en Dashboard) -->
+                    <button type="button" class="btn-action-delete"
+                      data-id="{{ v.id_venta }}"
+                      data-total="{{ v.total_neto }}"
+                      data-cajero="{{ v.id_usuario_cajero.username|capfirst }}"
+                      onclick="abrirModalEliminarVenta(this)"
+                      style="color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; cursor: pointer; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.82rem;"
+                      title="Eliminar venta del sistema">
                       Eliminar
-                    </a>
+                    </button>
                   </td>
                 </tr>
                 {% empty %}
@@ -1640,6 +1660,251 @@
   </div>
 
   <!-- ====================================================================== -->
+  <!-- MODAL 11: REGISTRAR NUEVA VENTA                                         -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalNuevaVenta">
+    <div class="dash-modal" style="max-width: 580px;">
+      <div class="dash-modal-header">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #dcfce7; color: #15803d; font-size: 0.9rem;">🛒</span>
+          Registrar Nueva Venta
+        </h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalNuevaVenta()">✕</button>
+      </div>
+      <form action="{% url 'dashboard_crear_venta' %}" method="post" id="formNuevaVenta">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <!-- Info de cajero activo -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 12px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.82rem; color: #166534; font-weight: 600;">
+              👤 Cajero en turno: <strong>{{ request.user.username|capfirst }}</strong>
+            </span>
+            <span class="badge-status badge-status-activo" style="font-size: 0.72rem; padding: 2px 8px;">Sesión Activa</span>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nueva_venta_origen">Origen de la Venta *</label>
+              <select id="nueva_venta_origen" name="origen_venta" class="form-select" required>
+                <option value="Tienda Física" selected>🏪 Tienda Física (Mostrador)</option>
+                <option value="Domicilio / WhatsApp">🛵 Domicilio / WhatsApp</option>
+                <option value="Tienda Virtual">🌐 Tienda Virtual</option>
+                <option value="Venta Mayorista">📦 Venta Mayorista</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nueva_venta_cliente">Cliente / Destinatario</label>
+              <select id="nueva_venta_cliente" name="id_cliente" class="form-select">
+                <option value="">👤 Consumidor Final (Ocasional)</option>
+                {% for cli in clientes %}
+                <option value="{{ cli.id_cliente }}">Cliente #{{ cli.id_cliente }} ({{ cli.get_tipo_cliente_display }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nueva_venta_medio">Medio de Pago *</label>
+              <select id="nueva_venta_medio" name="medio_pago" class="form-select" required>
+                <option value="Efectivo" selected>💵 Efectivo</option>
+                <option value="Nequi">📱 Nequi</option>
+                <option value="Daviplata">🔴 Daviplata</option>
+                <option value="Tarjeta Débito/Crédito">💳 Tarjeta Débito / Crédito</option>
+                <option value="Transferencia Bancaria">🏛️ Transferencia Bancaria</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="nueva_venta_estado">Estado de la Venta *</label>
+              <select id="nueva_venta_estado" name="estado_venta" class="form-select" required>
+                <option value="Completada" selected>✅ Completada (Pagada)</option>
+                <option value="Pendiente">⏳ Pendiente de Pago</option>
+                <option value="Anulada">❌ Anulada</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Asistente de cálculo rápido con frutas del inventario -->
+          <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 0.9rem; margin-bottom: 1rem;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #166534; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+              <span>🍎</span> Calculadora Rápida de Frutas por Peso
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 90px auto; gap: 8px; align-items: center;">
+              <select id="nv_sel_fruta" class="form-select" style="font-size: 0.82rem; padding: 6px 10px;">
+                <option value="" data-precio="0">-- Elegir fruta del inventario --</option>
+                {% for p in productos %}
+                <option value="{{ p.id_producto }}" data-precio="{{ p.precio_efectivo }}">
+                  {{ p.icono_emoji|default:"🍏" }} {{ p.nombre }} (${{ p.precio_efectivo|floatformat:0 }}/{{ p.unidad_medida }})
+                </option>
+                {% endfor %}
+              </select>
+              <input type="number" id="nv_cant_fruta" class="form-input" style="font-size: 0.82rem; padding: 6px 8px;" step="0.1" min="0.1" value="1.0" placeholder="Cant/Kg">
+              <button type="button" class="btn-primary-dash" onclick="sumarFrutaNuevaVenta()" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">
+                + Sumar
+              </button>
+            </div>
+          </div>
+
+          <!-- Total a Cobrar Banner -->
+          <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; border-radius: 10px; padding: 0.85rem 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; font-weight: 700; display: block;">Total Neto a Cobrar</span>
+              <div id="nv_lbl_total" style="font-size: 1.5rem; font-weight: 800;">$0 COP</div>
+            </div>
+            <span style="font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 6px; font-weight: 600;">$ COP</span>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="nueva_venta_subtotal">Subtotal ($ COP) *</label>
+              <input type="number" step="0.01" min="0" id="nueva_venta_subtotal" name="subtotal" class="form-input" value="0.00" oninput="recalcularTotalesNuevaVenta()" required>
+            </div>
+            <div class="form-group">
+              <label for="nueva_venta_descuento">Descuento Promocional ($ COP)</label>
+              <input type="number" step="0.01" min="0" id="nueva_venta_descuento" name="descuento" class="form-input" value="0.00" oninput="recalcularTotalesNuevaVenta()">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="nueva_venta_total">Total Neto ($ COP) *</label>
+            <input type="number" step="0.01" min="0" id="nueva_venta_total" name="total_neto" class="form-input" value="0.00" readonly required style="background: #f8fafc; font-weight: 700; color: #059669;">
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalNuevaVenta()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Guardar Venta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 12: MODIFICAR VENTA                                               -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEditarVenta">
+    <div class="dash-modal" style="max-width: 580px;">
+      <div class="dash-modal-header">
+        <h3 style="display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #e0f2fe; color: #0284c7; font-size: 0.9rem;">✎</span>
+          Modificar Registro de Venta <span id="lblEditarIdVenta" style="color: #059669; font-weight: 800;"></span>
+        </h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEditarVenta()">✕</button>
+      </div>
+      <form id="formEditarVenta" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_venta_origen">Origen de la Venta *</label>
+              <select id="edit_venta_origen" name="origen_venta" class="form-select" required>
+                <option value="Tienda Física">🏪 Tienda Física (Mostrador)</option>
+                <option value="Domicilio / WhatsApp">🛵 Domicilio / WhatsApp</option>
+                <option value="Tienda Virtual">🌐 Tienda Virtual</option>
+                <option value="Venta Mayorista">📦 Venta Mayorista</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_venta_cliente">Cliente / Destinatario</label>
+              <select id="edit_venta_cliente" name="id_cliente" class="form-select">
+                <option value="">👤 Consumidor Final (Ocasional)</option>
+                {% for cli in clientes %}
+                <option value="{{ cli.id_cliente }}">Cliente #{{ cli.id_cliente }} ({{ cli.get_tipo_cliente_display }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_venta_medio">Medio de Pago *</label>
+              <select id="edit_venta_medio" name="medio_pago" class="form-select" required>
+                <option value="Efectivo">💵 Efectivo</option>
+                <option value="Nequi">📱 Nequi</option>
+                <option value="Daviplata">🔴 Daviplata</option>
+                <option value="Tarjeta Débito/Crédito">💳 Tarjeta Débito / Crédito</option>
+                <option value="Transferencia Bancaria">🏛️ Transferencia Bancaria</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit_venta_estado">Estado de la Venta *</label>
+              <select id="edit_venta_estado" name="estado_venta" class="form-select" required>
+                <option value="Completada">✅ Completada (Pagada)</option>
+                <option value="Pendiente">⏳ Pendiente de Pago</option>
+                <option value="Anulada">❌ Anulada</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Total a Cobrar Banner -->
+          <div style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: white; border-radius: 10px; padding: 0.85rem 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; font-weight: 700; display: block;">Total Neto Calculado</span>
+              <div id="edit_lbl_total" style="font-size: 1.5rem; font-weight: 800;">$0 COP</div>
+            </div>
+            <span style="font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 6px; font-weight: 600;">$ COP</span>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit_venta_subtotal">Subtotal ($ COP) *</label>
+              <input type="number" step="0.01" min="0" id="edit_venta_subtotal" name="subtotal" class="form-input" oninput="recalcularTotalesEditarVenta()" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_venta_descuento">Descuento Promocional ($ COP)</label>
+              <input type="number" step="0.01" min="0" id="edit_venta_descuento" name="descuento" class="form-input" oninput="recalcularTotalesEditarVenta()">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="edit_venta_total">Total Neto ($ COP) *</label>
+            <input type="number" step="0.01" min="0" id="edit_venta_total" name="total_neto" class="form-input" readonly required style="background: #f8fafc; font-weight: 700; color: #0284c7;">
+          </div>
+        </div>
+        <div class="dash-modal-footer">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEditarVenta()">Cancelar</button>
+          <button type="submit" class="btn-primary-dash">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- MODAL 13: CONFIRMACIÓN DE ELIMINACIÓN DE VENTA (POST)                   -->
+  <!-- ====================================================================== -->
+  <div class="dash-modal-overlay" id="modalEliminarVenta">
+    <div class="dash-modal" style="max-width: 440px;">
+      <div class="dash-modal-header" style="background: #fef2f2; border-bottom-color: #fee2e2;">
+        <h3 style="color: #991b1b; display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Eliminar Registro de Venta
+        </h3>
+        <button type="button" class="dash-modal-close" onclick="cerrarModalEliminarVenta()">✕</button>
+      </div>
+      <form id="formEliminarVenta" method="post" action="">
+        {% csrf_token %}
+        <div class="dash-modal-body" style="text-align: center; padding: 1.75rem 1.5rem;">
+          <p style="font-size: 0.95rem; color: #334155; margin: 0 0 0.5rem;">
+            ¿Estás seguro de que deseas eliminar permanentemente la transacción
+          </p>
+          <strong id="eliminarIdVenta"
+            style="font-size: 1.25rem; color: #059669; display: block; margin-bottom: 0.25rem;"></strong>
+          <span id="eliminarTotalVenta"
+            style="display: inline-block; font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 0.9rem;"></span>
+          <p style="font-size: 0.8rem; color: #dc2626; margin: 0; background: #fff5f5; padding: 8px 12px; border-radius: 6px; border: 1px solid #fed7d7;">
+            Esta acción se confirmará mediante petición <strong>POST</strong> y no se puede deshacer. Se descontará del balance total de facturación.
+          </p>
+        </div>
+        <div class="dash-modal-footer" style="justify-content: center;">
+          <button type="button" class="btn-secondary-dash" onclick="cerrarModalEliminarVenta()">Cancelar</button>
+          <button type="submit" class="btn-action-delete" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
+            Sí, Eliminar Venta
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
   <!-- DATOS SEGUROS PARA ANALÍTICA Y GRÁFICOS (JSON Script Django)            -->
   <!-- ====================================================================== -->
   {{ chart_cat_labels|json_script:"data-cat-labels" }}
@@ -1863,6 +2128,102 @@
       if (modal) modal.classList.remove('open');
     }
 
+    // 5.2 Funciones para Modales de Ventas (Nativo en Dashboard)
+    function abrirModalNuevaVenta() {
+      const modal = document.getElementById('modalNuevaVenta');
+      if (modal) {
+        modal.classList.add('open');
+        recalcularTotalesNuevaVenta();
+      }
+    }
+    function cerrarModalNuevaVenta() {
+      const modal = document.getElementById('modalNuevaVenta');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function recalcularTotalesNuevaVenta() {
+      const sub = parseFloat(document.getElementById('nueva_venta_subtotal').value) || 0;
+      let desc = parseFloat(document.getElementById('nueva_venta_descuento').value) || 0;
+      if (desc > sub) {
+        desc = sub;
+        document.getElementById('nueva_venta_descuento').value = desc.toFixed(2);
+      }
+      const total = Math.max(0, sub - desc);
+      document.getElementById('nueva_venta_total').value = total.toFixed(2);
+      document.getElementById('nv_lbl_total').textContent = '$' + total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' COP';
+    }
+
+    function sumarFrutaNuevaVenta() {
+      const sel = document.getElementById('nv_sel_fruta');
+      const precio = parseFloat(sel.options[sel.selectedIndex]?.getAttribute('data-precio')) || 0;
+      const cant = parseFloat(document.getElementById('nv_cant_fruta').value) || 0;
+      if (precio > 0 && cant > 0) {
+        const monto = precio * cant;
+        let sub = parseFloat(document.getElementById('nueva_venta_subtotal').value) || 0;
+        sub += monto;
+        document.getElementById('nueva_venta_subtotal').value = sub.toFixed(2);
+        recalcularTotalesNuevaVenta();
+      }
+    }
+
+    function abrirModalEditarVenta(btn) {
+      const id = btn.getAttribute('data-id');
+      const cliente = btn.getAttribute('data-cliente') || '';
+      const origen = btn.getAttribute('data-origen') || 'Tienda Física';
+      const medio = btn.getAttribute('data-medio') || 'Efectivo';
+      const subtotal = parseFloat(btn.getAttribute('data-subtotal')) || 0;
+      const descuento = parseFloat(btn.getAttribute('data-descuento')) || 0;
+      const total = parseFloat(btn.getAttribute('data-total')) || 0;
+      const estado = btn.getAttribute('data-estado') || 'Completada';
+
+      document.getElementById('formEditarVenta').action = `/dashboard/venta/${id}/editar/`;
+      document.getElementById('lblEditarIdVenta').textContent = `#VTA-${id}`;
+      document.getElementById('edit_venta_origen').value = origen;
+      document.getElementById('edit_venta_cliente').value = cliente;
+      document.getElementById('edit_venta_medio').value = medio;
+      document.getElementById('edit_venta_estado').value = estado;
+      document.getElementById('edit_venta_subtotal').value = subtotal.toFixed(2);
+      document.getElementById('edit_venta_descuento').value = descuento.toFixed(2);
+      document.getElementById('edit_venta_total').value = total.toFixed(2);
+      document.getElementById('edit_lbl_total').textContent = '$' + total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' COP';
+
+      const modal = document.getElementById('modalEditarVenta');
+      if (modal) modal.classList.add('open');
+    }
+    function cerrarModalEditarVenta() {
+      const modal = document.getElementById('modalEditarVenta');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function recalcularTotalesEditarVenta() {
+      const sub = parseFloat(document.getElementById('edit_venta_subtotal').value) || 0;
+      let desc = parseFloat(document.getElementById('edit_venta_descuento').value) || 0;
+      if (desc > sub) {
+        desc = sub;
+        document.getElementById('edit_venta_descuento').value = desc.toFixed(2);
+      }
+      const total = Math.max(0, sub - desc);
+      document.getElementById('edit_venta_total').value = total.toFixed(2);
+      document.getElementById('edit_lbl_total').textContent = '$' + total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' COP';
+    }
+
+    function abrirModalEliminarVenta(btn) {
+      const id = btn.getAttribute('data-id');
+      const total = parseFloat(btn.getAttribute('data-total')) || 0;
+      const cajero = btn.getAttribute('data-cajero') || '';
+
+      document.getElementById('formEliminarVenta').action = `/dashboard/venta/${id}/eliminar/`;
+      document.getElementById('eliminarIdVenta').textContent = `#VTA-${id}`;
+      document.getElementById('eliminarTotalVenta').textContent = `Total Neto: $${total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} COP • Cajero: ${cajero}`;
+
+      const modal = document.getElementById('modalEliminarVenta');
+      if (modal) modal.classList.add('open');
+    }
+    function cerrarModalEliminarVenta() {
+      const modal = document.getElementById('modalEliminarVenta');
+      if (modal) modal.classList.remove('open');
+    }
+
     // 6. Filtros combinados (Búsqueda por texto + Filtro rápido por estado)
     let filtroEstadoActual = 'todos';
 
@@ -2058,6 +2419,9 @@
         cerrarModalNuevoUsuario();
         cerrarModalEditarUsuario();
         cerrarModalEliminarUsuario();
+        cerrarModalNuevaVenta();
+        cerrarModalEditarVenta();
+        cerrarModalEliminarVenta();
       }
     });
 

@@ -858,6 +858,45 @@ class VentasTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Gestión de Ventas')
         self.assertContains(response, 'seccion-ventas')
+        self.assertContains(response, 'modalNuevaVenta')
+        self.assertContains(response, 'modalEditarVenta')
+        self.assertContains(response, 'modalEliminarVenta')
+        self.assertContains(response, 'abrirModalNuevaVenta')
+
+    def test_crear_venta_dashboard(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('dashboard_crear_venta'), {
+            'origen_venta': 'Tienda Virtual',
+            'subtotal': '35000',
+            'descuento': '5000',
+            'total_neto': '30000',
+            'medio_pago': 'Transferencia Bancaria',
+            'estado_venta': 'Completada'
+        })
+        self.assertRedirects(response, '/dashboard/#ventas')
+        self.assertTrue(Venta.objects.filter(origen_venta='Tienda Virtual', total_neto=Decimal('30000.00')).exists())
+
+    def test_editar_venta_dashboard(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('dashboard_editar_venta', args=[self.venta.pk]), {
+            'origen_venta': 'Venta Mayorista',
+            'subtotal': '50000',
+            'descuento': '10000',
+            'total_neto': '40000',
+            'medio_pago': 'Nequi',
+            'estado_venta': 'Completada'
+        })
+        self.assertRedirects(response, '/dashboard/#ventas')
+        self.venta.refresh_from_db()
+        self.assertEqual(self.venta.origen_venta, 'Venta Mayorista')
+        self.assertEqual(self.venta.total_neto, Decimal('40000.00'))
+
+    def test_eliminar_venta_dashboard(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('dashboard_eliminar_venta', args=[self.venta.pk]))
+        self.assertRedirects(response, '/dashboard/#ventas')
+        self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
+
 
 
 
