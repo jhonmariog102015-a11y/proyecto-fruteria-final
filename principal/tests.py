@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.test import TestCase
-from principal.models import Categoria, Producto, PerfilUsuario
+from principal.models import Categoria, Producto, PerfilUsuario, Venta
 from django.contrib.auth import authenticate
 
 
@@ -783,6 +783,81 @@ class UsuariosRolesDashboardTestCase(TestCase):
         self.assertNotContains(response, 'Django Admin ↗')
         self.assertNotContains(response, 'href="/admin/principal/producto/"')
         self.assertNotContains(response, 'href="/admin/principal/proveedor/"')
+
+
+class VentasTestCase(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username='cajero_test',
+            email='cajero@fruteria.com',
+            password='password123'
+        )
+        self.venta = Venta.objects.create(
+            id_usuario_cajero=self.user,
+            origen_venta='Tienda Física',
+            subtotal=Decimal('15000.00'),
+            descuento=Decimal('1000.00'),
+            total_neto=Decimal('14000.00'),
+            medio_pago='Efectivo',
+            estado_venta='Completada'
+        )
+
+    def test_modelo_venta_str(self):
+        self.assertIn(str(self.venta.id_venta), str(self.venta))
+        self.assertIn('14000.00', str(self.venta))
+
+    def test_lista_ventas_requiere_login(self):
+        response = self.client.get(reverse('lista_ventas'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_lista_ventas_autenticado(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.get(reverse('lista_ventas'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Gestión de Ventas')
+        self.assertContains(response, '14000')
+
+    def test_crear_venta_post(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('crear_venta'), {
+            'origen_venta': 'Domicilio / WhatsApp',
+            'subtotal': '25000',
+            'descuento': '2000',
+            'total_neto': '23000',
+            'medio_pago': 'Nequi',
+            'estado_venta': 'Completada'
+        })
+        self.assertRedirects(response, reverse('lista_ventas'))
+        self.assertTrue(Venta.objects.filter(medio_pago='Nequi', total_neto=Decimal('23000.00')).exists())
+
+    def test_editar_venta_post(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('editar_venta', args=[self.venta.pk]), {
+            'origen_venta': 'Tienda Física',
+            'subtotal': '15000',
+            'descuento': '3000',
+            'total_neto': '12000',
+            'medio_pago': 'Daviplata',
+            'estado_venta': 'Completada'
+        })
+        self.assertRedirects(response, reverse('lista_ventas'))
+        self.venta.refresh_from_db()
+        self.assertEqual(self.venta.medio_pago, 'Daviplata')
+        self.assertEqual(self.venta.total_neto, Decimal('12000.00'))
+
+    def test_eliminar_venta_post(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('eliminar_venta', args=[self.venta.pk]))
+        self.assertRedirects(response, reverse('lista_ventas'))
+        self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
+
+    def test_dashboard_muestra_ventas(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Gestión de Ventas')
+        self.assertContains(response, 'seccion-ventas')
 
 
 

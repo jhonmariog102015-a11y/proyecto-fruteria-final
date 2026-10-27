@@ -35,6 +35,9 @@
         <a onclick="mostrarSeccion('inventario', this)" data-section="inventario" id="nav-inventario">
           <span class="nav-icon">📦</span> Inventario
         </a>
+        <a onclick="mostrarSeccion('ventas', this)" data-section="ventas" id="nav-ventas">
+          <span class="nav-icon">💵</span> Gestión de Ventas
+        </a>
         <a onclick="mostrarSeccion('proveedores', this)" data-section="proveedores" id="nav-proveedores">
           <span class="nav-icon">🚜</span> Proveedores
         </a>
@@ -857,6 +860,200 @@
             </div>
           </section>
         </div>
+
+      <!-- ================================================================== -->
+      <!-- SECCIÓN DE GESTIÓN DE VENTAS Y FACTURACIÓN                         -->
+      <!-- ================================================================== -->
+      <div id="seccion-ventas" class="dashboard-section" style="display: none;">
+        <section class="dashboard-products" style="margin-bottom: 1.5rem;">
+          <!-- MÉTRICAS CLAVE DE VENTAS -->
+          <div class="stats-row">
+            <!-- 1. Ingresos Totales -->
+            <div class="dash-card" style="--card-accent: #059669;">
+              <div class="dash-card-header">
+                <h5>Total Recaudado</h5>
+                <span class="dash-card-icon" style="background: #d1fae5; color: #059669;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #059669;">${{ total_ventas_ingresos|floatformat:0 }}</h3>
+                <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Recaudado</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Ingresos netos por ventas</span>
+                <span style="font-weight: 700; color: #059669; font-size: 0.75rem;">$ COP</span>
+              </div>
+            </div>
+
+            <!-- 2. Ventas Registradas -->
+            <div class="dash-card" style="--card-accent: #0284c7;">
+              <div class="dash-card-header">
+                <h5>Total Ventas</h5>
+                <span class="dash-card-icon" style="background: #e0f2fe; color: #0284c7;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #0284c7;">{{ total_ventas_count }}</h3>
+                <span class="kpi-badge kpi-badge-blue">Transacciones</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Operaciones registradas</span>
+                <span style="font-weight: 700; color: #0284c7; font-size: 0.75rem;">100%</span>
+              </div>
+            </div>
+
+            <!-- 3. Ventas de Hoy -->
+            <div class="dash-card" style="--card-accent: #d97706;">
+              <div class="dash-card-header">
+                <h5>Ventas Hoy</h5>
+                <span class="dash-card-icon" style="background: #fef3c7; color: #d97706;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #d97706;">{{ ventas_hoy_count }}</h3>
+                <span class="kpi-badge kpi-badge-amber">${{ ventas_hoy_ingresos|floatformat:0 }}</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Recaudo jornada actual</span>
+                <span style="font-weight: 700; color: #d97706; font-size: 0.75rem;">Hoy</span>
+              </div>
+            </div>
+
+            <!-- 4. Ticket Promedio -->
+            <div class="dash-card" style="--card-accent: #7c3aed;">
+              <div class="dash-card-header">
+                <h5>Ticket Promedio</h5>
+                <span class="dash-card-icon" style="background: #ede9fe; color: #7c3aed;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                </span>
+              </div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between;">
+                <h3 style="color: #7c3aed;">${{ ticket_promedio|floatformat:0 }}</h3>
+                <span class="kpi-badge kpi-badge-purple">Promedio</span>
+              </div>
+              <div class="dash-card-footer">
+                <span class="kpi-subtext">Valor medio por transacción</span>
+                <span style="font-weight: 700; color: #7c3aed; font-size: 0.75rem;">$ COP</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TABLA COMPLETA DE VENTAS -->
+        <section class="dashboard-products" style="margin-top: 0;">
+          <div class="products-table-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h2 style="margin: 0; font-size: 1.35rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #dcfce7; color: #15803d;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                  </span>
+                  Registro y Control de Ventas
+                </h2>
+                <p style="margin: 4px 0 0; font-size: 0.85rem; color: #64748b;">
+                  Historial de transacciones comerciales, cajeros en turno y medios de pago.
+                </p>
+              </div>
+              <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
+                  <input type="search" id="inputBuscarVenta" placeholder="Buscar por ID, cajero, medio..."
+                    aria-label="Buscar venta" onkeyup="filtrarTablaVentas()" style="font-size: 0.85rem;">
+                  <span aria-hidden="true">⌕</span>
+                </label>
+                <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
+                  Total: {{ total_ventas_count }} ventas
+                </span>
+                <a href="{% url 'crear_venta' %}" class="btn-primary-dash"
+                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Registrar nueva venta">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  + Nueva Venta
+                </a>
+                <a href="{% url 'lista_ventas' %}" class="btn-secondary-dash"
+                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Ver módulo completo de ventas">
+                  Ver Módulo Completo ↗
+                </a>
+              </div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">N° Venta</th>
+                  <th scope="col">Cajero / Vendedor</th>
+                  <th scope="col">Fecha y Hora</th>
+                  <th scope="col">Origen</th>
+                  <th scope="col">Medio de Pago</th>
+                  <th scope="col" style="text-align: right;">Subtotal</th>
+                  <th scope="col" style="text-align: right;">Total Neto</th>
+                  <th scope="col" style="text-align: center;">Estado</th>
+                  <th scope="col" style="text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaVentasBody">
+                {% for v in ventas %}
+                <tr class="fila-venta" data-busqueda="venta #{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.medio_pago|lower }} {{ v.origen_venta|lower }} {{ v.estado_venta|lower }}">
+                  <td>
+                    <strong style="color: #059669;">#VTA-{{ v.id_venta }}</strong>
+                  </td>
+                  <td>
+                    <strong>{{ v.id_usuario_cajero.username|capfirst }}</strong>
+                    {% if v.id_cliente %}
+                      <div style="font-size: 0.75rem; color: #64748b;">Cliente ID: #{{ v.id_cliente }}</div>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div>{{ v.fecha_venta|date:"d/m/Y" }}</div>
+                    <small style="color: #64748b; font-size: 0.75rem;">{{ v.fecha_venta|date:"H:i A" }}</small>
+                  </td>
+                  <td>
+                    <span style="font-size: 0.8rem; background: #f1f5f9; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                      {{ v.origen_venta|default:"Tienda Física" }}
+                    </span>
+                  </td>
+                  <td>
+                    <span style="font-size: 0.8rem; font-weight: 600;">
+                      {{ v.medio_pago }}
+                    </span>
+                  </td>
+                  <td style="text-align: right; font-weight: 500;">
+                    ${{ v.subtotal|floatformat:2 }}
+                  </td>
+                  <td style="text-align: right; font-weight: 700; color: #059669; font-size: 0.95rem;">
+                    ${{ v.total_neto|floatformat:2 }} COP
+                  </td>
+                  <td style="text-align: center;">
+                    {% if v.estado_venta == "Completada" or not v.estado_venta %}
+                      <span class="badge-status badge-status-activo">Completada</span>
+                    {% elif v.estado_venta == "Pendiente" %}
+                      <span class="badge-status" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">Pendiente</span>
+                    {% else %}
+                      <span class="badge-status badge-status-inactivo">{{ v.estado_venta }}</span>
+                    {% endif %}
+                  </td>
+                  <td style="text-align: center; white-space: nowrap;">
+                    <a href="{% url 'editar_venta' v.pk %}" class="btn-action-edit" style="text-decoration: none; display: inline-block;">
+                      Editar
+                    </a>
+                    <a href="{% url 'eliminar_venta' v.pk %}" class="btn-action-delete" style="text-decoration: none; display: inline-block;">
+                      Eliminar
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td class="empty-products" colspan="9">
+                    No hay ventas registradas aún. ¡Haz clic en "+ Nueva Venta" para registrar la primera!
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
 
       </div>
     </main>
@@ -1708,13 +1905,15 @@
       // 4. Actualizar título/breadcrumb superior y placeholder del buscador según sección
       const breadcrumb = document.getElementById('topbarBreadcrumb');
       const inputBuscar = document.getElementById('inputBuscarProducto');
-
       if (secKey === 'resumen') {
         if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Resumen Ejecutivo y Alertas de Inventario</strong>';
         if (inputBuscar) inputBuscar.placeholder = 'Buscar en el catálogo...';
       } else if (secKey === 'inventario') {
         if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Catálogo e Inventario en Tiempo Real</strong>';
         if (inputBuscar) inputBuscar.placeholder = 'Buscar producto o categoría...';
+      } else if (secKey === 'ventas') {
+        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Gestión y Control de Ventas</strong>';
+        if (inputBuscar) inputBuscar.placeholder = 'Buscar venta por ID, cajero, medio de pago...';
       } else if (secKey === 'proveedores') {
         if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Directorio de Productores y Proveedores</strong>';
         if (inputBuscar) inputBuscar.placeholder = 'Buscar razón social, NIT o contacto...';
@@ -1736,13 +1935,19 @@
       const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
       const secUsuarios = document.getElementById('seccion-usuarios');
       const secProveedores = document.getElementById('seccion-proveedores');
+      const secVentas = document.getElementById('seccion-ventas');
       const esUsuarios = secUsuarios && secUsuarios.classList.contains('active');
       const esProveedores = secProveedores && secProveedores.classList.contains('active');
+      const esVentas = secVentas && secVentas.classList.contains('active');
 
       if (esUsuarios) {
         const inputUsu = document.getElementById('inputBuscarUsuario');
         if (inputUsu) inputUsu.value = termino;
         filtrarTablaUsuarios(termino);
+      } else if (esVentas) {
+        const inputVta = document.getElementById('inputBuscarVenta');
+        if (inputVta) inputVta.value = termino;
+        if (typeof filtrarTablaVentas === 'function') filtrarTablaVentas(termino);
       } else if (esProveedores) {
         filtrarTablaProveedores(termino);
       } else {
@@ -1772,6 +1977,17 @@
       });
     }
 
+    function filtrarTablaVentas(terminoDirecto) {
+      const input = document.getElementById('inputBuscarVenta');
+      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
+      const filas = document.querySelectorAll('#tablaVentasBody tr.fila-venta');
+
+      filas.forEach(fila => {
+        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
+        fila.style.display = busquedaTexto.includes(termino) ? '' : 'none';
+      });
+    }
+
     function filtrarPorRol(filtro, btn) {
       document.querySelectorAll('.btn-role-tab').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
@@ -1789,7 +2005,7 @@
 
     function sincronizarSeccionUrl() {
       const hash = (window.location.hash || '').replace('#', '').trim();
-      const seccionesValidas = ['resumen', 'inventario', 'proveedores', 'usuarios'];
+      const seccionesValidas = ['resumen', 'inventario', 'ventas', 'proveedores', 'usuarios'];
       if (seccionesValidas.includes(hash)) {
         mostrarSeccion(hash);
       } else {

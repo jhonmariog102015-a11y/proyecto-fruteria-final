@@ -6,6 +6,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 # ==============================================================================
@@ -286,6 +287,37 @@ class PerfilUsuario(models.Model):
         return f"{self.usuario.username} ({self.nombre_rol}) - {self.get_estado_display()}"
 
 
+# ==============================================================================
+# 5. ENTIDAD VENTA
+# Gestión de transacciones comerciales y punto de venta
+# ==============================================================================
+class Venta(models.Model):
+    id_venta = models.AutoField(primary_key=True)
+    id_cliente = models.IntegerField(null=True, blank=True, verbose_name="ID Cliente")
+    id_usuario_cajero = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column='id_usuario_cajero',
+        related_name='ventas',
+        verbose_name="Cajero / Vendedor"
+    )
+    origen_venta = models.CharField(max_length=40, default="Tienda Física", verbose_name="Origen de Venta")
+    fecha_venta = models.DateTimeField(default=timezone.now, verbose_name="Fecha y Hora")
+    subtotal = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="Subtotal")
+    descuento = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, blank=True, null=True, verbose_name="Descuento")
+    total_neto = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, verbose_name="Total Neto")
+    medio_pago = models.CharField(max_length=30, default="Efectivo", verbose_name="Medio de Pago")
+    estado_venta = models.CharField(max_length=30, default="Completada", blank=True, null=True, verbose_name="Estado")
+
+    class Meta:
+        verbose_name = "Venta"
+        verbose_name_plural = "Ventas"
+        db_table = "ventas"
+        ordering = ['-fecha_venta']
+
+    def __str__(self):
+        return f"Venta #{self.id_venta} - Total: ${self.total_neto}"
+        
 # ==============================================================================
 # SEÑALES DE INTEGRIDAD Y AUDITORÍA AUTOMÁTICA
 # NOTA PARA EL EQUIPO:

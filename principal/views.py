@@ -20,7 +20,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .models import Producto, Categoria, Proveedor, PerfilUsuario
+from .models import Producto, Categoria, Proveedor, PerfilUsuario, Venta
 from .forms import ProductoForm, CategoriaForm, ProveedorForm
 
 
@@ -168,11 +168,22 @@ def dashboard_view(request):
     total_cajeros = perfiles_usuarios.filter(orden_rol=3).count()
     total_staff = perfiles_usuarios.filter(usuario__is_staff=True).count()
 
+    # Métricas y listado de Ventas para el panel de gestión
+    ventas = Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta')
+    total_ventas_count = ventas.count()
+    total_ventas_ingresos = sum(v.total_neto for v in ventas)
+    hoy = timezone.now().date()
+    ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
+    ventas_hoy_count = len(ventas_hoy)
+    ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
+    ticket_promedio = round(total_ventas_ingresos / total_ventas_count, 2) if total_ventas_count > 0 else Decimal('0.00')
+
     return render(request, 'principal/dashboard.html', {
         'productos': productos,
         'categorias': categorias,
         'proveedores': proveedores,
         'perfiles_usuarios': perfiles_usuarios,
+        'ventas': ventas,
         'total_productos': total_productos,
         'total_ofertas': total_ofertas,
         'total_bajo_stock': total_bajo_stock,
@@ -190,6 +201,11 @@ def dashboard_view(request):
         'total_admins': total_activos,
         'total_admins_activos': total_activos,
         'total_staff': total_staff,
+        'total_ventas_count': total_ventas_count,
+        'total_ventas_ingresos': total_ventas_ingresos,
+        'ventas_hoy_count': ventas_hoy_count,
+        'ventas_hoy_ingresos': ventas_hoy_ingresos,
+        'ticket_promedio': ticket_promedio,
         'inversion_total': inversion_total,
         'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
         'valor_venta_potencial': valor_venta_potencial,
@@ -887,5 +903,94 @@ class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, "La categoria se elimino correctamente.")
         return super().form_valid(form)
+
+
+# ==============================================================================
+# MÓDULO DE GESTIÓN DE VENTAS (PUNTO DE VENTA Y FACTURACIÓN)
+# ==============================================================================
+
+@login_required
+def lista_ventas(request):
+    """
+    1. LISTADO DE VENTAS: Muestra el historial completo de ventas con métricas clave.
+    """
+    ventas = Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta')
+    total_ingresos = sum(v.total_neto for v in ventas)
+    hoy = timezone.now().date()
+    ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
+    ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
+    
+    return render(request, 'principal/ventas/lista_ventas.html', {
+        'ventas': ventas,
+        'total_ingresos': total_ingresos,
+        'total_ventas': ventas.count(),
+        'ventas_hoy_count': len(ventas_hoy),
+        'ventas_hoy_ingresos': ventas_hoy_ingresos,
+        'titulo': 'Gestión de Ventas'
+    })
+
+
+# Crear venta
+@login_required
+def crear_venta(request):
+    if request.method == 'POST':
+        id_cliente = request.POST.get('id_cliente')
+        origen_venta = request.POST.get('origen_venta')
+        subtotal = request.POST.get('subtotal')
+        descuento = request.POST.get('descuento', 0)
+        total_neto = request.POST.get('total_neto')
+        medio_pago = request.POST.get('medio_pago')
+        estado_venta = request.POST.get('estado_venta')
+
+        Venta.objects.create(
+            id_cliente=id_cliente if id_cliente else None,
+            id_usuario_cajero=request.user,  # Asigna automáticamente al cajero logueado
+            origen_venta=origen_venta,
+            subtotal=subtotal,
+            descuento=descuento if descuento else 0,
+            total_neto=total_neto,
+            medio_pago=medio_pago,
+            estado_venta=estado_venta
+        )
+        return redirect('lista_ventas')
+        
+    return render(request, 'principal/ventas/venta_form.html')
+
+# Actualizar venta
+@login_required
+def editar_venta(request, pk):
+    venta = get_object_or_404(Venta, pk=pk)
+    
+    if request.method == 'POST':
+        venta.id_cliente = request.POST.get('id_cliente')
+        venta.origen_venta = request.POST.get('origen_venta')
+        venta.subtotal = request.POST.get('subtotal')
+        venta.descuento = request.POST.get('descuento', 0)
+        venta.total_neto = request.POST.get('total_neto')
+        venta.medio_pago = request.POST.get('medio_pago')
+        venta.estado_venta = request.POST.get('estado_venta')
+        venta.save()
+        
+        return redirect('lista_ventas')
+        
+    return render(request, 'principal/ventas/venta_form.html', {'venta': venta})
+
+
+@login_required
+def eliminar_venta(request, pk):
+    """
+    4. ELIMINAR VENTA: Muestra pantalla de confirmación y borra el registro de la BD.
+    """
+    venta = get_object_or_404(Venta, pk=pk)
+    if request.method == 'POST':
+        num_venta = venta.id_venta
+        venta.delete()
+        messages.success(request, f"La venta #{num_venta} fue eliminada del sistema.")
+        return redirect('lista_ventas')
+
+    return render(request, 'principal/ventas/venta_confirm_delete.html', {
+        'venta': venta,
+        'titulo': f'Confirmar Eliminación de Venta #{venta.id_venta}'
+    })
 
 
