@@ -2,6 +2,19 @@
 # CONTROLADOR DE VISTAS (principal/views.py)
 # Gestiona la lógica de negocio, consultas al ORM y renderizado de plantillas.
 # ==============================================================================
+# NOTA TÉCNICA PARA EL EQUIPO (GAES - AUDITORÍA DE CALIDAD Y SEGURIDAD):
+# 1. Control de Acceso Basado en Roles (RBAC): Se implementaron la función
+#    'es_personal_operativo', el decorador '@personal_requerido' y el mixin
+#    'PersonalRequeridoMixin' para proteger '/dashboard/', '/gestion/' y '/ventas/'
+#    frente a cuentas públicas registradas como 'cliente'.
+# 2. Unificación de Validación de Ventas: Se creó el helper '_extraer_datos_venta'
+#    para sanear montos con 'Decimal', evitar descuentos mayores al subtotal y
+#    prevenir errores 500 tanto en los modales del dashboard como en las vistas CRUD.
+# 3. Prevención de Open Redirect: Se agregó '_obtener_redireccion_segura' usando
+#    'url_has_allowed_host_and_scheme' de Django para validar el parámetro 'next'.
+# 4. Estandarización de Plantillas: Se renombró 'Registro.html' a 'registro.html'
+#    en minúsculas para compatibilidad con sistemas operativos Linux/Unix.
+# ==============================================================================
 
 import csv
 from decimal import Decimal
@@ -153,19 +166,12 @@ def inicio(request):
     3. Obtiene todas las categorías disponibles para alimentar las tarjetas y filtros.
     4. Envía los datos al contexto para que 'index.html' dibuje dinámicamente las tarjetas.
     """
-    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
-    categorias = Categoria.objects.all()
-    producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
-    productos_oferta = productos.filter(en_oferta=True)
-
+    # NOTA PARA EL EQUIPO: Al retirar el carrusel duplicado de 'index.html',
+    # la portada solo requiere el conteo total de referencias ('total_productos'),
+    # optimizando la velocidad de carga inicial con un único COUNT(*) en SQL.
     context = {
         'titulo': 'Al Paso Frutería — Mercado Campesino',
-        'productos': productos,
-        'productos_oferta': productos_oferta,
-        'categorias': categorias,
-        'producto_destacado': producto_destacado,
-        'total_productos': productos.count(),
-        'total_ofertas': productos_oferta.count(),
+        'total_productos': Producto.objects.count(),
     }
     return render(request, 'principal/index.html', context)
 

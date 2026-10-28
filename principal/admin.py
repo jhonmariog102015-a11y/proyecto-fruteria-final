@@ -1,3 +1,15 @@
+# ==============================================================================
+# CONFIGURACIÓN DEL PANEL ADMINISTRATIVO DE DJANGO (principal/admin.py)
+# ==============================================================================
+# NOTA TÉCNICA PARA EL EQUIPO (GAES):
+# - Se eliminó la duplicidad de código donde 'PerfilUsuarioInline' y
+#   'CustomUserAdmin' estaban declarados dos veces en este archivo.
+# - Se añadió soporte visual (insignia azul) para el rol 'cliente' en el listado
+#   de usuarios y perfiles del administrador.
+# - El acceso a '/admin/' está restringido exclusivamente a Super Administradores
+#   mediante 'superuser_only_has_permission'.
+# ==============================================================================
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
