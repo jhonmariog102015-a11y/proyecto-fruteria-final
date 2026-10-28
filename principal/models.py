@@ -177,7 +177,6 @@ class Producto(models.Model):
         return f"{nombre_display} - Venta: ${self.precio_venta_unitario:,.0f}{oferta_tag} (Costo: ${self.costo_compra:,.0f})"
 
 
-
 # ==============================================================================
 # 4. ENTIDAD CLIENTE
 # Gestión de compradores con diferenciación minorista / mayorista.
@@ -204,6 +203,7 @@ class Cliente(models.Model):
 
     def __str__(self):
         return f"Cliente #{self.id_cliente} ({self.tipo_cliente})"
+
 
 class RegistroLogin(models.Model):
     ESTADOS_LOGIN = [
@@ -238,6 +238,7 @@ class PerfilUsuario(models.Model):
         ('admin', 'Super Admin'),
         ('bodeguero', 'Bodeguero'),
         ('cajero', 'Cajero'),
+        ('cliente', 'Cliente'),
     ]
     ESTADOS = [
         ('activo', 'Activo'),
@@ -258,13 +259,15 @@ class PerfilUsuario(models.Model):
 
     @property
     def nombre_rol(self):
-        """Retorna la etiqueta legible del rol (Super Admin, Bodeguero, Cajero)"""
+        """Retorna la etiqueta legible del rol (Super Admin, Bodeguero, Cajero, Cliente)"""
         if self.usuario.is_superuser or self.rol == 'admin':
             return 'Super Admin'
         elif self.rol == 'bodeguero':
             return 'Bodeguero'
         elif self.rol == 'cajero':
             return 'Cajero'
+        elif self.rol == 'cliente':
+            return 'Cliente'
         return self.get_rol_display()
 
     @property
@@ -315,9 +318,17 @@ class Venta(models.Model):
         db_table = "ventas"
         ordering = ['-fecha_venta']
 
+    @property
+    def cliente(self):
+        """Retorna la instancia de Cliente asociada a id_cliente si existe."""
+        if not self.id_cliente:
+            return None
+        return Cliente.objects.filter(pk=self.id_cliente).first()
+
     def __str__(self):
         return f"Venta #{self.id_venta} - Total: ${self.total_neto}"
-        
+
+
 # ==============================================================================
 # SEÑALES DE INTEGRIDAD Y AUDITORÍA AUTOMÁTICA
 # NOTA PARA EL EQUIPO:
@@ -383,4 +394,3 @@ def registrar_acceso_fallido(sender, credentials, request, **kwargs):
         )
     except Exception:
         pass
-

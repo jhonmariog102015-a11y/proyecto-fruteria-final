@@ -101,31 +101,31 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 5. RECUPERACIÓN DE CONTRASEÑA POR CORREO ELECTRÓNICO (SMTP)
     # -------------------------------------------------------------------------
-    path('accounts/password_reset/', 
+    path('accounts/password_reset/',
          auth_views.PasswordResetView.as_view(
              template_name='principal/password_reset_form.html',
-             email_template_name='principal/password_reset_email.html',
+             email_template_name='principal/password_reset_email.txt',
              html_email_template_name='principal/password_reset_email.html',
              subject_template_name='principal/password_reset_subject.txt'
-         ), 
+         ),
          name='password_reset'),
 
-    path('accounts/password_reset/done/', 
+    path('accounts/password_reset/done/',
          auth_views.PasswordResetDoneView.as_view(
              template_name='principal/password_reset_done.html'
-         ), 
+         ),
          name='password_reset_done'),
 
-    path('accounts/reset/<uidb64>/<token>/', 
+    path('accounts/reset/<uidb64>/<token>/',
          auth_views.PasswordResetConfirmView.as_view(
              template_name='principal/password_reset_confirm.html'
-         ), 
+         ),
          name='password_reset_confirm'),
 
-    path('accounts/reset/done/', 
+    path('accounts/reset/done/',
          auth_views.PasswordResetCompleteView.as_view(
              template_name='principal/password_reset_complete.html'
-         ), 
+         ),
          name='password_reset_complete'),
 
     # -------------------------------------------------------------------------
@@ -148,5 +148,3 @@ urlpatterns = [
 # Manejadores globales de error HTTP para producción
 handler404 = 'principal.views.error_404_view'
 handler500 = 'principal.views.error_500_view'
-
-

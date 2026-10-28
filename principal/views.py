@@ -5,17 +5,19 @@
 
 import csv
 from decimal import Decimal
+from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout, login as auth_login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count, Case, When, Value, IntegerField, Avg
+from django.db.models import Count, Case, When, Value, IntegerField
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -37,6 +39,109 @@ def es_administrador(user):
     return perfil is not None and (perfil.rol == 'admin' or getattr(perfil, 'es_admin', False))
 
 
+def es_personal_operativo(user):
+    """
+    Control de acceso RBAC: Verifica que el usuario pertenezca al personal interno
+    (Super Admin, Bodeguero, Cajero o is_staff=True), impidiendo que clientes públicos
+    accedan al panel administrativo o modifiquen el inventario.
+    """
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser or user.is_staff:
+        return True
+    perfil = getattr(user, 'perfil', None)
+    return perfil is not None and perfil.rol in ('admin', 'bodeguero', 'cajero')
+
+
+def personal_requerido(view_func):
+    """
+    Decorador de seguridad para vistas operativas y del dashboard:
+    1. Si el usuario es anónimo, redirige al login (/accounts/login/).
+    2. Si el usuario tiene rol 'cliente' sin privilegios de staff, bloquea el acceso
+       y lo redirige a la tienda principal con un mensaje informativo.
+    """
+    @wraps(view_func)
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        if not es_personal_operativo(request.user):
+            messages.error(
+                request,
+                "Acceso restringido: esta sección es exclusiva para el personal operativo de Al Paso Frutería."
+            )
+            return redirect('index')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+class PersonalRequeridoMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Mixin de control de acceso operativo para Vistas Basadas en Clases (CBV)."""
+
+    def test_func(self):
+        return es_personal_operativo(self.request.user)
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        messages.error(
+            self.request,
+            "Acceso restringido: esta sección es exclusiva para el personal operativo de Al Paso Frutería."
+        )
+        return redirect('index')
+
+
+def _extraer_datos_venta(post_data):
+    """
+    Extrae, sanea y valida los campos numéricos y de estado de una transacción de venta,
+    previniendo errores 500 por valores vacíos o malformados.
+    """
+    id_cliente_raw = post_data.get('id_cliente', '')
+    origen_venta = (post_data.get('origen_venta') or 'Tienda Física').strip()
+    subtotal_raw = str(post_data.get('subtotal') or '0').strip()
+    descuento_raw = str(post_data.get('descuento') or '0').strip()
+    total_neto_raw = str(post_data.get('total_neto') or '').strip()
+    medio_pago = (post_data.get('medio_pago') or 'Efectivo').strip()
+    estado_venta = (post_data.get('estado_venta') or 'Completada').strip()
+
+    try:
+        subtotal = max(Decimal('0.00'), Decimal(subtotal_raw)) if subtotal_raw else Decimal('0.00')
+    except Exception:
+        subtotal = Decimal('0.00')
+
+    try:
+        descuento = max(Decimal('0.00'), Decimal(descuento_raw)) if descuento_raw else Decimal('0.00')
+    except Exception:
+        descuento = Decimal('0.00')
+
+    if descuento > subtotal:
+        descuento = subtotal
+
+    try:
+        total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
+        if total_neto < Decimal('0.00'):
+            total_neto = Decimal('0.00')
+    except Exception:
+        total_neto = subtotal - descuento
+
+    cli_id = int(id_cliente_raw) if id_cliente_raw and str(id_cliente_raw).strip().isdigit() else None
+
+    return {
+        'id_cliente': cli_id,
+        'origen_venta': origen_venta,
+        'subtotal': subtotal,
+        'descuento': descuento,
+        'total_neto': total_neto,
+        'medio_pago': medio_pago,
+        'estado_venta': estado_venta,
+    }
+
+
+def _obtener_redireccion_segura(request, default_route='lista_ventas'):
+    """Valida el parámetro 'next' contra ataques Open Redirect."""
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return next_url
+    return default_route
+
 
 def inicio(request):
     """
@@ -45,12 +150,11 @@ def inicio(request):
     1. Consulta la base de datos para obtener todos los productos ordenados por su ID.
     2. Utiliza 'select_related('categoria')' para optimizar la consulta SQL (JOIN)
        y evitar problemas de rendimiento (N+1 queries).
-    3. Obtiene todas las categorías disponibles para alimentar las tarjetas y carrusel.
+    3. Obtiene todas las categorías disponibles para alimentar las tarjetas y filtros.
     4. Envía los datos al contexto para que 'index.html' dibuje dinámicamente las tarjetas.
     """
     productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
     categorias = Categoria.objects.all()
-    # Producto destacado para el Hero dinámico asimétrico
     producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
     productos_oferta = productos.filter(en_oferta=True)
 
@@ -81,14 +185,10 @@ def catalogo_frutas_view(request):
         'categorias': categorias,
         'total_productos': productos.count(),
     }
-    # NOTA TÉCNICA PARA EL EQUIPO (GAES):
-    # Se unificó la ubicación de plantillas dentro de 'principal/templates/principal/'
-    # para que todos los archivos HTML (index, catalogo, dashboard, login) residan
-    # en una sola carpeta bajo la convención estándar de Django MVT.
     return render(request, 'principal/catalogo_frutas.html', context)
 
 
-@login_required
+@personal_requerido
 def dashboard_view(request):
     """
     PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')
@@ -136,20 +236,22 @@ def dashboard_view(request):
     total_prov_inactivos = total_proveedores - total_prov_activos
     total_prov_con_telefono = proveedores.exclude(telefono__isnull=True).exclude(telefono='').count()
 
-    # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
-    # Sincronización de perfiles administrativos y métricas del equipo de gestión
+    # Sincronización preventiva de perfiles para cuentas sin perfil vinculado
     for u in User.objects.filter(perfil__isnull=True):
-        rol_def = 'admin' if u.is_superuser else ('bodeguero' if u.is_staff else 'cajero')
+        rol_def = 'admin' if u.is_superuser else ('bodeguero' if u.is_staff else 'cliente')
         PerfilUsuario.objects.get_or_create(
             usuario=u,
-            defaults={'rol': rol_def, 'estado': 'activo', 'telefono': '3001234567'}
+            defaults={'rol': rol_def, 'estado': 'activo'}
         )
 
-    # Obtener única y exclusivamente los REGISTROS ACTIVOS ordenados por ROLES:
+    # Obtener única y exclusivamente los REGISTROS ACTIVOS del personal operativo ordenados por ROLES:
     # Jerarquía requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
     perfiles_usuarios = PerfilUsuario.objects.select_related('usuario').filter(
         estado='activo',
         usuario__is_active=True
+    ).exclude(
+        rol='cliente',
+        usuario__is_superuser=False
     ).annotate(
         orden_rol=Case(
             When(usuario__is_superuser=True, then=Value(1)),
@@ -222,7 +324,7 @@ def dashboard_view(request):
     })
 
 
-@login_required
+@personal_requerido
 def crear_producto_dashboard(request):
     """
     CREACIÓN DIRECTA DE PRODUCTOS DESDE EL DASHBOARD CON VALIDACIÓN FORMULARIA
@@ -239,7 +341,7 @@ def crear_producto_dashboard(request):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def editar_producto_dashboard(request, id_producto):
     """
     EDICIÓN RÁPIDA DE PRECIOS, COSTOS, OFERTAS Y STOCK DESDE EL DASHBOARD
@@ -257,7 +359,7 @@ def editar_producto_dashboard(request, id_producto):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def eliminar_producto_dashboard(request, id_producto):
     """
     ELIMINACIÓN DE PRODUCTO DESDE EL DASHBOARD
@@ -270,7 +372,7 @@ def eliminar_producto_dashboard(request, id_producto):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def crear_categoria_dashboard(request):
     """
     CREACIÓN DE CATEGORÍA DESDE EL DASHBOARD CON VALIDACIÓN
@@ -286,7 +388,7 @@ def crear_categoria_dashboard(request):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def eliminar_categoria_dashboard(request, id_categoria):
     """
     ELIMINACIÓN DE CATEGORÍA DESDE EL DASHBOARD
@@ -436,10 +538,7 @@ def editar_usuario_dashboard(request, user_id):
             target_user.is_superuser = False
             target_user.is_staff = True
 
-        if estado == 'inactivo':
-            target_user.is_active = False
-        else:
-            target_user.is_active = True
+        target_user.is_active = (estado != 'inactivo')
 
         if nueva_password:
             target_user.set_password(nueva_password)
@@ -485,7 +584,7 @@ def eliminar_usuario_dashboard(request, user_id):
     return redirect('/dashboard/#usuarios')
 
 
-@login_required
+@personal_requerido
 def exportar_inventario_csv(request):
     """
     EXPORTACIÓN DE INVENTARIO COMPATIBLE CON MICROSOFT EXCEL (UTF-8-SIG)
@@ -543,7 +642,7 @@ def exportar_inventario_csv(request):
     return response
 
 
-@login_required
+@personal_requerido
 def crear_proveedor_dashboard(request):
     """
     REGISTRO DE NUEVO PROVEEDOR AGRÍCOLA DESDE EL DASHBOARD
@@ -559,7 +658,7 @@ def crear_proveedor_dashboard(request):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def editar_proveedor_dashboard(request, id_proveedor):
     """
     EDICIÓN DE PROVEEDOR AGRÍCOLA EXISTENTE
@@ -576,7 +675,7 @@ def editar_proveedor_dashboard(request, id_proveedor):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def eliminar_proveedor_dashboard(request, id_proveedor):
     """
     ELIMINACIÓN DE PROVEEDOR AGRÍCOLA
@@ -589,83 +688,32 @@ def eliminar_proveedor_dashboard(request, id_proveedor):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def crear_venta_dashboard(request):
     """
     CRUD VENTAS: REGISTRO DE NUEVA TRANSACCIÓN DESDE EL DASHBOARD (MODAL / VENTANA)
     """
     if request.method == 'POST':
-        id_cliente = request.POST.get('id_cliente')
-        origen_venta = request.POST.get('origen_venta', 'Tienda Física').strip()
-        subtotal_raw = request.POST.get('subtotal', '0').strip()
-        descuento_raw = request.POST.get('descuento', '0').strip()
-        total_neto_raw = request.POST.get('total_neto', '0').strip()
-        medio_pago = request.POST.get('medio_pago', 'Efectivo').strip()
-        estado_venta = request.POST.get('estado_venta', 'Completada').strip()
-
-        try:
-            subtotal = Decimal(subtotal_raw) if subtotal_raw else Decimal('0.00')
-            descuento = Decimal(descuento_raw) if descuento_raw else Decimal('0.00')
-            total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
-        except Exception:
-            subtotal = Decimal('0.00')
-            descuento = Decimal('0.00')
-            total_neto = Decimal('0.00')
-
-        if descuento > subtotal:
-            descuento = subtotal
-            total_neto = Decimal('0.00')
-
-        cli_id = int(id_cliente) if id_cliente and str(id_cliente).isdigit() else None
-
+        datos = _extraer_datos_venta(request.POST)
         nueva_venta = Venta.objects.create(
-            id_cliente=cli_id,
             id_usuario_cajero=request.user,
-            origen_venta=origen_venta,
-            subtotal=subtotal,
-            descuento=descuento,
-            total_neto=total_neto,
-            medio_pago=medio_pago,
-            estado_venta=estado_venta
+            **datos
         )
         messages.success(request, f"¡Venta #VTA-{nueva_venta.id_venta} registrada exitosamente por ${nueva_venta.total_neto:,.2f} COP!")
 
     return redirect('/dashboard/#ventas')
 
 
-@login_required
+@personal_requerido
 def editar_venta_dashboard(request, id_venta):
     """
     CRUD VENTAS: MODIFICACIÓN DE VENTA DESDE EL DASHBOARD (MODAL / VENTANA)
     """
     venta = get_object_or_404(Venta, pk=id_venta)
     if request.method == 'POST':
-        id_cliente = request.POST.get('id_cliente')
-        origen_venta = request.POST.get('origen_venta', 'Tienda Física').strip()
-        subtotal_raw = request.POST.get('subtotal', '0').strip()
-        descuento_raw = request.POST.get('descuento', '0').strip()
-        total_neto_raw = request.POST.get('total_neto', '0').strip()
-        medio_pago = request.POST.get('medio_pago', 'Efectivo').strip()
-        estado_venta = request.POST.get('estado_venta', 'Completada').strip()
-
-        try:
-            subtotal = Decimal(subtotal_raw) if subtotal_raw else Decimal('0.00')
-            descuento = Decimal(descuento_raw) if descuento_raw else Decimal('0.00')
-            total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
-        except Exception:
-            subtotal = Decimal('0.00')
-            descuento = Decimal('0.00')
-            total_neto = Decimal('0.00')
-
-        cli_id = int(id_cliente) if id_cliente and str(id_cliente).isdigit() else None
-
-        venta.id_cliente = cli_id
-        venta.origen_venta = origen_venta
-        venta.subtotal = subtotal
-        venta.descuento = descuento
-        venta.total_neto = total_neto
-        venta.medio_pago = medio_pago
-        venta.estado_venta = estado_venta
+        datos = _extraer_datos_venta(request.POST)
+        for campo, valor in datos.items():
+            setattr(venta, campo, valor)
         venta.save()
 
         messages.success(request, f"¡Venta #VTA-{venta.id_venta} actualizada exitosamente!")
@@ -673,7 +721,7 @@ def editar_venta_dashboard(request, id_venta):
     return redirect('/dashboard/#ventas')
 
 
-@login_required
+@personal_requerido
 def eliminar_venta_dashboard(request, id_venta):
     """
     CRUD VENTAS: ELIMINACIÓN DE VENTA DESDE EL DASHBOARD (MODAL / VENTANA POST)
@@ -766,16 +814,6 @@ def registro_view(request):
     REGISTRO PÚBLICO DE CLIENTES Y ASIGNACIÓN DE PERFIL ('/registro/')
     Almacena: username, email, contraseña, teléfono, rol ('cliente'), estado ('activo')
     y fecha de creación automática vía ORM.
-
-    NOTA TÉCNICA PARA EL EQUIPO (CORRECCIONES SOBRE EL CÓDIGO DE GUTIÉRREZ):
-    1. SEGURIDAD (Escalamiento de privilegios): En el registro público el rol se fuerza
-       estrictamente a 'cliente' (is_staff=False, is_superuser=False). Los roles 'admin'
-       y 'cajero' solo pueden ser concedidos por administradores en /admin/auth/user/.
-    2. VALIDACIÓN DE EMAIL: Se incorpora validate_email de Django para descartar correos malformados.
-    3. POLÍTICAS DE CONTRASEÑA: Se evalúa validate_password para cumplir con las políticas
-       configuradas en settings.py (longitud mínima, no numérica, no común).
-    4. EXPERIENCIA DE USUARIO: Los datos ingresados (form_data) se devuelven a la plantilla
-       en caso de error para que el usuario no deba reescribirlos.
     """
     if request.user.is_authenticated:
         return redirect('index')
@@ -799,33 +837,33 @@ def registro_view(request):
         # 1. Validaciones de presencia de campos obligatorios
         if not username or not email or not password:
             messages.error(request, 'Por favor completa todos los campos obligatorios.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 2. Validación de aceptación de términos del servicio
         if not terminos:
             messages.error(request, 'Debes aceptar los términos de servicio y políticas de privacidad para registrarte.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 3. Validación de coincidencia de contraseñas
         if password != confirm_password:
             messages.error(request, 'Las contraseñas ingresadas no coinciden.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 4. Validación de formato de correo electrónico
         try:
             validate_email(email)
         except ValidationError:
             messages.error(request, 'El correo electrónico ingresado no tiene un formato válido.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 5. Validación de unicidad de usuario y correo (insensible a mayúsculas)
         if User.objects.filter(username__iexact=username).exists():
             messages.error(request, 'El nombre de usuario ya se encuentra registrado.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         if User.objects.filter(email__iexact=email).exists():
             messages.error(request, 'El correo electrónico ya está en uso.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 6. Validación de robustez de contraseña mediante validadores de Django
         try:
@@ -833,7 +871,7 @@ def registro_view(request):
         except ValidationError as e:
             for err in e.messages:
                 messages.error(request, err)
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 7. Crear el usuario base de autenticación con rol 'cliente' seguro
         nuevo_usuario = User.objects.create_user(
@@ -857,14 +895,14 @@ def registro_view(request):
         messages.success(request, f'¡Bienvenido a Al Paso Frutería, {username}!')
         return redirect('index')
 
-    return render(request, 'principal/Registro.html', {'form_data': form_data})
+    return render(request, 'principal/registro.html', {'form_data': form_data})
 
 
 # ==============================================================================
 # CRUD SEGURO GUIA 4 (PRODUCTOS Y CATEGORIAS - FBV Y CBV)
 # ==============================================================================
 
-@login_required
+@personal_requerido
 def producto_listar(request):
     """
     Lista todos los productos del catálogo ordenados alfabéticamente (FBV).
@@ -877,7 +915,7 @@ def producto_listar(request):
     )
 
 
-@login_required
+@personal_requerido
 def producto_crear(request):
     """
     Crea un nuevo producto mediante formulario validado (FBV).
@@ -897,7 +935,7 @@ def producto_crear(request):
     )
 
 
-@login_required
+@personal_requerido
 def producto_editar(request, pk):
     """
     Actualiza la información de un producto existente (FBV).
@@ -922,7 +960,7 @@ def producto_editar(request, pk):
     )
 
 
-@login_required
+@personal_requerido
 def producto_eliminar(request, pk):
     """
     Elimina un producto previa confirmación y petición POST segura (FBV).
@@ -941,7 +979,7 @@ def producto_eliminar(request, pk):
     )
 
 
-class CategoriaListaView(LoginRequiredMixin, ListView):
+class CategoriaListaView(PersonalRequeridoMixin, ListView):
     """
     Vista basada en clases para listar categorías ordenadas por nombre (CBV).
     """
@@ -956,7 +994,7 @@ class CategoriaListaView(LoginRequiredMixin, ListView):
         return contexto
 
 
-class CategoriaCrearView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class CategoriaCrearView(PersonalRequeridoMixin, SuccessMessageMixin, CreateView):
     """
     Vista basada en clases para registrar una nueva categoría (CBV).
     """
@@ -972,7 +1010,7 @@ class CategoriaCrearView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return contexto
 
 
-class CategoriaEditarView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class CategoriaEditarView(PersonalRequeridoMixin, SuccessMessageMixin, UpdateView):
     """
     Vista basada en clases para editar una categoría existente (CBV).
     """
@@ -988,7 +1026,7 @@ class CategoriaEditarView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return contexto
 
 
-class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
+class CategoriaEliminarView(PersonalRequeridoMixin, DeleteView):
     """
     Vista basada en clases para eliminar una categoría previa confirmación (CBV).
     """
@@ -1010,7 +1048,7 @@ class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
 # MÓDULO DE GESTIÓN DE VENTAS (PUNTO DE VENTA Y FACTURACIÓN)
 # ==============================================================================
 
-@login_required
+@personal_requerido
 def lista_ventas(request):
     """
     1. LISTADO DE VENTAS: Muestra el historial completo de ventas con métricas clave.
@@ -1020,7 +1058,7 @@ def lista_ventas(request):
     hoy = timezone.now().date()
     ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
     ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
-    
+
     return render(request, 'principal/ventas/lista_ventas.html', {
         'ventas': ventas,
         'total_ingresos': total_ingresos,
@@ -1031,32 +1069,20 @@ def lista_ventas(request):
     })
 
 
-# Crear venta
-@login_required
+@personal_requerido
 def crear_venta(request):
+    """
+    2. CREAR VENTA: Formulario completo con validación segura de tipos numéricos.
+    """
     if request.method == 'POST':
-        id_cliente = request.POST.get('id_cliente')
-        origen_venta = request.POST.get('origen_venta')
-        subtotal = request.POST.get('subtotal')
-        descuento = request.POST.get('descuento', 0)
-        total_neto = request.POST.get('total_neto')
-        medio_pago = request.POST.get('medio_pago')
-        estado_venta = request.POST.get('estado_venta')
-
+        datos = _extraer_datos_venta(request.POST)
         Venta.objects.create(
-            id_cliente=id_cliente if id_cliente else None,
-            id_usuario_cajero=request.user,  # Asigna automáticamente al cajero logueado
-            origen_venta=origen_venta,
-            subtotal=subtotal,
-            descuento=descuento if descuento else 0,
-            total_neto=total_neto,
-            medio_pago=medio_pago,
-            estado_venta=estado_venta
+            id_usuario_cajero=request.user,
+            **datos
         )
         messages.success(request, "Venta registrada con éxito.")
-        next_url = request.POST.get('next') or request.GET.get('next')
-        return redirect(next_url if next_url else 'lista_ventas')
-        
+        return redirect(_obtener_redireccion_segura(request, 'lista_ventas'))
+
     clientes = Cliente.objects.all()
     productos = Producto.objects.all()
     return render(request, 'principal/ventas/venta_form.html', {
@@ -1065,25 +1091,23 @@ def crear_venta(request):
         'titulo': 'Registrar Nueva Venta'
     })
 
-# Actualizar venta
-@login_required
+
+@personal_requerido
 def editar_venta(request, pk):
+    """
+    3. EDITAR VENTA: Actualiza una transacción existente con validación numérica segura.
+    """
     venta = get_object_or_404(Venta, pk=pk)
-    
+
     if request.method == 'POST':
-        venta.id_cliente = request.POST.get('id_cliente') if request.POST.get('id_cliente') else None
-        venta.origen_venta = request.POST.get('origen_venta')
-        venta.subtotal = request.POST.get('subtotal')
-        venta.descuento = request.POST.get('descuento', 0)
-        venta.total_neto = request.POST.get('total_neto')
-        venta.medio_pago = request.POST.get('medio_pago')
-        venta.estado_venta = request.POST.get('estado_venta')
+        datos = _extraer_datos_venta(request.POST)
+        for campo, valor in datos.items():
+            setattr(venta, campo, valor)
         venta.save()
-        
+
         messages.success(request, f"Venta #{venta.id_venta} actualizada exitosamente.")
-        next_url = request.POST.get('next') or request.GET.get('next')
-        return redirect(next_url if next_url else 'lista_ventas')
-        
+        return redirect(_obtener_redireccion_segura(request, 'lista_ventas'))
+
     clientes = Cliente.objects.all()
     productos = Producto.objects.all()
     return render(request, 'principal/ventas/venta_form.html', {
@@ -1094,7 +1118,7 @@ def editar_venta(request, pk):
     })
 
 
-@login_required
+@personal_requerido
 def eliminar_venta(request, pk):
     """
     4. ELIMINAR VENTA: Muestra pantalla de confirmación y borra el registro de la BD.
@@ -1104,12 +1128,9 @@ def eliminar_venta(request, pk):
         num_venta = venta.id_venta
         venta.delete()
         messages.success(request, f"La venta #{num_venta} fue eliminada del sistema.")
-        next_url = request.POST.get('next') or request.GET.get('next')
-        return redirect(next_url if next_url else 'lista_ventas')
+        return redirect(_obtener_redireccion_segura(request, 'lista_ventas'))
 
     return render(request, 'principal/ventas/venta_confirm_delete.html', {
         'venta': venta,
         'titulo': f'Confirmar Eliminación de Venta #{venta.id_venta}'
     })
-
-

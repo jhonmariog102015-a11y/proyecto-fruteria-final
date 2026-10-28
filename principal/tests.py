@@ -60,7 +60,7 @@ from django.urls import reverse
 class DashboardCrudTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username='admin_test', password='password123')
+        self.user = User.objects.create_user(username='admin_test', password='password123', is_staff=True)
         self.client.login(username='admin_test', password='password123')
         self.categoria = Categoria.objects.create(nombre="Cítricos", descripcion="Frutas ácidas")
 
@@ -176,7 +176,7 @@ class ProveedorFormTestCase(TestCase):
 class ProveedorDashboardCrudTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username='admin_prov', password='password123')
+        self.user = User.objects.create_user(username='admin_prov', password='password123', is_staff=True)
         self.client.login(username='admin_prov', password='password123')
 
     def test_crear_proveedor_dashboard(self):
@@ -232,7 +232,7 @@ class ProveedorDashboardCrudTestCase(TestCase):
 class ExportarInventarioCsvTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username='admin_csv', password='password123')
+        self.user = User.objects.create_user(username='admin_csv', password='password123', is_staff=True)
         self.client.login(username='admin_csv', password='password123')
         self.cat = Categoria.objects.create(nombre="Frutas Exóticas")
         self.prod = Producto.objects.create(
@@ -411,7 +411,7 @@ class FormulariosCrudTests(TestCase):
 class CrudProductoFbvTests(TestCase):
     def setUp(self):
         usuario = get_user_model().objects.create_user(
-            username="gestor", password="Clave-segura-123"
+            username="gestor", password="Clave-segura-123", is_staff=True
         )
         self.client.force_login(usuario)
         self.categoria = Categoria.objects.create(nombre="Frutas")
@@ -489,7 +489,7 @@ class CrudProductoFbvTests(TestCase):
 class CrudCategoriaCbvTests(TestCase):
     def setUp(self):
         usuario = get_user_model().objects.create_user(
-            username="gestor_cat", password="Clave-segura-123"
+            username="gestor_cat", password="Clave-segura-123", is_staff=True
         )
         self.client.force_login(usuario)
         self.categoria = Categoria.objects.create(nombre="Tropicales")
@@ -559,6 +559,15 @@ class SeguridadCrudTests(TestCase):
         respuesta = self.client.post(reverse("logout"))
         self.assertRedirects(respuesta, reverse("index"))
         self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_cliente_publico_bloqueado_en_dashboard_y_crud(self):
+        cliente = get_user_model().objects.create_user(
+            username="comprador_publico", password="Clave-segura-123", is_staff=False
+        )
+        self.client.force_login(cliente)
+        for ruta in [reverse("dashboard"), reverse("principal:producto_listar"), reverse("lista_ventas")]:
+            res = self.client.get(ruta)
+            self.assertRedirects(res, reverse("index"))
 
 
 class UsuariosRolesDashboardTestCase(TestCase):
@@ -791,7 +800,8 @@ class VentasTestCase(TestCase):
         self.user = User.objects.create_user(
             username='cajero_test',
             email='cajero@fruteria.com',
-            password='password123'
+            password='password123',
+            is_staff=True
         )
         self.venta = Venta.objects.create(
             id_usuario_cajero=self.user,
