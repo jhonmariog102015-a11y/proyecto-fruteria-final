@@ -30,21 +30,18 @@ except ImportError:
     class EnvFallback:
         def __call__(self, key, default=None):
             return os.environ.get(key, default)
-
-        def bool(self, key, default=True):
-            val = os.environ.get(key)
-            if val is None:
-                return default
-            return str(val).lower() in ('1', 'true', 'yes', 'on')
     env = EnvFallback()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-_up6x&lapw^956f!#*n^f9t+8y@#gnb9%dj8y03-658diwbd$4')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', default=True) if hasattr(env, 'bool') else bool(env('DEBUG', default=True))
+# NOTA TÉCNICA PARA EL EQUIPO:
+# Se usa 'DJANGO_DEBUG' (por defecto True) en lugar de 'DEBUG' porque en Windows/VS Code
+# la variable del sistema DEBUG suele valer 'release', lo que desactivaría la carga de
+# archivos estáticos (/static/css/login.css, panel.css, etc.) en runserver.
+DEBUG = str(os.environ.get('DJANGO_DEBUG', 'True')).strip().lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver', '*']
 
 # Application definition
 INSTALLED_APPS = [
