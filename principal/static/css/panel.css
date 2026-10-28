@@ -152,12 +152,23 @@ button {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Enlace a Django Admin destacado para Super Admins */
+/* Enlace a Django Admin destacado para Super Admins (Ajustado al ancho del sidebar) */
 .nav-link-django-admin {
   background: rgba(99, 102, 241, 0.16) !important;
   color: #e0e7ff !important;
   border: 1px solid rgba(99, 102, 241, 0.35) !important;
   font-weight: 700 !important;
+  padding: 10px 10px !important;
+  gap: 7px !important;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.nav-link-django-admin span:nth-child(2) {
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-link-django-admin:hover {
@@ -168,15 +179,17 @@ button {
 }
 
 .badge-super-pill {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 800;
   background: #4f46e5;
   color: #ffffff;
-  padding: 2px 7px;
+  padding: 3px 6px;
   border-radius: 999px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   margin-left: auto;
+  flex-shrink: 0;
+  line-height: 1.1;
 }
 
 .nav-link-store {
@@ -1633,4 +1646,197 @@ button {
 @keyframes pulseDot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ==============================================================================
+   BUSCADOR GLOBAL DEL TOPBAR Y FILTRO DE GANANCIAS EN RESUMEN (TIEMPO REAL)
+   ============================================================================== */
+.header-actions {
+  position: relative;
+}
+
+.global-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 380px;
+  max-width: 92vw;
+  max-height: 420px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+  z-index: 200;
+  padding: 0.65rem;
+  display: none;
+}
+
+.global-search-dropdown.open {
+  display: block;
+}
+
+.search-res-group-title {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #64748b;
+  padding: 6px 8px 4px;
+}
+
+.search-res-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #1e293b;
+  font-size: 0.83rem;
+  transition: background 0.15s ease;
+}
+
+.search-res-item:hover {
+  background: #f1f5f9;
+}
+
+.search-res-item strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #0f172a;
+}
+
+.search-res-item small {
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.search-res-badge {
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  white-space: nowrap;
+}
+
+/* Barra de filtro de ganancias (Día, Mes, Año, General) */
+.profit-filter-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+.profit-filter-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.15rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.profit-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profit-period-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.profit-period-btn:hover {
+  border-color: #10b981;
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.profit-period-btn.active {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+
+.profit-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.profit-kpi-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+}
+
+.profit-kpi-box.highlight {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.profit-kpi-box small {
+  display: block;
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.profit-kpi-box strong {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.profit-kpi-box.highlight strong {
+  color: #047857;
+}
+
+.profit-kpi-box span {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.live-sync-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #047857;
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.live-sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
 }

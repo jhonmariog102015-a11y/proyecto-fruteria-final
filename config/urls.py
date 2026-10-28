@@ -8,7 +8,10 @@
 # 2. Se integró 'CustomLoginView' para redirigir inteligentemente según el rol
 #    del usuario (personal operativo -> '/dashboard/', cliente -> '/').
 # 3. Se agregaron las rutas para conectar el carrito de WhatsApp con Ventas
-#    ('/api/pedido-whatsapp/'), exportar ventas a CSV y generar recibos imprimibles.
+#    ('/api/pedido-whatsapp/'), sincronización en tiempo real ('/api/estado-tiempo-real/'),
+#    exportar ventas a CSV y generar recibos imprimibles.
+# 4. Se eliminó el módulo secundario duplicado de ventas ('/dashboard/ventas/...')
+#    dejando únicamente el módulo definitivo dentro de '/dashboard/#ventas'.
 # ==============================================================================
 
 from django.contrib import admin
@@ -30,6 +33,7 @@ from principal.views import (
     exportar_ventas_csv,
     recibo_venta_view,
     registrar_pedido_whatsapp,
+    estado_tiempo_real_api,
     CustomLoginView,
     crear_proveedor_dashboard,
     editar_proveedor_dashboard,
@@ -38,10 +42,6 @@ from principal.views import (
     error_500_view,
     logout_view,
     registro_view,
-    lista_ventas,
-    crear_venta,
-    editar_venta,
-    eliminar_venta,
     crear_venta_dashboard,
     editar_venta_dashboard,
     eliminar_venta_dashboard,
@@ -64,8 +64,10 @@ urlpatterns = [
     path('catalogo-frutas/', catalogo_frutas_view, name='catalogo_frutas'),
     path('catalogo/', catalogo_frutas_view, name='catalogo'),
 
-    # Endpoint API para registrar pedidos enviados desde el carrito de WhatsApp
+    # Endpoint API para registrar y actualizar pedidos enviados desde el carrito de WhatsApp
     path('api/pedido-whatsapp/', registrar_pedido_whatsapp, name='api_pedido_whatsapp'),
+    # Endpoint API de sincronización en tiempo real para todos los clientes y administradores
+    path('api/estado-tiempo-real/', estado_tiempo_real_api, name='api_estado_tiempo_real'),
 
     # -------------------------------------------------------------------------
     # 3. PANEL DE CONTROL INTERNO (DASHBOARD, INVENTARIO Y PROVEEDORES)
@@ -145,11 +147,6 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     path('404/', error_404_view, name='error_404_preview'),
     path('500/', error_500_view, name='error_500_preview'),
-    # Rutas del módulo de ventas por funciones
-    path('dashboard/ventas/', lista_ventas, name='lista_ventas'),
-    path('dashboard/ventas/nueva/', crear_venta, name='crear_venta'),
-    path('dashboard/ventas/editar/<int:pk>/', editar_venta, name='editar_venta'),
-    path('dashboard/ventas/eliminar/<int:pk>/', eliminar_venta, name='eliminar_venta'),
 ]
 
 # Manejadores globales de error HTTP para producción

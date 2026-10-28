@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.6">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -108,16 +108,24 @@
         </div>
 
         <div class="header-actions">
+          <span class="live-sync-pill" id="liveSyncIndicator" title="Sincronización automática en tiempo real activa con tienda y pedidos">
+            <span class="live-sync-dot"></span> En tiempo real
+          </span>
           <label class="search search-w-280">
             <input
               type="search"
               id="inputBuscarProducto"
-              placeholder="Buscar producto o categoría..."
+              placeholder="Buscar fruta, categoría o venta..."
               aria-label="Buscar en el catálogo"
+              autocomplete="off"
+              oninput="ejecutarBusquedaActiva()"
               onkeyup="ejecutarBusquedaActiva()"
+              onsearch="ejecutarBusquedaActiva()"
             >
             <span aria-hidden="true">⌕</span>
           </label>
+          <!-- Dropdown de resultados rápidos globales del buscador superior -->
+          <div id="globalSearchDropdown" class="global-search-dropdown" role="listbox" aria-label="Resultados de búsqueda rápida"></div>
         </div>
       </header>
 
@@ -164,49 +172,332 @@
             </div>
             {% endif %}
 
-            <!-- KPIs Clave de Operación -->
+            <!-- KPIs Clave de Operación (100% Reales en Base a Productos y Precios) -->
             <div class="stats-row">
               <div class="dash-card">
                 <h5>Productos Registrados</h5>
-                <h3>{{ total_productos }}</h3>
+                <h3 id="kpiTotalProductos">{{ total_productos }}</h3>
                 <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
               </div>
               <div class="dash-card">
                 <h5>Ofertas Activas</h5>
-                <h3 class="kpi-val-rose">{{ total_ofertas }}</h3>
+                <h3 class="kpi-val-rose" id="kpiTotalOfertas">{{ total_ofertas }}</h3>
                 <span class="kpi-subtext">Precios promocionales vigentes</span>
               </div>
               <div class="dash-card">
                 <h5>Inversión en Inventario</h5>
-                <h3 class="kpi-val-blue">${{ inversion_total|floatformat:0 }}</h3>
-                <span class="kpi-subtext">Costo total de compra en bodega</span>
+                <h3 class="kpi-val-blue" id="kpiInversionTotal">${{ inversion_total|floatformat:0 }}</h3>
+                <span class="kpi-subtext">Costo real de compra en bodega</span>
               </div>
               <div class="dash-card">
                 <h5>Ganancia Proyectada</h5>
-                <h3 class="kpi-val-green">+${{ ganancia_potencial|floatformat:0 }}</h3>
-                <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
+                <h3 class="kpi-val-green" id="kpiGananciaPotencial">+${{ ganancia_potencial|floatformat:0 }}</h3>
+                <span class="kpi-subtext">Margen real sobre costo: <strong id="kpiMargenPromedio">{{ margen_promedio|floatformat:1 }}%</strong></span>
               </div>
             </div>
 
-            <!-- Analítica Visual (Chart.js) -->
+            <!-- ============================================================== -->
+            <!-- FILTRO INTERACTIVO DE GANANCIAS EN GENERAL (DÍA, MES, AÑO)      -->
+            <!-- Calcula las ganancias netas reales de todo lo vendido          -->
+            <!-- ============================================================== -->
+            <div class="profit-filter-panel" id="panelFiltroGanancias">
+              <div class="profit-filter-header">
+                <div class="profit-filter-title-wrap">
+                  <h4>
+                    <span>💰</span> Control de Ganancias Reales (Ventas vs Costos de Productos)
+                    <span class="finanzas-badge-pill" id="badgePeriodoActivo">Todo lo Vendido (Histórico)</span>
+                  </h4>
+                  <p>Consulta únicamente las ganancias netas reales obtenidas en el Día, Mes, Año o el Proyectado en Bodega.</p>
+                </div>
+                <div class="profit-period-tabs" role="tablist" aria-label="Filtrar ganancias por período">
+                  <button type="button" class="profit-period-btn" data-periodo="dia" onclick="filtrarGananciasPeriodo('dia', this)">
+                    📅 Hoy (Día)
+                  </button>
+                  <button type="button" class="profit-period-btn" data-periodo="mes" onclick="filtrarGananciasPeriodo('mes', this)">
+                    🗓️ Este Mes
+                  </button>
+                  <button type="button" class="profit-period-btn" data-periodo="anio" onclick="filtrarGananciasPeriodo('anio', this)">
+                    📆 Este Año
+                  </button>
+                  <button type="button" class="profit-period-btn active" data-periodo="general" onclick="filtrarGananciasPeriodo('general', this)">
+                    🌎 General (Ventas)
+                  </button>
+                  <button type="button" class="profit-period-btn" data-periodo="catalogo" onclick="filtrarGananciasPeriodo('catalogo', this)">
+                    📦 Catálogo Bodega
+                  </button>
+                </div>
+              </div>
+
+              <div class="profit-kpis-grid">
+                <div class="profit-kpi-box highlight-profit">
+                  <span class="profit-kpi-label" id="lblProfitBoxTitle">Ganancia Neta General (Lo Vendido)</span>
+                  <div class="profit-kpi-val green" id="valFiltroGanancia">+${{ ganancias_periodos.general.ganancia|floatformat:0 }} COP</div>
+                  <div class="profit-kpi-sub" id="subFiltroGanancia">
+                    Utilidad limpia descontando costos • Rentabilidad: <strong>{{ ganancias_periodos.general.margen_pct|floatformat:1 }}%</strong>
+                  </div>
+                </div>
+                <div class="profit-kpi-box">
+                  <span class="profit-kpi-label">Total Vendido (Ingresos Netos)</span>
+                  <div class="profit-kpi-val blue" id="valFiltroIngresos">${{ ganancias_periodos.general.ingresos|floatformat:0 }} COP</div>
+                  <div class="profit-kpi-sub" id="subFiltroIngresos">Facturación real registrada en el período</div>
+                </div>
+                <div class="profit-kpi-box">
+                  <span class="profit-kpi-label">Costo de Mercancía Vendida</span>
+                  <div class="profit-kpi-val slate" id="valFiltroCostos">${{ ganancias_periodos.general.costo|floatformat:0 }} COP</div>
+                  <div class="profit-kpi-sub" id="subFiltroCostos">Base de compra a fincas productoras</div>
+                </div>
+                <div class="profit-kpi-box">
+                  <span class="profit-kpi-label">Operaciones Computadas</span>
+                  <div class="profit-kpi-val amber" id="valFiltroCount">{{ ganancias_periodos.general.ventas_count }} ventas</div>
+                  <div class="profit-kpi-sub" id="subFiltroCount">Sincronizado en tiempo real con pedidos</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analítica Visual (Chart.js) — Se actualiza según búsqueda y período -->
             <div class="dash-charts-grid">
               <div class="dash-chart-card">
-                <div class="dash-chart-header">
-                  <h4>Distribución por Categorías</h4>
-                  <span class="dash-chart-sub">Volumen de productos clasificados por grupo taxonómico</span>
+                <div class="dash-chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                  <div>
+                    <h4 id="chartIzqTitulo">Distribución por Categorías y Ganancias</h4>
+                    <span class="dash-chart-sub" id="chartIzqSub">Volumen de productos clasificados por grupo taxonómico</span>
+                  </div>
+                  <div style="display: flex; gap: 4px;">
+                    <button type="button" class="quick-filter-btn active" id="btnChartModoCat" onclick="cambiarModoGraficaIzquierda('categorias')" style="padding: 3px 9px; font-size: 0.72rem;">
+                      Categorías
+                    </button>
+                    <button type="button" class="quick-filter-btn" id="btnChartModoPer" onclick="cambiarModoGraficaIzquierda('periodos')" style="padding: 3px 9px; font-size: 0.72rem;">
+                      Ganancias Día/Mes/Año
+                    </button>
+                  </div>
                 </div>
                 <div class="dash-chart-canvas-wrap">
                   <canvas id="chartCategorias"></canvas>
                 </div>
               </div>
               <div class="dash-chart-card">
-                <div class="dash-chart-header">
-                  <h4>Rentabilidad y Márgenes de Ganancia</h4>
-                  <span class="dash-chart-sub">Comparativa Costo de Compra vs Precio de Venta ($ COP)</span>
+                <div class="dash-chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                  <div>
+                    <h4 id="chartDerTitulo">Rentabilidad y Márgenes Reales por Producto</h4>
+                    <span class="dash-chart-sub" id="chartDerSub">Comparativa Costo de Compra vs Precio Venta Vigente vs Ganancia ($ COP)</span>
+                  </div>
+                  <span class="finanzas-badge-pill" id="chartDerBadge">{{ total_productos }} productos reales</span>
                 </div>
                 <div class="dash-chart-canvas-wrap">
                   <canvas id="chartMargenes"></canvas>
                 </div>
+              </div>
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- TABLA 1 EN RESUMEN: GANANCIAS DE TODO LO VENDIDO (DÍA/MES/AÑO) -->
+            <!-- Se actualiza en vivo con el filtro Día / Mes / Año / General   -->
+            <!-- ============================================================== -->
+            <div class="products-table-container" style="margin-bottom: 1.35rem;">
+              <div class="catalog-inv-header" style="margin-bottom: 0.85rem;">
+                <div>
+                  <h3 class="catalog-inv-title" style="font-size: 1.12rem; display: flex; align-items: center; gap: 8px;">
+                    <span>📈</span> Desglose de Ganancias por Ventas Realizadas
+                    <span class="finanzas-badge-pill" id="lblTablaVentasPeriodo">Período: General (Todas las Ventas)</span>
+                  </h3>
+                  <p class="catalog-inv-subtitle">
+                    Muestra cada venta registrada en el período seleccionado (Día, Mes, Año o General) y la ganancia neta obtenida.
+                  </p>
+                </div>
+                <div class="catalog-inv-actions">
+                  <button type="button" class="btn-primary-dash" onclick="mostrarSeccion('ventas'); abrirModalNuevaVenta();" style="padding: 6px 12px; font-size: 0.8rem;">
+                    + Registrar Venta
+                  </button>
+                  <button type="button" class="btn-secondary-dash" onclick="mostrarSeccion('ventas')" style="padding: 6px 12px; font-size: 0.8rem;">
+                    Ir a Gestión de Ventas →
+                  </button>
+                </div>
+              </div>
+              <div class="table-scroll-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">N° Venta</th>
+                      <th scope="col">Fecha y Hora</th>
+                      <th scope="col">Cajero / Cliente</th>
+                      <th scope="col">Origen / Medio</th>
+                      <th scope="col" style="text-align: right;">Total Vendido</th>
+                      <th scope="col" style="text-align: right;">Costo Base Est.</th>
+                      <th scope="col" style="text-align: right;">Ganancia Neta</th>
+                      <th scope="col" style="text-align: center;">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaGananciasVentasBody">
+                    {% for v in ventas %}
+                    <tr class="fila-resumen-venta"
+                        data-id="{{ v.id_venta }}"
+                        data-es-hoy="{% if v.es_hoy %}1{% else %}0{% endif %}"
+                        data-es-mes="{% if v.es_mes %}1{% else %}0{% endif %}"
+                        data-es-anio="{% if v.es_anio %}1{% else %}0{% endif %}"
+                        data-anulada="{% if v.estado_venta == 'Anulada' %}1{% else %}0{% endif %}"
+                        data-ingreso="{{ v.total_neto }}"
+                        data-costo="{{ v.costo_estimado }}"
+                        data-ganancia="{{ v.ganancia_estimada }}"
+                        data-busqueda="venta #vta-{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.origen_venta|lower }} {{ v.medio_pago|lower }} {{ v.estado_venta|lower }}">
+                      <td><strong style="color: #059669;">#VTA-{{ v.id_venta }}</strong></td>
+                      <td>
+                        <div>{{ v.fecha_venta|date:"d/m/Y" }}</div>
+                        <small style="color: #64748b; font-size: 0.74rem;">{{ v.fecha_venta|date:"H:i A" }}</small>
+                      </td>
+                      <td>
+                        <strong>{{ v.id_usuario_cajero.username|capfirst }}</strong>
+                        {% if v.id_cliente %}<div style="font-size: 0.73rem; color: #64748b;">Cliente #{{ v.id_cliente }}</div>{% endif %}
+                      </td>
+                      <td>
+                        <span class="badge-cat">{{ v.origen_venta|default:"Tienda Física" }}</span>
+                        <small style="display: block; color: #64748b; font-size: 0.73rem; margin-top: 2px;">{{ v.medio_pago }}</small>
+                      </td>
+                      <td style="text-align: right; font-weight: 600; color: #1e293b;">
+                        ${{ v.total_neto|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #64748b;">
+                        ${{ v.costo_estimado|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right;">
+                        {% if v.estado_venta == 'Anulada' %}
+                          <span class="badge-normal">$0 COP (Anulada)</span>
+                        {% else %}
+                          <span class="badge-margen">+${{ v.ganancia_estimada|floatformat:0 }} COP</span>
+                        {% endif %}
+                      </td>
+                      <td style="text-align: center;">
+                        {% if v.estado_venta == "Completada" or not v.estado_venta %}
+                          <span class="badge-status badge-status-activo">Completada</span>
+                        {% elif v.estado_venta == "Pendiente" %}
+                          <span class="badge-status" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">Pendiente</span>
+                        {% else %}
+                          <span class="badge-status badge-status-inactivo">{{ v.estado_venta }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="filaSinVentasResumen">
+                      <td colspan="8" class="empty-products">No hay ventas registradas para este período.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background: #f0fdf4; border-top: 2px solid #bbf7d0; font-weight: 800;">
+                      <td colspan="4" style="color: #166534; font-size: 0.84rem;" id="tfootVentasLabel">
+                        TOTAL ACUMULADO DEL PERÍODO SELECCIONADO ({{ ganancias_periodos.general.ventas_count }} ventas):
+                      </td>
+                      <td style="text-align: right; color: #0284c7; font-size: 0.9rem;" id="tfootVentasIngresos">
+                        ${{ ganancias_periodos.general.ingresos|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #475569; font-size: 0.9rem;" id="tfootVentasCosto">
+                        ${{ ganancias_periodos.general.costo|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #15803d; font-size: 0.96rem;" id="tfootVentasGanancia">
+                        +${{ ganancias_periodos.general.ganancia|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: center; font-size: 0.78rem; color: #166534;" id="tfootVentasMargen">
+                        {{ ganancias_periodos.general.margen_pct|floatformat:1 }}%
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- TABLA 2 EN RESUMEN: RENTABILIDAD REAL POR PRODUCTO DEL CATÁLOGO-->
+            <!-- Basada en los productos, costos, ofertas y stock reales        -->
+            <!-- ============================================================== -->
+            <div class="products-table-container" style="margin-bottom: 1.35rem;">
+              <div class="catalog-inv-header" style="margin-bottom: 0.85rem;">
+                <div>
+                  <h3 class="catalog-inv-title" style="font-size: 1.12rem; display: flex; align-items: center; gap: 8px;">
+                    <span>🍎</span> Tabla de Rentabilidad Real por Producto en Catálogo
+                    <span class="finanzas-badge-pill" id="lblConteoProductosResumen">{{ total_productos }} referencias reales</span>
+                  </h3>
+                  <p class="catalog-inv-subtitle">
+                    Cálculo exacto en base a los productos y precios reales en bodega (incluyendo descuentos de oferta activos). Usa el buscador superior para filtrar productos y gráficas.
+                  </p>
+                </div>
+                <div class="catalog-inv-actions">
+                  <button type="button" class="btn-secondary-dash" onclick="mostrarSeccion('inventario')" style="padding: 6px 12px; font-size: 0.8rem;">
+                    Editar Precios en Inventario →
+                  </button>
+                </div>
+              </div>
+              <div class="table-scroll-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Producto</th>
+                      <th scope="col">Categoría</th>
+                      <th scope="col" style="text-align: center;">Stock</th>
+                      <th scope="col" style="text-align: right;">Costo Unitario</th>
+                      <th scope="col" style="text-align: right;">Precio Vigente</th>
+                      <th scope="col" style="text-align: right;">Ganancia / Und</th>
+                      <th scope="col" style="text-align: right;">Inversión Bodega</th>
+                      <th scope="col" style="text-align: right;">Valor Venta Total</th>
+                      <th scope="col" style="text-align: right;">Ganancia Total Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaRentabilidadProductosBody">
+                    {% for pr in productos_resumen %}
+                    <tr class="fila-resumen-producto"
+                        data-id="{{ pr.id }}"
+                        data-busqueda="{{ pr.nombre|lower }} {{ pr.categoria|lower }} {{ pr.estado|lower }}">
+                      <td>
+                        <div class="table-prod-info">
+                          <span class="table-prod-icon">{{ pr.nombre|slice:":1"|upper }}</span>
+                          <div>
+                            <strong>{{ pr.nombre }}</strong>
+                            {% if pr.en_oferta %}
+                              <span class="badge-oferta" style="margin-left: 4px; font-size: 0.65rem; padding: 1px 6px;">Oferta</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="badge-cat">{{ pr.categoria }}</span></td>
+                      <td style="text-align: center;">
+                        <strong>{{ pr.stock_actual|floatformat:0 }}</strong> {{ pr.unidad_medida }}
+                      </td>
+                      <td style="text-align: right; color: #475569;">
+                        ${{ pr.costo_compra|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right; font-weight: 700; color: {% if pr.en_oferta %}#e11d48{% else %}#0f172a{% endif %};">
+                        ${{ pr.precio_efectivo|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right;">
+                        <span class="badge-margen">+${{ pr.margen_unitario|floatformat:0 }} ({{ pr.porcentaje_margen|floatformat:1 }}%)</span>
+                      </td>
+                      <td style="text-align: right; color: #2563eb; font-weight: 600;">
+                        ${{ pr.inversion_stock|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right; color: #0f172a; font-weight: 600;">
+                        ${{ pr.venta_stock|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right; color: #15803d; font-weight: 800;">
+                        +${{ pr.ganancia_stock|floatformat:0 }} COP
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background: #f8fafc; border-top: 2px solid #e2e8f0; font-weight: 800;">
+                      <td colspan="6" style="color: #1e293b; font-size: 0.84rem;" id="tfootProdLabel">
+                        TOTALES REALES DEL CATÁLOGO EN BODEGA ({{ total_productos }} productos):
+                      </td>
+                      <td style="text-align: right; color: #2563eb; font-size: 0.9rem;" id="tfootProdInversion">
+                        ${{ inversion_total|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #0f172a; font-size: 0.9rem;" id="tfootProdVenta">
+                        ${{ valor_venta_potencial|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #15803d; font-size: 0.95rem;" id="tfootProdGanancia">
+                        +${{ ganancia_potencial|floatformat:0 }} COP
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
 
@@ -216,30 +507,30 @@
               <div class="finanzas-card">
                 <div class="finanzas-header">
                   <h3>Rentabilidad y Finanzas</h3>
-                  <span class="finanzas-badge-pill">
-                    Margen Promedio: {{ margen_promedio|floatformat:1 }}%
+                  <span class="finanzas-badge-pill" id="finanzasMargenPill">
+                    Margen Real: {{ margen_promedio|floatformat:1 }}%
                   </span>
                 </div>
                 <div>
                   <div class="finanzas-metric-row">
                     <span class="finanzas-metric-label">Inversión Total en Compras:</span>
-                    <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
+                    <span class="val" id="finanzasInversionVal">${{ inversion_total|floatformat:0 }} COP</span>
                   </div>
                   <div class="finanzas-metric-row">
                     <span class="finanzas-metric-label">Valor Comercial de Venta:</span>
-                    <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
+                    <span class="val" id="finanzasVentaVal">${{ valor_venta_potencial|floatformat:0 }} COP</span>
                   </div>
                   <div class="finanzas-metric-row">
                     <span class="finanzas-metric-label">Utilidad Bruta Estimada:</span>
-                    <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
+                    <span class="val green" id="finanzasGananciaVal">+${{ ganancia_potencial|floatformat:0 }} COP</span>
                   </div>
                   <div class="finanzas-metric-row">
-                    <span class="finanzas-metric-label">Promoción / Descuentos:</span>
-                    <span class="val finanzas-val-rebajados">{{ total_ofertas }} productos rebajados</span>
+                    <span class="finanzas-metric-label">Ganancia Real de Ventas (Hoy / General):</span>
+                    <span class="val green" id="finanzasGananciaRealVentas">+${{ ganancias_periodos.dia.ganancia|floatformat:0 }} hoy / +${{ ganancias_periodos.general.ganancia|floatformat:0 }} total</span>
                   </div>
                 </div>
                 <div class="finanzas-note-box">
-                  <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
+                  <em>Nota: Todos los cálculos toman en consideración los costos reales de compra, los precios de oferta vigentes multiplicados por las existencias en bodega y las ventas facturadas en tiempo real.</em>
                 </div>
               </div>
 
@@ -881,7 +1172,7 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #059669;">${{ total_ventas_ingresos|floatformat:0 }}</h3>
+                <h3 style="color: #059669;" id="kpiVentasRecaudado">${{ total_ventas_ingresos|floatformat:0 }}</h3>
                 <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Recaudado</span>
               </div>
               <div class="dash-card-footer">
@@ -899,7 +1190,7 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #0284c7;">{{ total_ventas_count }}</h3>
+                <h3 style="color: #0284c7;" id="kpiVentasCount">{{ total_ventas_count }}</h3>
                 <span class="kpi-badge kpi-badge-blue">Transacciones</span>
               </div>
               <div class="dash-card-footer">
@@ -917,8 +1208,8 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #d97706;">{{ ventas_hoy_count }}</h3>
-                <span class="kpi-badge kpi-badge-amber">${{ ventas_hoy_ingresos|floatformat:0 }}</span>
+                <h3 style="color: #d97706;" id="kpiVentasHoyCount">{{ ventas_hoy_count }}</h3>
+                <span class="kpi-badge kpi-badge-amber" id="kpiVentasHoyIngresos">${{ ventas_hoy_ingresos|floatformat:0 }}</span>
               </div>
               <div class="dash-card-footer">
                 <span class="kpi-subtext">Recaudo jornada actual</span>
@@ -935,7 +1226,7 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #7c3aed;">${{ ticket_promedio|floatformat:0 }}</h3>
+                <h3 style="color: #7c3aed;" id="kpiVentasTicket">${{ ticket_promedio|floatformat:0 }}</h3>
                 <span class="kpi-badge kpi-badge-purple">Promedio</span>
               </div>
               <div class="dash-card-footer">
@@ -964,10 +1255,10 @@
               <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
                 <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
                   <input type="search" id="inputBuscarVenta" placeholder="Buscar por ID, cajero, medio..."
-                    aria-label="Buscar venta" onkeyup="filtrarTablaVentas()" style="font-size: 0.85rem;">
+                    aria-label="Buscar venta" oninput="filtrarTablaVentas()" onkeyup="filtrarTablaVentas()" onsearch="filtrarTablaVentas()" style="font-size: 0.85rem;">
                   <span aria-hidden="true">⌕</span>
                 </label>
-                <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
+                <span class="badge-margen" id="badgeTotalVentasCount" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
                   Total: {{ total_ventas_count }} ventas
                 </span>
                 <a href="{% url 'dashboard_exportar_ventas_csv' %}" class="btn-secondary-dash"
@@ -979,10 +1270,6 @@
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   + Nueva Venta
                 </button>
-                <a href="{% url 'lista_ventas' %}" class="btn-secondary-dash"
-                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Ver módulo completo de ventas">
-                  Ver Módulo Completo ↗
-                </a>
               </div>
             </div>
 
@@ -996,13 +1283,14 @@
                   <th scope="col">Medio de Pago</th>
                   <th scope="col" style="text-align: right;">Subtotal</th>
                   <th scope="col" style="text-align: right;">Total Neto</th>
+                  <th scope="col" style="text-align: right;">Ganancia Neta</th>
                   <th scope="col" style="text-align: center;">Estado</th>
                   <th scope="col" style="text-align: center;">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tablaVentasBody">
                 {% for v in ventas %}
-                <tr class="fila-venta" data-busqueda="venta #{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.medio_pago|lower }} {{ v.origen_venta|lower }} {{ v.estado_venta|lower }}">
+                <tr class="fila-venta" data-id="{{ v.id_venta }}" data-busqueda="venta #vta-{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.medio_pago|lower }} {{ v.origen_venta|lower }} {{ v.estado_venta|lower }}">
                   <td>
                     <strong style="color: #059669;">#VTA-{{ v.id_venta }}</strong>
                   </td>
@@ -1031,6 +1319,13 @@
                   </td>
                   <td style="text-align: right; font-weight: 700; color: #059669; font-size: 0.95rem;">
                     ${{ v.total_neto|floatformat:2 }} COP
+                  </td>
+                  <td style="text-align: right;">
+                    {% if v.estado_venta == "Anulada" %}
+                      <span class="badge-normal">$0 COP</span>
+                    {% else %}
+                      <span class="badge-margen">+${{ v.ganancia_estimada|floatformat:0 }} COP</span>
+                    {% endif %}
                   </td>
                   <td style="text-align: center;">
                     {% if v.estado_venta == "Completada" or not v.estado_venta %}
@@ -1079,7 +1374,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td class="empty-products" colspan="9">
+                  <td class="empty-products" colspan="10">
                     No hay ventas registradas aún. ¡Haz clic en "+ Nueva Venta" para registrar la primera!
                   </td>
                 </tr>
@@ -1928,6 +2223,9 @@
   {{ chart_prod_costos|json_script:"data-prod-costos" }}
   {{ chart_prod_precios|json_script:"data-prod-precios" }}
   {{ chart_prod_margenes|json_script:"data-prod-margenes" }}
+  {{ ganancias_periodos|json_script:"data-ganancias-periodos" }}
+  {{ productos_resumen|json_script:"data-productos-resumen" }}
+  {{ ventas_json|json_script:"data-ventas-json" }}
 
   <!-- ====================================================================== -->
   <!-- JAVASCRIPT EXTERNO DEL DASHBOARD (principal/static/js/dashboard.js)    -->
@@ -1936,6 +2234,6 @@
   <!-- archivo estático 'js/dashboard.js' para separar responsabilidades      -->
   <!-- (HTML vs JS) y mejorar el almacenamiento en caché del navegador.       -->
   <!-- ====================================================================== -->
-  <script src="{% static 'js/dashboard.js' %}?v=1.0"></script>
+  <script src="{% static 'js/dashboard.js' %}?v=2.0"></script>
 </body>
 </html>

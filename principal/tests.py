@@ -565,7 +565,7 @@ class SeguridadCrudTests(TestCase):
             username="comprador_publico", password="Clave-segura-123", is_staff=False
         )
         self.client.force_login(cliente)
-        for ruta in [reverse("dashboard"), reverse("principal:producto_listar"), reverse("lista_ventas")]:
+        for ruta in [reverse("dashboard"), reverse("principal:producto_listar"), reverse("dashboard_exportar_ventas_csv")]:
             res = self.client.get(ruta)
             self.assertRedirects(res, reverse("index"))
 
@@ -817,50 +817,73 @@ class VentasTestCase(TestCase):
         self.assertIn(str(self.venta.id_venta), str(self.venta))
         self.assertIn('14000.00', str(self.venta))
 
-    def test_lista_ventas_requiere_login(self):
-        response = self.client.get(reverse('lista_ventas'))
-        self.assertEqual(response.status_code, 302)
-
-    def test_lista_ventas_autenticado(self):
+    def test_dashboard_resumen_muestra_filtro_ganancias_y_tablas_reales(self):
+        """Verifica que el Resumen muestre el filtro de ganancias (Día/Mes/Año) y elimine el módulo secundario."""
         self.client.login(username='cajero_test', password='password123')
-        response = self.client.get(reverse('lista_ventas'))
+        response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Gestión de Ventas')
-        self.assertContains(response, '14000')
+        self.assertContains(response, 'panelFiltroGanancias')
+        self.assertContains(response, 'tablaGananciasVentasBody')
+        self.assertContains(response, 'tablaRentabilidadProductosBody')
+        self.assertContains(response, 'globalSearchDropdown')
+        self.assertNotContains(response, 'Ver Módulo Completo')
 
-    def test_crear_venta_post(self):
-        self.client.login(username='cajero_test', password='password123')
-        response = self.client.post(reverse('crear_venta'), {
-            'origen_venta': 'Domicilio / WhatsApp',
-            'subtotal': '25000',
-            'descuento': '2000',
-            'total_neto': '23000',
-            'medio_pago': 'Nequi',
-            'estado_venta': 'Completada'
-        })
-        self.assertRedirects(response, reverse('lista_ventas'))
-        self.assertTrue(Venta.objects.filter(medio_pago='Nequi', total_neto=Decimal('23000.00')).exists())
+    def test_api_estado_tiempo_real_devuelve_metricas_y_ganancias_reales(self):
+        """Verifica el endpoint de tiempo real con ganancias por Día, Mes, Año y General."""
+        response = self.client.get(reverse('api_estado_tiempo_real'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['ok'])
+        self.assertIn('ganancias_periodos', data)
+        for periodo in ('dia', 'mes', 'anio', 'general', 'catalogo'):
+            self.assertIn(periodo, data['ganancias_periodos'])
+            self.assertIn('ganancia', data['ganancias_periodos'][periodo])
+        self.assertGreaterEqual(data['ganancias_periodos']['dia']['ingresos'], 14000.0)
+        self.assertGreaterEqual(len(data['ventas']), 1)
 
-    def test_editar_venta_post(self):
-        self.client.login(username='cajero_test', password='password123')
-        response = self.client.post(reverse('editar_venta', args=[self.venta.pk]), {
-            'origen_venta': 'Tienda Física',
-            'subtotal': '15000',
-            'descuento': '3000',
-            'total_neto': '12000',
-            'medio_pago': 'Daviplata',
-            'estado_venta': 'Completada'
-        })
-        self.assertRedirects(response, reverse('lista_ventas'))
-        self.venta.refresh_from_db()
-        self.assertEqual(self.venta.medio_pago, 'Daviplata')
-        self.assertEqual(self.venta.total_neto, Decimal('12000.00'))
+    def test_api_pedido_whatsapp_actualiza_y_elimina_en_tiempo_real(self):
+        """Verifica que si el cliente modifica su pedido en el carrito, la venta se actualice en tiempo real."""
+        import json
+        # 1. Crear pedido inicial
+        resp_crear = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'total': 15000,
+                'items': [{'id': '1', 'nombre': 'Piña Golden', 'precio': 7500, 'cantidad': 2}],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp_crear.status_code, 201)
+        id_venta = resp_crear.json()['id_venta']
 
-    def test_eliminar_venta_post(self):
-        self.client.login(username='cajero_test', password='password123')
-        response = self.client.post(reverse('eliminar_venta', args=[self.venta.pk]))
-        self.assertRedirects(response, reverse('lista_ventas'))
-        self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
+        # 2. Modificar cantidades del pedido existente en tiempo real
+        resp_mod = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'id_venta': id_venta,
+                'total': 30000,
+                'items': [{'id': '1', 'nombre': 'Piña Golden', 'precio': 7500, 'cantidad': 4}],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp_mod.status_code, 200)
+        self.assertTrue(resp_mod.json()['updated'])
+        venta_db = Venta.objects.get(pk=id_venta)
+        self.assertEqual(venta_db.total_neto, Decimal('30000.00'))
+
+        # 3. Vaciar carrito elimina el pedido pendiente en tiempo real
+        resp_del = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'id_venta': id_venta,
+                'total': 0,
+                'items': [],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp_del.status_code, 200)
+        self.assertTrue(resp_del.json()['eliminada'])
+        self.assertFalse(Venta.objects.filter(pk=id_venta).exists())
 
     def test_dashboard_muestra_ventas(self):
         self.client.login(username='cajero_test', password='password123')

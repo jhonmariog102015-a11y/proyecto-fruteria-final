@@ -9,10 +9,13 @@
     'use strict';
 
     const STORAGE_KEY = 'el_paso_frutas_cart';
+    const ACTIVE_ORDER_KEY = 'el_paso_active_venta_id';
     const WHATSAPP_PHONE = '573001234567';
 
     // Estado en memoria
     let cart = [];
+    let activeVentaId = null;
+    let syncTimer = null;
 
     // Cargar desde LocalStorage de forma segura
     try {
@@ -20,17 +23,25 @@
         if (stored) {
             cart = JSON.parse(stored);
         }
+        const storedOrder = localStorage.getItem(ACTIVE_ORDER_KEY);
+        if (storedOrder) {
+            activeVentaId = parseInt(storedOrder, 10) || null;
+        }
     } catch (e) {
         cart = [];
+        activeVentaId = null;
     }
 
-    function saveCart() {
+    function saveCart(triggerServerSync = true) {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
         } catch (e) {
             console.error('Error guardando carrito:', e);
         }
         updateCartUI();
+        if (triggerServerSync) {
+            programarSincronizacionPedido();
+        }
     }
 
     function getCartCount() {
@@ -254,17 +265,176 @@
         return match ? decodeURIComponent(match[1]) : '';
     }
 
-    // Envío del Pedido a WhatsApp y Registro Automático en Gestión de Ventas (#ventas)
+    // =========================================================================
+    // SINCRONIZACIÓN EN TIEMPO REAL DE PEDIDOS Y CATÁLOGO (PARA TODOS LOS USUARIOS)
+    // NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    // 1. Cada vez que el cliente o usuario modifica su pedido en la canasta
+    //    (agrega fruta, cambia cantidad o elimina un ítem), se sincroniza en
+    //    tiempo real contra 'POST /api/pedido-whatsapp/' enviando 'id_venta'.
+    // 2. Así el pedido activo (#VTA-X) se actualiza instantáneamente en todas
+    //    las pantallas del Dashboard (#ventas y #resumen) sin duplicar registros.
+    // 3. Además, se consulta '/api/estado-tiempo-real/' periódicamente para que
+    //    cualquier cambio de precio, oferta o stock realizado por el administrador
+    //    se refleje en tiempo real en el catálogo y en el carrito de todos los clientes.
+    // =========================================================================
+    function programarSincronizacionPedido() {
+        if (syncTimer) clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => {
+            sincronizarPedidoConServidor();
+        }, 250);
+    }
+
+    async function sincronizarPedidoConServidor() {
+        const total = Math.round(getCartTotal());
+        if (cart.length === 0 && !activeVentaId) {
+            return null;
+        }
+
+        try {
+            const resp = await fetch('/api/pedido-whatsapp/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({
+                    id_venta: activeVentaId,
+                    total: total,
+                    items: cart,
+                }),
+            });
+            if (!resp.ok) return null;
+            const data = await resp.json();
+            if (data && data.ok) {
+                if (data.eliminada || cart.length === 0) {
+                    activeVentaId = null;
+                    localStorage.removeItem(ACTIVE_ORDER_KEY);
+                } else if (data.id_venta) {
+                    activeVentaId = data.id_venta;
+                    localStorage.setItem(ACTIVE_ORDER_KEY, String(activeVentaId));
+                }
+                actualizarIndicadorPedidoActivo();
+                return data;
+            }
+        } catch (e) {
+            // Silencioso en caso de desconexión temporal
+        }
+        return null;
+    }
+
+    function actualizarIndicadorPedidoActivo() {
+        const header = document.querySelector('.cart-drawer-header h3');
+        if (!header) return;
+        let badge = document.getElementById('cartLiveOrderBadge');
+        if (activeVentaId && cart.length > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.id = 'cartLiveOrderBadge';
+                badge.style.cssText = 'display:inline-block; margin-left:8px; font-size:0.72rem; background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:2px 8px; border-radius:999px; font-weight:700; vertical-align:middle;';
+                header.appendChild(badge);
+            }
+            badge.textContent = `Pedido #VTA-${activeVentaId} en vivo`;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    async function sincronizarCatalogoClientesTiempoReal() {
+        try {
+            const resp = await fetch('/api/estado-tiempo-real/', {
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
+            });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data || !data.ok || !Array.isArray(data.productos_resumen)) return;
+
+            let carritoCambioPrecio = false;
+
+            data.productos_resumen.forEach(p => {
+                // 1. Actualizar tarjetas del catálogo de frutas en tiempo real si están en el DOM
+                const card = document.querySelector(`.fruit-card[data-id="${p.id}"]`);
+                if (card) {
+                    const priceVal = card.querySelector('.price-val');
+                    if (priceVal) {
+                        priceVal.textContent = '$' + Math.round(p.precio_efectivo).toLocaleString('es-CO');
+                    }
+                    const addBtn = card.querySelector('.add-btn');
+                    const agotado = p.stock_actual <= 0 || p.estado === 'Agotado';
+                    if (addBtn) {
+                        if (agotado) {
+                            addBtn.disabled = true;
+                            addBtn.classList.add('add-btn-disabled');
+                            addBtn.textContent = '✕';
+                            addBtn.title = 'Producto agotado temporalmente';
+                        } else {
+                            addBtn.disabled = false;
+                            addBtn.classList.remove('add-btn-disabled');
+                            addBtn.textContent = '+';
+                            addBtn.title = `Agregar ${p.nombre} al carrito`;
+                        }
+                    }
+                }
+
+                // 2. Si el producto está en el carrito del cliente y su precio cambió en el admin, actualizarlo en vivo
+                const itemCarrito = cart.find(item => String(item.id) === String(p.id));
+                if (itemCarrito) {
+                    const nuevoPrecio = Number(p.precio_efectivo) || 0;
+                    if (nuevoPrecio > 0 && Math.round(itemCarrito.precio) !== Math.round(nuevoPrecio)) {
+                        itemCarrito.precio = nuevoPrecio;
+                        itemCarrito.nombre = p.nombre;
+                        carritoCambioPrecio = true;
+                    }
+                }
+            });
+
+            if (carritoCambioPrecio) {
+                saveCart(true);
+            }
+
+            // 3. Verificar si el pedido activo del cliente fue modificado o eliminado desde el Dashboard
+            if (activeVentaId && Array.isArray(data.ventas)) {
+                const ventaServidor = data.ventas.find(v => Number(v.id_venta) === Number(activeVentaId));
+                if (!ventaServidor) {
+                    // Fue eliminado en el panel administrativo
+                    activeVentaId = null;
+                    localStorage.removeItem(ACTIVE_ORDER_KEY);
+                    actualizarIndicadorPedidoActivo();
+                }
+            }
+        } catch (e) {
+            // Silencioso ante fallos de red
+        }
+    }
+
+    // Sincronizar entre múltiples pestañas abiertas del mismo navegador
+    window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEY) {
+            try {
+                cart = e.newValue ? JSON.parse(e.newValue) : [];
+                updateCartUI();
+            } catch (err) {}
+        } else if (e.key === ACTIVE_ORDER_KEY) {
+            activeVentaId = e.newValue ? (parseInt(e.newValue, 10) || null) : null;
+            actualizarIndicadorPedidoActivo();
+        }
+    });
+
+    // Envío del Pedido a WhatsApp y Registro/Actualización Automática en Gestión de Ventas (#ventas)
     function setupWhatsappCheckout() {
         const btn = document.getElementById('btnSendWhatsapp');
         if (!btn) return;
 
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
             if (cart.length === 0) return;
+
+            // Asegurar sincronización inmediata antes de abrir WhatsApp
+            await sincronizarPedidoConServidor();
 
             const total = getCartTotal();
             let lineas = [];
-            lineas.push('¡Hola, Al Paso Frutería! Deseo realizar el siguiente pedido campesino:');
+            const refPedido = activeVentaId ? ` (Pedido #VTA-${activeVentaId})` : '';
+            lineas.push(`¡Hola, Al Paso Frutería! Deseo confirmar mi pedido campesino${refPedido}:`);
             lineas.push('');
 
             cart.forEach((item, index) => {
@@ -279,30 +449,16 @@
             const textoCodificado = encodeURIComponent(lineas.join('\n'));
             const urlWa = `https://wa.me/${WHATSAPP_PHONE}?text=${textoCodificado}`;
             window.open(urlWa, '_blank');
-
-            // Registrar automáticamente el pedido como Venta Pendiente en el Dashboard
-            try {
-                fetch('/api/pedido-whatsapp/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken(),
-                    },
-                    body: JSON.stringify({
-                        total: Math.round(total),
-                        items: cart,
-                    }),
-                }).catch(() => {});
-            } catch (e) {
-                // No bloquear la redirección a WhatsApp si falla la red
-            }
         });
     }
 
     // Inicialización al cargar el DOM
     document.addEventListener('DOMContentLoaded', () => {
         updateCartUI();
+        actualizarIndicadorPedidoActivo();
         setupWhatsappCheckout();
+        // Iniciar sincronización en tiempo real de precios, stock y pedidos cada 4 segundos
+        setInterval(sincronizarCatalogoClientesTiempoReal, 4000);
 
         // Botón abrir carrito
         const btnToggle = document.getElementById('cartToggleBtn');

@@ -31,7 +31,6 @@ from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -149,14 +148,6 @@ def _extraer_datos_venta(post_data):
     }
 
 
-def _obtener_redireccion_segura(request, default_route='lista_ventas'):
-    """Valida el parámetro 'next' contra ataques Open Redirect."""
-    next_url = request.POST.get('next') or request.GET.get('next')
-    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
-        return next_url
-    return default_route
-
-
 def inicio(request):
     """
     VISTA PRINCIPAL / LANDING PAGE ('/' y '/inicio/')
@@ -195,55 +186,280 @@ def catalogo_frutas_view(request):
     return render(request, 'principal/catalogo_frutas.html', context)
 
 
+def _calcular_metricas_reales():
+    """
+    MOTOR CENTRAL DE MÉTRICAS REALES (PRODUCTOS, INVENTARIO Y GANANCIAS POR PERIODO)
+    --------------------------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Calcula en tiempo real a partir de la base de datos:
+    1. Valoración real del catálogo completo (todos los productos, costos, precios y márgenes).
+    2. Ganancias netas reales de todo lo vendido filtradas por DÍA (Hoy), MES actual,
+       AÑO actual e Histórico General, aplicando la razón real de utilidad del catálogo.
+    """
+    productos = list(Producto.objects.select_related('categoria').all().order_by('id_producto'))
+    categorias = list(Categoria.objects.annotate(num_productos=Count('productos')).order_by('nombre'))
+    total_productos = len(productos)
+    total_ofertas = sum(1 for p in productos if p.en_oferta)
+
+    productos_bajo_stock = [p for p in productos if p.stock_actual <= p.stock_minimo]
+    total_bajo_stock = len(productos_bajo_stock)
+    total_agotados = sum(1 for p in productos if p.stock_actual <= 0 or p.estado == 'Agotado')
+
+    # Valoración exacta de cada producto en bodega
+    inversion_total = sum((p.costo_compra * p.stock_actual) for p in productos) or Decimal('0.00')
+    valor_venta_potencial = sum((p.precio_efectivo * p.stock_actual) for p in productos) or Decimal('0.00')
+    ganancia_potencial = valor_venta_potencial - inversion_total
+    margen_promedio = round((ganancia_potencial / inversion_total * 100), 1) if inversion_total > 0 else Decimal('0.0')
+
+    # Razón real de ganancia sobre precio de venta basada en los productos actuales
+    suma_precios_unit = sum(p.precio_efectivo for p in productos) or Decimal('0.00')
+    suma_margenes_unit = sum(p.margen_ganancia for p in productos) or Decimal('0.00')
+    if valor_venta_potencial > 0:
+        ratio_ganancia_venta = ganancia_potencial / valor_venta_potencial
+    elif suma_precios_unit > 0:
+        ratio_ganancia_venta = suma_margenes_unit / suma_precios_unit
+    else:
+        ratio_ganancia_venta = Decimal('0.30')
+
+    # Datos de TODOS los productos para tablas y gráficas de Resumen
+    productos_resumen = []
+    for p in productos:
+        inv_p = round(p.costo_compra * p.stock_actual, 2)
+        val_p = round(p.precio_efectivo * p.stock_actual, 2)
+        gan_p = round(val_p - inv_p, 2)
+        productos_resumen.append({
+            'id': p.id_producto,
+            'id_producto': p.id_producto,
+            'nombre': p.nombre,
+            'categoria': p.categoria.nombre if p.categoria else 'General',
+            'costo_compra': float(p.costo_compra),
+            'precio_venta_unitario': float(p.precio_venta_unitario),
+            'precio_oferta': float(p.precio_oferta) if p.precio_oferta else None,
+            'en_oferta': bool(p.en_oferta),
+            'precio_efectivo': float(p.precio_efectivo),
+            'porcentaje_descuento': int(p.porcentaje_descuento),
+            'margen_unitario': float(p.margen_ganancia),
+            'porcentaje_margen': float(round(p.porcentaje_margen, 1)),
+            'stock_actual': float(p.stock_actual),
+            'stock_minimo': float(p.stock_minimo),
+            'unidad_medida': p.unidad_medida,
+            'origen': p.origen,
+            'estado': p.estado,
+            'agotado': bool(p.stock_actual <= 0 or p.estado == 'Agotado'),
+            'inversion_stock': float(inv_p),
+            'venta_stock': float(val_p),
+            'ganancia_stock': float(gan_p),
+            'inversion_total_prod': float(inv_p),
+            'valor_venta_prod': float(val_p),
+            'ganancia_total_prod': float(gan_p),
+        })
+
+    chart_cat_labels = [cat.nombre for cat in categorias if cat.num_productos > 0]
+    chart_cat_data = [cat.num_productos for cat in categorias if cat.num_productos > 0]
+
+    chart_prod_labels = [p.nombre for p in productos]
+    chart_prod_costos = [float(p.costo_compra) for p in productos]
+    chart_prod_precios = [float(p.precio_efectivo) for p in productos]
+    chart_prod_margenes = [float(p.margen_ganancia) for p in productos]
+
+    # Ventas y cálculo real de ganancias por Día, Mes, Año y General
+    ahora_local = timezone.localtime(timezone.now())
+    hoy = ahora_local.date()
+    ventas = list(Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta'))
+
+    ventas_enriquecidas = []
+    ingresos_dia = Decimal('0.00')
+    ganancia_dia = Decimal('0.00')
+    costo_dia = Decimal('0.00')
+    count_dia = 0
+
+    ingresos_mes = Decimal('0.00')
+    ganancia_mes = Decimal('0.00')
+    costo_mes = Decimal('0.00')
+    count_mes = 0
+
+    ingresos_anio = Decimal('0.00')
+    ganancia_anio = Decimal('0.00')
+    costo_anio = Decimal('0.00')
+    count_anio = 0
+
+    total_ventas_ingresos = Decimal('0.00')
+    total_ventas_ganancia = Decimal('0.00')
+    total_ventas_costo = Decimal('0.00')
+    count_general_activas = 0
+
+    for v in ventas:
+        f_local = timezone.localtime(v.fecha_venta) if v.fecha_venta else ahora_local
+        es_hoy = (f_local.date() == hoy)
+        es_mes = (f_local.year == hoy.year and f_local.month == hoy.month)
+        es_anio = (f_local.year == hoy.year)
+
+        neto = v.total_neto or Decimal('0.00')
+        if v.estado_venta == 'Anulada':
+            ganancia_v = Decimal('0.00')
+            costo_v = Decimal('0.00')
+        else:
+            ganancia_v = round(neto * ratio_ganancia_venta, 2)
+            costo_v = round(neto - ganancia_v, 2)
+
+        v.ganancia_estimada = ganancia_v
+        v.costo_estimado = costo_v
+        v.es_hoy = es_hoy
+        v.es_mes = es_mes
+        v.es_anio = es_anio
+
+        if v.estado_venta != 'Anulada':
+            count_general_activas += 1
+            total_ventas_ingresos += neto
+            total_ventas_ganancia += ganancia_v
+            total_ventas_costo += costo_v
+
+            if es_hoy:
+                count_dia += 1
+                ingresos_dia += neto
+                ganancia_dia += ganancia_v
+                costo_dia += costo_v
+            if es_mes:
+                count_mes += 1
+                ingresos_mes += neto
+                ganancia_mes += ganancia_v
+                costo_mes += costo_v
+            if es_anio:
+                count_anio += 1
+                ingresos_anio += neto
+                ganancia_anio += ganancia_v
+                costo_anio += costo_v
+
+        ventas_enriquecidas.append({
+            'id_venta': v.id_venta,
+            'cajero': v.id_usuario_cajero.username.capitalize() if v.id_usuario_cajero else 'Sistema',
+            'id_cliente': v.id_cliente,
+            'fecha_str': f_local.strftime('%d/%m/%Y'),
+            'hora_str': f_local.strftime('%H:%M %p'),
+            'origen_venta': v.origen_venta or 'Tienda Física',
+            'medio_pago': v.medio_pago or 'Efectivo',
+            'subtotal': float(v.subtotal or 0),
+            'descuento': float(v.descuento or 0),
+            'total_neto': float(neto),
+            'costo_estimado': float(costo_v),
+            'ganancia_estimada': float(ganancia_v),
+            'estado_venta': v.estado_venta or 'Completada',
+            'es_hoy': es_hoy,
+            'es_mes': es_mes,
+            'es_anio': es_anio,
+        })
+
+    total_ventas_count = len(ventas)
+    ticket_promedio = round(total_ventas_ingresos / count_general_activas, 2) if count_general_activas > 0 else Decimal('0.00')
+    margen_venta_pct = float(round(ratio_ganancia_venta * 100, 1))
+
+    ganancias_periodos = {
+        'dia': {
+            'label': 'Ventas de Hoy (Día)',
+            'count': count_dia,
+            'ventas_count': count_dia,
+            'ingresos': float(round(ingresos_dia, 2)),
+            'costo': float(round(costo_dia, 2)),
+            'ganancia': float(round(ganancia_dia, 2)),
+            'margen_pct': margen_venta_pct if ingresos_dia > 0 else 0.0,
+        },
+        'mes': {
+            'label': 'Ventas del Mes Actual',
+            'count': count_mes,
+            'ventas_count': count_mes,
+            'ingresos': float(round(ingresos_mes, 2)),
+            'costo': float(round(costo_mes, 2)),
+            'ganancia': float(round(ganancia_mes, 2)),
+            'margen_pct': margen_venta_pct if ingresos_mes > 0 else 0.0,
+        },
+        'anio': {
+            'label': 'Ventas del Año Actual',
+            'count': count_anio,
+            'ventas_count': count_anio,
+            'ingresos': float(round(ingresos_anio, 2)),
+            'costo': float(round(costo_anio, 2)),
+            'ganancia': float(round(ganancia_anio, 2)),
+            'margen_pct': margen_venta_pct if ingresos_anio > 0 else 0.0,
+        },
+        'general': {
+            'label': 'Todas las Ventas Registradas',
+            'count': count_general_activas,
+            'ventas_count': count_general_activas,
+            'ingresos': float(round(total_ventas_ingresos, 2)),
+            'costo': float(round(total_ventas_costo, 2)),
+            'ganancia': float(round(total_ventas_ganancia, 2)),
+            'margen_pct': margen_venta_pct if total_ventas_ingresos > 0 else 0.0,
+        },
+        'catalogo': {
+            'label': 'Proyección Total en Bodega',
+            'count': total_productos,
+            'ventas_count': total_productos,
+            'ingresos': float(round(valor_venta_potencial, 2)),
+            'costo': float(round(inversion_total, 2)),
+            'ganancia': float(round(ganancia_potencial, 2)),
+            'margen_pct': float(margen_promedio),
+        }
+    }
+
+    return {
+        'productos': productos,
+        'productos_resumen': productos_resumen,
+        'categorias': categorias,
+        'ventas': ventas,
+        'ventas_json': ventas_enriquecidas,
+        'total_productos': total_productos,
+        'total_ofertas': total_ofertas,
+        'total_bajo_stock': total_bajo_stock,
+        'productos_bajo_stock': productos_bajo_stock,
+        'total_agotados': total_agotados,
+        'inversion_total': inversion_total,
+        'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
+        'valor_venta_potencial': valor_venta_potencial,
+        'ganancia_potencial': ganancia_potencial,
+        'margen_promedio': margen_promedio,
+        'ratio_ganancia_pct': round(ratio_ganancia_venta * 100, 1),
+        'chart_cat_labels': chart_cat_labels,
+        'chart_cat_data': chart_cat_data,
+        'chart_prod_labels': chart_prod_labels,
+        'chart_prod_costos': chart_prod_costos,
+        'chart_prod_precios': chart_prod_precios,
+        'chart_prod_margenes': chart_prod_margenes,
+        'total_ventas_count': total_ventas_count,
+        'total_ventas_ingresos': total_ventas_ingresos,
+        'total_ventas_ganancia': total_ventas_ganancia,
+        'ventas_hoy_count': count_dia,
+        'ventas_hoy_ingresos': ingresos_dia,
+        'ganancia_dia': ganancia_dia,
+        'ingresos_mes': ingresos_mes,
+        'ganancia_mes': ganancia_mes,
+        ' count_mes': count_mes,
+        'count_mes': count_mes,
+        'ingresos_anio': ingresos_anio,
+        'ganancia_anio': ganancia_anio,
+        'count_anio': count_anio,
+        'ticket_promedio': ticket_promedio,
+        'ganancias_periodos': ganancias_periodos,
+    }
+
+
 @personal_requerido
 def dashboard_view(request):
     """
     PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')
     --------------------------------------------
-    Gestión integral del negocio:
-    - Métricas en tiempo real (productos, ofertas, usuarios, categorías).
-    - Métricas financieras (inversión total, valor comercial, margen estimado).
-    - Inventario con edición y creación directa sin salir del dashboard.
-    - Categorización del catálogo en vivo.
+    Gestión integral del negocio con métricas reales de inventario y ganancias
+    por periodo (Día, Mes, Año y Catálogo).
     """
     User = get_user_model()
-
-    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
-    categorias = Categoria.objects.annotate(num_productos=Count('productos')).order_by('nombre')
-    total_productos = productos.count()
-    total_ofertas = productos.filter(en_oferta=True).count()
+    metricas = _calcular_metricas_reales()
     total_usuarios = User.objects.count()
 
-    # Conteo y lista para alertas de inventario
-    productos_bajo_stock = [p for p in productos if p.stock_actual <= p.stock_minimo]
-    total_bajo_stock = len(productos_bajo_stock)
-    total_agotados = sum(1 for p in productos if p.stock_actual <= 0 or p.estado == 'Agotado')
-
-    # Métricas financieras del catálogo
-    inversion_total = sum(p.costo_compra * p.stock_actual for p in productos)
-    valor_venta_potencial = sum(p.precio_efectivo * p.stock_actual for p in productos)
-    ganancia_potencial = valor_venta_potencial - inversion_total
-    margen_promedio = round((ganancia_potencial / inversion_total * 100), 1) if inversion_total > 0 else Decimal('0.0')
-
-    # Datos para gráficos analíticos (Chart.js)
-    chart_cat_labels = [cat.nombre for cat in categorias if cat.num_productos > 0]
-    chart_cat_data = [cat.num_productos for cat in categorias if cat.num_productos > 0]
-
-    # Top productos para comparativa de precios y costo
-    top_prods = list(productos[:7])
-    chart_prod_labels = [p.nombre for p in top_prods]
-    chart_prod_costos = [float(p.costo_compra) for p in top_prods]
-    chart_prod_precios = [float(p.precio_efectivo) for p in top_prods]
-    chart_prod_margenes = [float(p.margen_ganancia) for p in top_prods]
-
-    # Proveedores y productores aliados (Métricas de Abastecimiento)
     proveedores = Proveedor.objects.all().order_by('razon_social')
     total_proveedores = proveedores.count()
     total_prov_activos = proveedores.filter(estado='Activo').count()
     total_prov_inactivos = total_proveedores - total_prov_activos
     total_prov_con_telefono = proveedores.exclude(telefono__isnull=True).exclude(telefono='').count()
 
-    # Sincronización preventiva de perfiles para cuentas sin perfil vinculado
     for u in User.objects.filter(perfil__isnull=True):
         rol_def = 'admin' if u.is_superuser else ('bodeguero' if u.is_staff else 'cliente')
         PerfilUsuario.objects.get_or_create(
@@ -251,8 +467,6 @@ def dashboard_view(request):
             defaults={'rol': rol_def, 'estado': 'activo'}
         )
 
-    # Obtener única y exclusivamente los REGISTROS ACTIVOS del personal operativo ordenados por ROLES:
-    # Jerarquía requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
     perfiles_usuarios = PerfilUsuario.objects.select_related('usuario').filter(
         estado='activo',
         usuario__is_active=True
@@ -270,35 +484,17 @@ def dashboard_view(request):
         )
     ).order_by('orden_rol', 'usuario__username')
 
-    # Métricas específicas del equipo de cuentas activas por rol
     total_activos = perfiles_usuarios.count()
     total_superadmins = perfiles_usuarios.filter(orden_rol=1).count()
     total_bodegueros = perfiles_usuarios.filter(orden_rol=2).count()
     total_cajeros = perfiles_usuarios.filter(orden_rol=3).count()
     total_staff = perfiles_usuarios.filter(usuario__is_staff=True).count()
 
-    # Métricas y listado de Ventas para el panel de gestión
-    ventas = Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta')
-    total_ventas_count = ventas.count()
-    total_ventas_ingresos = sum(v.total_neto for v in ventas)
-    hoy = timezone.now().date()
-    ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
-    ventas_hoy_count = len(ventas_hoy)
-    ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
-    ticket_promedio = round(total_ventas_ingresos / total_ventas_count, 2) if total_ventas_count > 0 else Decimal('0.00')
-
-    return render(request, 'principal/dashboard.html', {
-        'productos': productos,
-        'categorias': categorias,
+    context = {
+        **metricas,
         'proveedores': proveedores,
         'perfiles_usuarios': perfiles_usuarios,
-        'ventas': ventas,
         'clientes': Cliente.objects.all(),
-        'total_productos': total_productos,
-        'total_ofertas': total_ofertas,
-        'total_bajo_stock': total_bajo_stock,
-        'productos_bajo_stock': productos_bajo_stock,
-        'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,
         'total_prov_activos': total_prov_activos,
@@ -311,24 +507,10 @@ def dashboard_view(request):
         'total_admins': total_activos,
         'total_admins_activos': total_activos,
         'total_staff': total_staff,
-        'total_ventas_count': total_ventas_count,
-        'total_ventas_ingresos': total_ventas_ingresos,
-        'ventas_hoy_count': ventas_hoy_count,
-        'ventas_hoy_ingresos': ventas_hoy_ingresos,
-        'ticket_promedio': ticket_promedio,
-        'inversion_total': inversion_total,
-        'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
-        'valor_venta_potencial': valor_venta_potencial,
-        'ganancia_potencial': ganancia_potencial,
-        'margen_promedio': margen_promedio,
         'es_admin': es_administrador(request.user),
-        'chart_cat_labels': chart_cat_labels,
-        'chart_cat_data': chart_cat_data,
-        'chart_prod_labels': chart_prod_labels,
-        'chart_prod_costos': chart_prod_costos,
-        'chart_prod_precios': chart_prod_precios,
-        'chart_prod_margenes': chart_prod_margenes,
-    })
+    }
+    return render(request, 'principal/dashboard.html', context)
+
 
 
 @personal_requerido
@@ -810,11 +992,13 @@ def recibo_venta_view(request, id_venta):
 
 def registrar_pedido_whatsapp(request):
     """
-    ENDPOINT API: REGISTRO AUTOMÁTICO DE PEDIDOS DEL CARRITO WHATSAPP
-    -----------------------------------------------------------------
-    Conecta el carrito web ('cart.js') con el módulo 'Gestión de Ventas' (#ventas)
-    del Dashboard. Cuando el cliente presiona 'Enviar pedido por WhatsApp', se
-    crea automáticamente una Venta con origen 'WhatsApp' y estado 'Pendiente'.
+    ENDPOINT API: REGISTRO Y ACTUALIZACIÓN EN TIEMPO REAL DE PEDIDOS DEL CARRITO
+    ----------------------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Permite tanto crear un pedido nuevo desde el carrito como actualizar en tiempo
+    real un pedido existente ('id_venta') cuando el cliente o usuario modifica
+    las cantidades o productos de su canasta, reflejándose de inmediato para todos
+    los usuarios y administradores.
     """
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
@@ -826,6 +1010,7 @@ def registrar_pedido_whatsapp(request):
 
     items = payload.get('items') or []
     total_raw = payload.get('total', 0)
+    id_venta_raw = payload.get('id_venta') or request.session.get('active_venta_id')
 
     try:
         monto = Decimal(str(total_raw))
@@ -845,10 +1030,35 @@ def registrar_pedido_whatsapp(request):
                     continue
         monto = acumulado
 
+    # Verificar si ya existe una venta activa asociada a este pedido para actualizarla en tiempo real
+    venta_existente = None
+    if id_venta_raw and str(id_venta_raw).isdigit():
+        venta_existente = Venta.objects.filter(pk=int(id_venta_raw)).first()
+
+    # Si el usuario vació su carrito y tenía un pedido pendiente, se elimina/cancela en tiempo real
     if monto <= Decimal('0.00'):
+        if venta_existente and venta_existente.estado_venta == 'Pendiente':
+            vid = venta_existente.id_venta
+            venta_existente.delete()
+            request.session.pop('active_venta_id', None)
+            return JsonResponse({'ok': True, 'deleted': True, 'eliminada': True, 'id_venta': None, 'eliminado': vid}, status=200)
         return JsonResponse({'ok': False, 'error': 'Monto de pedido inválido.'}, status=400)
 
-    # Determinar usuario responsable para el registro contable
+    if venta_existente:
+        venta_existente.subtotal = monto
+        venta_existente.total_neto = max(Decimal('0.00'), monto - (venta_existente.descuento or Decimal('0.00')))
+        venta_existente.fecha_venta = timezone.now()
+        venta_existente.save()
+        request.session['active_venta_id'] = venta_existente.id_venta
+        return JsonResponse({
+            'ok': True,
+            'updated': True,
+            'id_venta': venta_existente.id_venta,
+            'codigo': f'#VTA-{venta_existente.id_venta}',
+            'total_neto': float(venta_existente.total_neto),
+        }, status=200)
+
+    # Determinar usuario responsable para nuevo registro contable
     if request.user.is_authenticated:
         cajero = request.user
     else:
@@ -869,11 +1079,77 @@ def registrar_pedido_whatsapp(request):
         total_neto=monto,
         estado_venta='Pendiente',
     )
+    request.session['active_venta_id'] = nueva_venta.id_venta
     return JsonResponse({
         'ok': True,
+        'updated': False,
         'id_venta': nueva_venta.id_venta,
         'codigo': f'#VTA-{nueva_venta.id_venta}',
+        'total_neto': float(nueva_venta.total_neto),
     }, status=201)
+
+
+def estado_tiempo_real_api(request):
+    """
+    ENDPOINT API DE SINCRONIZACIÓN EN TIEMPO REAL ('/api/estado-tiempo-real/')
+    --------------------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Provee los datos actualizados en vivo de ventas, ganancias (Día, Mes, Año y
+    Catálogo) y estado de productos para que tanto el Dashboard administrativo
+    como el catálogo/carrito de todos los clientes se actualicen sin recargar.
+    """
+    m = _calcular_metricas_reales()
+    # Firma determinista del estado actual para detectar cualquier cambio
+    firma_partes = [
+        f"p:{p['id_producto']}:{p['precio_efectivo']}:{p['stock_actual']}:{p['estado']}:{p['en_oferta']}"
+        for p in m['productos_resumen']
+    ] + [
+        f"v:{v['id_venta']}:{v['total_neto']}:{v['estado_venta']}:{v['medio_pago']}:{v['origen_venta']}"
+        for v in m['ventas_json']
+    ]
+    version_hash = str(hash('|'.join(firma_partes)))
+
+    resumen_data = {
+        'total_productos': m['total_productos'],
+        'total_ofertas': m['total_ofertas'],
+        'total_bajo_stock': m['total_bajo_stock'],
+        'total_agotados': m['total_agotados'],
+        'inversion_total': float(m['inversion_total']),
+        'valor_venta_potencial': float(m['valor_venta_potencial']),
+        'ganancia_potencial': float(m['ganancia_potencial']),
+        'margen_promedio': float(m['margen_promedio']),
+        'ratio_ganancia_pct': float(m['ratio_ganancia_pct']),
+        'total_ventas_count': m['total_ventas_count'],
+        'total_ventas_ingresos': float(m['total_ventas_ingresos']),
+        'total_ventas_ganancia': float(m['total_ventas_ganancia']),
+        'ventas_hoy_count': m['ventas_hoy_count'],
+        'ventas_hoy_ingresos': float(m['ventas_hoy_ingresos']),
+        'ticket_promedio': float(m['ticket_promedio']),
+        'chart_cat_labels': m['chart_cat_labels'],
+        'chart_cat_data': m['chart_cat_data'],
+        'chart_prod_labels': m['chart_prod_labels'],
+        'chart_prod_costos': m['chart_prod_costos'],
+        'chart_prod_precios': m['chart_prod_precios'],
+        'chart_prod_margenes': m['chart_prod_margenes'],
+    }
+
+    return JsonResponse({
+        'ok': True,
+        'version': version_hash,
+        'resumen': resumen_data,
+        'resumen_kpis': resumen_data,
+        'ventas_kpis': {
+            'total_ventas_ingresos': float(m['total_ventas_ingresos']),
+            'total_ventas_count': m['total_ventas_count'],
+            'ventas_hoy_count': m['ventas_hoy_count'],
+            'ventas_hoy_ingresos': float(m['ventas_hoy_ingresos']),
+            'ticket_promedio': float(m['ticket_promedio']),
+        },
+        'ganancias_periodos': m['ganancias_periodos'],
+        'productos': m['productos_resumen'],
+        'productos_resumen': m['productos_resumen'],
+        'ventas': m['ventas_json'],
+    })
 
 
 class CustomLoginView(auth_views.LoginView):
@@ -1157,95 +1433,3 @@ class CategoriaEliminarView(PersonalRequeridoMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, "La categoria se elimino correctamente.")
         return super().form_valid(form)
-
-
-# ==============================================================================
-# MÓDULO DE GESTIÓN DE VENTAS (PUNTO DE VENTA Y FACTURACIÓN)
-# ==============================================================================
-
-@personal_requerido
-def lista_ventas(request):
-    """
-    1. LISTADO DE VENTAS: Muestra el historial completo de ventas con métricas clave.
-    """
-    ventas = Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta')
-    total_ingresos = sum(v.total_neto for v in ventas)
-    hoy = timezone.now().date()
-    ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
-    ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
-
-    return render(request, 'principal/ventas/lista_ventas.html', {
-        'ventas': ventas,
-        'total_ingresos': total_ingresos,
-        'total_ventas': ventas.count(),
-        'ventas_hoy_count': len(ventas_hoy),
-        'ventas_hoy_ingresos': ventas_hoy_ingresos,
-        'titulo': 'Gestión de Ventas'
-    })
-
-
-@personal_requerido
-def crear_venta(request):
-    """
-    2. CREAR VENTA: Formulario completo con validación segura de tipos numéricos.
-    """
-    if request.method == 'POST':
-        datos = _extraer_datos_venta(request.POST)
-        Venta.objects.create(
-            id_usuario_cajero=request.user,
-            **datos
-        )
-        messages.success(request, "Venta registrada con éxito.")
-        return redirect(_obtener_redireccion_segura(request, 'lista_ventas'))
-
-    clientes = Cliente.objects.all()
-    productos = Producto.objects.all()
-    return render(request, 'principal/ventas/venta_form.html', {
-        'clientes': clientes,
-        'productos': productos,
-        'titulo': 'Registrar Nueva Venta'
-    })
-
-
-@personal_requerido
-def editar_venta(request, pk):
-    """
-    3. EDITAR VENTA: Actualiza una transacción existente con validación numérica segura.
-    """
-    venta = get_object_or_404(Venta, pk=pk)
-
-    if request.method == 'POST':
-        datos = _extraer_datos_venta(request.POST)
-        for campo, valor in datos.items():
-            setattr(venta, campo, valor)
-        venta.save()
-
-        messages.success(request, f"Venta #{venta.id_venta} actualizada exitosamente.")
-        return redirect(_obtener_redireccion_segura(request, 'lista_ventas'))
-
-    clientes = Cliente.objects.all()
-    productos = Producto.objects.all()
-    return render(request, 'principal/ventas/venta_form.html', {
-        'venta': venta,
-        'clientes': clientes,
-        'productos': productos,
-        'titulo': f'Editar Venta #{venta.id_venta}'
-    })
-
-
-@personal_requerido
-def eliminar_venta(request, pk):
-    """
-    4. ELIMINAR VENTA: Muestra pantalla de confirmación y borra el registro de la BD.
-    """
-    venta = get_object_or_404(Venta, pk=pk)
-    if request.method == 'POST':
-        num_venta = venta.id_venta
-        venta.delete()
-        messages.success(request, f"La venta #{num_venta} fue eliminada del sistema.")
-        return redirect(_obtener_redireccion_segura(request, 'lista_ventas'))
-
-    return render(request, 'principal/ventas/venta_confirm_delete.html', {
-        'venta': venta,
-        'titulo': f'Confirmar Eliminación de Venta #{venta.id_venta}'
-    })
