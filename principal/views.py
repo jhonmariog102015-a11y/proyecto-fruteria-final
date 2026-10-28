@@ -17,16 +17,17 @@
 # ==============================================================================
 
 import csv
-from decimal import Decimal
+import json
+from decimal import Decimal, InvalidOperation
 from functools import wraps
 from django.contrib import messages
-from django.contrib.auth import get_user_model, logout, login as auth_login
+from django.contrib.auth import get_user_model, logout, login as auth_login, views as auth_views
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Count, Case, When, Value, IntegerField
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -743,30 +744,170 @@ def eliminar_venta_dashboard(request, id_venta):
     return redirect('/dashboard/#ventas')
 
 
+@personal_requerido
+def exportar_ventas_csv(request):
+    """
+    EXPORTACIÓN DE HISTORIAL DE VENTAS A CSV (COMPATIBLE CON EXCEL)
+    ---------------------------------------------------------------
+    Genera un archivo descargable con codificación UTF-8 con BOM y delimitador ';'
+    para auditoría contable y cierre de caja diario/mensual.
+    """
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    fecha_str = timezone.now().strftime('%Y%m%d_%H%M')
+    response['Content-Disposition'] = f'attachment; filename="ventas_al_paso_{fecha_str}.csv"'
+    response.write('﻿')
+
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([
+        'ID Venta',
+        'Fecha y Hora',
+        'Cajero Responsable',
+        'Cliente',
+        'Canal / Origen',
+        'Medio de Pago',
+        'Subtotal (COP)',
+        'Descuento (COP)',
+        'Total Neto (COP)',
+        'Estado',
+    ])
+
+    ventas = Venta.objects.select_related('id_usuario_cajero').order_by('-fecha_venta')
+    for v in ventas:
+        fecha_local = timezone.localtime(v.fecha_venta).strftime('%Y-%m-%d %H:%M') if v.fecha_venta else ''
+        cajero_nombre = v.id_usuario_cajero.username if v.id_usuario_cajero else 'Sistema'
+        cliente_str = str(v.cliente) if v.cliente else (f'Cliente #{v.id_cliente}' if v.id_cliente else 'Consumidor Final')
+        descuento_val = v.descuento or Decimal('0.00')
+        writer.writerow([
+            f'#VTA-{v.id_venta}',
+            fecha_local,
+            cajero_nombre,
+            cliente_str,
+            v.origen_venta,
+            v.medio_pago,
+            f'{v.subtotal:.2f}',
+            f'{descuento_val:.2f}',
+            f'{v.total_neto:.2f}',
+            v.estado_venta,
+        ])
+
+    return response
+
+
+@personal_requerido
+def recibo_venta_view(request, id_venta):
+    """
+    COMPROBANTE / TIRILLA DE VENTA IMPRIMIBLE
+    -----------------------------------------
+    Renderiza un comprobante limpio con logotipo oficial listo para impresión
+    térmica o guardado en PDF desde el navegador.
+    """
+    venta = get_object_or_404(
+        Venta.objects.select_related('id_usuario_cajero'),
+        pk=id_venta,
+    )
+    return render(request, 'principal/ventas/recibo_venta.html', {'venta': venta})
+
+
+def registrar_pedido_whatsapp(request):
+    """
+    ENDPOINT API: REGISTRO AUTOMÁTICO DE PEDIDOS DEL CARRITO WHATSAPP
+    -----------------------------------------------------------------
+    Conecta el carrito web ('cart.js') con el módulo 'Gestión de Ventas' (#ventas)
+    del Dashboard. Cuando el cliente presiona 'Enviar pedido por WhatsApp', se
+    crea automáticamente una Venta con origen 'WhatsApp' y estado 'Pendiente'.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except (ValueError, TypeError):
+        payload = {}
+
+    items = payload.get('items') or []
+    total_raw = payload.get('total', 0)
+
+    try:
+        monto = Decimal(str(total_raw))
+    except (InvalidOperation, ValueError, TypeError):
+        monto = Decimal('0.00')
+
+    if monto <= Decimal('0.00') and isinstance(items, list):
+        acumulado = Decimal('0.00')
+        for item in items:
+            if isinstance(item, dict):
+                try:
+                    precio = Decimal(str(item.get('precio', 0)))
+                    cantidad = Decimal(str(item.get('cantidad', 1)))
+                    if precio > 0 and cantidad > 0:
+                        acumulado += precio * cantidad
+                except (InvalidOperation, ValueError, TypeError):
+                    continue
+        monto = acumulado
+
+    if monto <= Decimal('0.00'):
+        return JsonResponse({'ok': False, 'error': 'Monto de pedido inválido.'}, status=400)
+
+    # Determinar usuario responsable para el registro contable
+    if request.user.is_authenticated:
+        cajero = request.user
+    else:
+        cajero = (
+            User.objects.filter(is_active=True, is_superuser=True).order_by('id').first()
+            or User.objects.filter(is_active=True).order_by('id').first()
+        )
+
+    if not cajero:
+        return JsonResponse({'ok': False, 'error': 'No hay cajero disponible.'}, status=503)
+
+    nueva_venta = Venta.objects.create(
+        id_usuario_cajero=cajero,
+        origen_venta='WhatsApp',
+        medio_pago='Transferencia',
+        subtotal=monto,
+        descuento=Decimal('0.00'),
+        total_neto=monto,
+        estado_venta='Pendiente',
+    )
+    return JsonResponse({
+        'ok': True,
+        'id_venta': nueva_venta.id_venta,
+        'codigo': f'#VTA-{nueva_venta.id_venta}',
+    }, status=201)
+
+
+class CustomLoginView(auth_views.LoginView):
+    """
+    VISTA DE INICIO DE SESIÓN CON REDIRECCIÓN INTELIGENTE POR ROL
+    -------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Evita que los usuarios con rol 'cliente' sean enviados a '/dashboard/' tras
+    iniciar sesión (lo que antes les mostraba una alerta de 'Acceso restringido').
+    - Personal operativo (Superadmin, Admin, Bodeguero, Cajero) -> '/dashboard/'
+    - Clientes de la tienda ('cliente') -> '/' (Portada de la tienda)
+    """
+    template_name = 'principal/login.html'
+
+    def get_default_redirect_url(self):
+        user = self.request.user
+        if user.is_authenticated and es_personal_operativo(user):
+            return str(reverse_lazy('dashboard'))
+        if user.is_authenticated:
+            nombre = user.first_name or user.username
+            messages.success(self.request, f'¡Bienvenido de nuevo a Al Paso Frutería, {nombre}!')
+        return str(reverse_lazy('index'))
+
+
 def error_404_view(request, exception=None):
     """
-    MANEJADOR DE ERROR 404 (PÁGINA NO ENCONTRADA)
+    MANEJADOR DE ERROR 404 (PÁGINA NO ENCONTRADA Y PREVISUALIZACIÓN)
     """
     return render(request, 'principal/404.html', status=404)
 
 
 def error_500_view(request):
     """
-    MANEJADOR DE ERROR 500 (ERROR INTERNO DEL SERVIDOR)
-    """
-    return render(request, 'principal/500.html', status=500)
-
-
-def error_404_preview(request):
-    """
-    RUTA DE AUDITORÍA Y PREVISUALIZACIÓN DE ERROR 404
-    """
-    return render(request, 'principal/404.html', status=404)
-
-
-def error_500_preview(request):
-    """
-    RUTA DE AUDITORÍA Y PREVISUALIZACIÓN DE ERROR 500
+    MANEJADOR DE ERROR 500 (ERROR INTERNO DEL SERVIDOR Y PREVISUALIZACIÓN)
     """
     return render(request, 'principal/500.html', status=500)
 
@@ -782,38 +923,6 @@ def logout_view(request):
         return HttpResponseNotAllowed(["POST"])
     logout(request)
     return redirect('index')
-
-
-@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
-def admin_preview(request):
-    """
-    PREVISUALIZACIÓN DE AUDITORÍA: PANEL GENERAL
-    Permite generar reportes técnicos y capturas del estado del admin exclusivamente para superusuarios.
-    """
-    from django.contrib import admin
-    return admin.site.index(request)
-
-
-@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
-def admin_productos_preview(request):
-    """
-    PREVISUALIZACIÓN DE AUDITORÍA: APP PRINCIPAL
-    Carga el índice de modelos de la app 'principal' en el panel de Django exclusivamente para superusuarios.
-    """
-    from django.contrib import admin
-    return admin.site.app_index(request, 'principal')
-
-
-@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
-def admin_producto_list_preview(request):
-    """
-    PREVISUALIZACIÓN DE AUDITORÍA: LISTADO DE PRODUCTOS
-    Genera la vista de tabla tabular de productos en el admin de Django exclusivamente para superusuarios.
-    """
-    from django.contrib import admin
-    from .models import Producto
-    return admin.site._registry[Producto].changelist_view(request)
-
 
 def registro_view(request):
     """

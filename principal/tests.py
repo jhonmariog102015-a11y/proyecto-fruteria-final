@@ -907,10 +907,73 @@ class VentasTestCase(TestCase):
         self.assertRedirects(response, '/dashboard/#ventas')
         self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
 
+    def test_login_redireccion_inteligente_por_rol(self):
+        """Verifica que el login redirija clientes a la tienda ('/') y personal al '/dashboard/'."""
+        User = get_user_model()
+        cliente = User.objects.create_user(username='cliente_tienda', password='password123', is_staff=False)
+        cliente.perfil.rol = 'cliente'
+        cliente.perfil.save()
 
+        resp_cliente = self.client.post(reverse('login_direct'), {
+            'username': 'cliente_tienda',
+            'password': 'password123',
+        })
+        self.assertRedirects(resp_cliente, reverse('index'))
+        self.client.logout()
 
+        resp_cajero = self.client.post(reverse('login_direct'), {
+            'username': 'cajero_test',
+            'password': 'password123',
+        })
+        self.assertRedirects(resp_cajero, reverse('dashboard'))
 
+    def test_api_pedido_whatsapp_registra_venta_pendiente(self):
+        """Verifica que el endpoint de WhatsApp cree automáticamente una Venta Pendiente."""
+        import json
+        resp = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'total': 24500,
+                'items': [{'id': '1', 'nombre': 'Mango Tommy', 'precio': 12250, 'cantidad': 2}],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 201)
+        data = resp.json()
+        self.assertTrue(data['ok'])
+        venta_creada = Venta.objects.get(pk=data['id_venta'])
+        self.assertEqual(venta_creada.origen_venta, 'WhatsApp')
+        self.assertEqual(venta_creada.estado_venta, 'Pendiente')
+        self.assertEqual(venta_creada.total_neto, Decimal('24500.00'))
 
+    def test_exportar_ventas_csv_y_recibo_venta(self):
+        """Verifica la exportación de ventas a CSV y el comprobante imprimible."""
+        self.client.login(username='cajero_test', password='password123')
+        resp_csv = self.client.get(reverse('dashboard_exportar_ventas_csv'))
+        self.assertEqual(resp_csv.status_code, 200)
+        self.assertIn('text/csv', resp_csv['Content-Type'])
+        contenido_csv = resp_csv.content.decode('utf-8-sig')
+        self.assertIn(f'#VTA-{self.venta.id_venta}', contenido_csv)
 
+        resp_recibo = self.client.get(reverse('dashboard_recibo_venta', args=[self.venta.id_venta]))
+        self.assertEqual(resp_recibo.status_code, 200)
+        self.assertContains(resp_recibo, f'#VTA-{self.venta.id_venta}')
+        self.assertContains(resp_recibo, 'Imprimir / Guardar PDF')
 
+    def test_catalogo_frutas_muestra_estado_agotado(self):
+        """Verifica que los productos sin stock o en estado Agotado deshabiliten el botón de compra."""
+        cat = Categoria.objects.create(nombre='Tropicales Test')
+        Producto.objects.create(
+            nombre='Maracuyá Sin Stock',
+            categoria=cat,
+            costo_compra=Decimal('2000.00'),
+            precio_venta_unitario=Decimal('3800.00'),
+            stock_actual=Decimal('0.000'),
+            stock_minimo=Decimal('5.000'),
+            estado='Agotado',
+        )
+        resp = self.client.get(reverse('catalogo_frutas'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'badge-agotado')
+        self.assertContains(resp, 'add-btn-disabled')
 

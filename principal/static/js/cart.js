@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
  * CARRITO UNIVERSAL Y SISTEMA DE TOASTS (principal/static/js/cart.js)
- * El Paso Frutería — Gestión de Canasta, LocalStorage y Checkout a WhatsApp
+ * Al Paso Frutería — Gestión de Canasta, LocalStorage y Checkout a WhatsApp
  * ==============================================================================
  */
 
@@ -246,7 +246,15 @@
         renderCartItems();
     }
 
-    // Envío del Pedido a WhatsApp
+    // Auxiliar para leer cookie CSRF de Django en peticiones AJAX
+    function getCsrfToken() {
+        const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (input && input.value) return input.value;
+        const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    // Envío del Pedido a WhatsApp y Registro Automático en Gestión de Ventas (#ventas)
     function setupWhatsappCheckout() {
         const btn = document.getElementById('btnSendWhatsapp');
         if (!btn) return;
@@ -271,6 +279,23 @@
             const textoCodificado = encodeURIComponent(lineas.join('\n'));
             const urlWa = `https://wa.me/${WHATSAPP_PHONE}?text=${textoCodificado}`;
             window.open(urlWa, '_blank');
+
+            // Registrar automáticamente el pedido como Venta Pendiente en el Dashboard
+            try {
+                fetch('/api/pedido-whatsapp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        total: Math.round(total),
+                        items: cart,
+                    }),
+                }).catch(() => {});
+            } catch (e) {
+                // No bloquear la redirección a WhatsApp si falla la red
+            }
         });
     }
 
@@ -306,31 +331,16 @@
             }
         });
 
-        // Escuchar clics en botones de agregar en toda la página
-        // 1. Carrusel de la landing page (index.html)
+        // NOTA TÉCNICA PARA EL EQUIPO (GAES):
+        // Se eliminó el listener obsoleto del antiguo carrusel (.btn-add-fruit / .carousel-card)
+        // y se dejó únicamente el selector oficial de tarjetas del catálogo (.add-btn / .fruit-card),
+        // validando además que el producto no esté agotado (.add-btn-disabled).
         document.addEventListener('click', (e) => {
-            const btnCarousel = e.target.closest('.btn-add-fruit');
-            if (btnCarousel) {
-                e.preventDefault();
-                const card = btnCarousel.closest('.carousel-card');
-                if (card) {
-                    const id = btnCarousel.dataset.id || card.dataset.id;
-                    const nombre = btnCarousel.dataset.nombre || card.querySelector('h3')?.textContent.trim() || 'Fruta Fresca';
-                    const priceEl = card.querySelector('.carousel-price.price-oferta, .carousel-price, .card-price-value');
-                    const precioRaw = priceEl ? priceEl.textContent.replace(/[^0-9]/g, '') : '0';
-                    const precio = parseFloat(precioRaw) || 0;
-                    const unitEl = card.querySelector('.carousel-unit, .card-price-unit');
-                    const unidad = unitEl ? unitEl.textContent.replace(/desde\s*\/\s*|\//gi, '').trim() : 'kg';
-                    const imagen = card.querySelector('img')?.src || '';
-
-                    window.addToCart({ id, nombre, precio, unidad, imagen });
-                }
-                return;
-            }
-
-            // 2. Tarjetas de catálogo (catalogo_frutas.html)
             const btnCatalog = e.target.closest('.add-btn');
             if (btnCatalog) {
+                if (btnCatalog.disabled || btnCatalog.classList.contains('add-btn-disabled')) {
+                    return;
+                }
                 e.preventDefault();
                 const card = btnCatalog.closest('.fruit-card');
                 if (card) {

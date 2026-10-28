@@ -2,9 +2,18 @@
 # ENRUTADOR PRINCIPAL DEL PROYECTO (config/urls.py)
 # Define el mapa de navegación y la correspondencia entre URLs y vistas de Django.
 # ==============================================================================
+# NOTA TÉCNICA PARA EL EQUIPO (GAES):
+# 1. Se eliminaron las rutas temporales sin uso ('/admin-preview/...') y se
+#    unificaron las vistas de error 404 y 500 ('error_404_view', 'error_500_view').
+# 2. Se integró 'CustomLoginView' para redirigir inteligentemente según el rol
+#    del usuario (personal operativo -> '/dashboard/', cliente -> '/').
+# 3. Se agregaron las rutas para conectar el carrito de WhatsApp con Ventas
+#    ('/api/pedido-whatsapp/'), exportar ventas a CSV y generar recibos imprimibles.
+# ==============================================================================
 
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
 from principal.views import (
     inicio,
     catalogo_frutas_view,
@@ -18,17 +27,16 @@ from principal.views import (
     editar_usuario_dashboard,
     eliminar_usuario_dashboard,
     exportar_inventario_csv,
+    exportar_ventas_csv,
+    recibo_venta_view,
+    registrar_pedido_whatsapp,
+    CustomLoginView,
     crear_proveedor_dashboard,
     editar_proveedor_dashboard,
     eliminar_proveedor_dashboard,
     error_404_view,
     error_500_view,
-    error_404_preview,
-    error_500_preview,
     logout_view,
-    admin_preview,
-    admin_productos_preview,
-    admin_producto_list_preview,
     registro_view,
     lista_ventas,
     crear_venta,
@@ -38,18 +46,12 @@ from principal.views import (
     editar_venta_dashboard,
     eliminar_venta_dashboard,
 )
-from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     # -------------------------------------------------------------------------
     # 1. PANEL DE ADMINISTRACIÓN DE DJANGO (ORM & CRUD Nativo)
     # -------------------------------------------------------------------------
     path('admin/', admin.site.urls),
-
-    # Rutas auxiliares de previsualización para auditoría y capturas del informe técnico
-    path('admin-preview/', admin_preview, name='admin_preview'),
-    path('admin-preview/principal/', admin_productos_preview, name='admin_productos_preview'),
-    path('admin-preview/principal/producto/', admin_producto_list_preview, name='admin_producto_list_preview'),
 
     # -------------------------------------------------------------------------
     # 2. VISTAS PÚBLICAS DE LA TIENDA WEB (FRONTEND CLIENTES)
@@ -61,6 +63,9 @@ urlpatterns = [
     # Catálogo especializado de frutas con filtrado reactivo por categorías
     path('catalogo-frutas/', catalogo_frutas_view, name='catalogo_frutas'),
     path('catalogo/', catalogo_frutas_view, name='catalogo'),
+
+    # Endpoint API para registrar pedidos enviados desde el carrito de WhatsApp
+    path('api/pedido-whatsapp/', registrar_pedido_whatsapp, name='api_pedido_whatsapp'),
 
     # -------------------------------------------------------------------------
     # 3. PANEL DE CONTROL INTERNO (DASHBOARD, INVENTARIO Y PROVEEDORES)
@@ -75,24 +80,26 @@ urlpatterns = [
     path('dashboard/usuario/crear/', crear_usuario_dashboard, name='dashboard_crear_usuario'),
     path('dashboard/usuario/<int:user_id>/editar/', editar_usuario_dashboard, name='dashboard_editar_usuario'),
     path('dashboard/usuario/<int:user_id>/eliminar/', eliminar_usuario_dashboard, name='dashboard_eliminar_usuario'),
-    # Exportación de inventario compatible con Excel
+    # Exportaciones compatibles con Excel (Inventario y Ventas)
     path('dashboard/inventario/exportar-csv/', exportar_inventario_csv, name='dashboard_exportar_inventario_csv'),
+    path('dashboard/ventas/exportar-csv/', exportar_ventas_csv, name='dashboard_exportar_ventas_csv'),
 
     # Gestión de proveedores agrícolas
     path('dashboard/proveedor/crear/', crear_proveedor_dashboard, name='dashboard_crear_proveedor'),
     path('dashboard/proveedor/<int:id_proveedor>/editar/', editar_proveedor_dashboard, name='dashboard_editar_proveedor'),
     path('dashboard/proveedor/<int:id_proveedor>/eliminar/', eliminar_proveedor_dashboard, name='dashboard_eliminar_proveedor'),
 
-    # Gestión de ventas directas desde modal en Dashboard
+    # Gestión de ventas directas desde modal en Dashboard y comprobante imprimible
     path('dashboard/venta/crear/', crear_venta_dashboard, name='dashboard_crear_venta'),
     path('dashboard/venta/<int:id_venta>/editar/', editar_venta_dashboard, name='dashboard_editar_venta'),
     path('dashboard/venta/<int:id_venta>/eliminar/', eliminar_venta_dashboard, name='dashboard_eliminar_venta'),
+    path('dashboard/venta/<int:id_venta>/recibo/', recibo_venta_view, name='dashboard_recibo_venta'),
 
     # -------------------------------------------------------------------------
-    # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN
+    # 4. GESTIÓN DE SESIONES Y AUTENTICACIÓN (Con redirección inteligente por rol)
     # -------------------------------------------------------------------------
-    path('login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login_direct'),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='principal/login.html'), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login_direct'),
+    path('accounts/login/', CustomLoginView.as_view(), name='login'),
     path('registro/', registro_view, name='registro'),
 
     path('logout/', logout_view, name='logout_direct'),
@@ -136,8 +143,8 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     # 7. RUTAS DE PREVISUALIZACIÓN DE ERRORES DE MARCA
     # -------------------------------------------------------------------------
-    path('404/', error_404_preview, name='error_404_preview'),
-    path('500/', error_500_preview, name='error_500_preview'),
+    path('404/', error_404_view, name='error_404_preview'),
+    path('500/', error_500_view, name='error_500_preview'),
     # Rutas del módulo de ventas por funciones
     path('dashboard/ventas/', lista_ventas, name='lista_ventas'),
     path('dashboard/ventas/nueva/', crear_venta, name='crear_venta'),

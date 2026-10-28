@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.5">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -970,6 +970,10 @@
                 <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
                   Total: {{ total_ventas_count }} ventas
                 </span>
+                <a href="{% url 'dashboard_exportar_ventas_csv' %}" class="btn-secondary-dash"
+                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Exportar historial de ventas a Excel (CSV)">
+                  📥 Exportar CSV
+                </a>
                 <button type="button" class="btn-primary-dash" onclick="abrirModalNuevaVenta()"
                   style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nueva venta">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -1038,6 +1042,13 @@
                     {% endif %}
                   </td>
                   <td style="text-align: center; white-space: nowrap;">
+                    <!-- Botón de Comprobante / Recibo Imprimible -->
+                    <a href="{% url 'dashboard_recibo_venta' v.id_venta %}" target="_blank" rel="noopener"
+                      style="margin-right: 6px; display: inline-block; text-decoration: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;"
+                      title="Abrir comprobante imprimible de la venta">
+                      🖨️ Recibo
+                    </a>
+
                     <!-- Botón de Editar (Modal Nativo en Dashboard) -->
                     <button type="button" class="btn-action-edit"
                       data-id="{{ v.id_venta }}"

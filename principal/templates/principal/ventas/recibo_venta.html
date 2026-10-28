@@ -1,0 +1,205 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante #VTA-{{ venta.id_venta }} | Al Paso Frutería</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ======================================================================
+           NOTA TÉCNICA PARA EL EQUIPO (GAES):
+           Plantilla de comprobante / tirilla de venta optimizada para visualización
+           en pantalla e impresión térmica o exportación a PDF (@media print).
+           ====================================================================== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .receipt-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .btn-receipt {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .btn-print {
+            background: #15803d;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);
+        }
+        .btn-print:hover { background: #166534; }
+        .btn-back {
+            background: #ffffff;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+        .btn-back:hover { background: #f8fafc; }
+        .receipt-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 16px;
+            padding: 2rem 1.75rem;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #e2e8f0;
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .receipt-logo {
+            max-width: 150px;
+            max-height: 60px;
+            object-fit: contain;
+            margin-bottom: 0.5rem;
+        }
+        .receipt-company {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #14532d;
+        }
+        .receipt-sub {
+            font-size: 0.78rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .receipt-badge {
+            display: inline-block;
+            margin-top: 0.65rem;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .receipt-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            font-size: 0.86rem;
+            margin-bottom: 1.25rem;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .receipt-row span:first-child { color: #64748b; font-weight: 500; }
+        .receipt-row strong { color: #0f172a; text-align: right; }
+        .receipt-totals {
+            border-top: 2px dashed #e2e8f0;
+            padding-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .receipt-total-final {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.4rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid #f1f5f9;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #15803d;
+        }
+        .receipt-footer {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 0.76rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        @media print {
+            body { background: #ffffff; padding: 0; }
+            .receipt-actions { display: none !important; }
+            .receipt-card { box-shadow: none; border: none; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-actions">
+        <a href="/dashboard/#ventas" class="btn-receipt btn-back">← Volver a Ventas</a>
+        <button type="button" class="btn-receipt btn-print" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+
+    <main class="receipt-card">
+        <div class="receipt-header">
+            <img src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería" class="receipt-logo">
+            <div class="receipt-company">AL PASO FRUTERÍA</div>
+            <div class="receipt-sub">Mercado Campesino Boyacense • Sogamoso</div>
+            <div class="receipt-sub">Comprobante Oficial de Transacción</div>
+            <span class="receipt-badge">#VTA-{{ venta.id_venta }} • {{ venta.estado_venta|upper }}</span>
+        </div>
+
+        <div class="receipt-rows">
+            <div class="receipt-row">
+                <span>Fecha y Hora:</span>
+                <strong>{{ venta.fecha_venta|date:"d/m/Y h:i A" }}</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Cajero Responsable:</span>
+                <strong>{{ venta.id_usuario_cajero.get_full_name|default:venta.id_usuario_cajero.username }}</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Cliente:</span>
+                <strong>{{ venta.cliente|default:"Consumidor Final" }}</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Canal de Venta:</span>
+                <strong>{{ venta.origen_venta }}</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Medio de Pago:</span>
+                <strong>{{ venta.medio_pago }}</strong>
+            </div>
+        </div>
+
+        <div class="receipt-totals">
+            <div class="receipt-row">
+                <span>Subtotal Bruto:</span>
+                <strong>${{ venta.subtotal|floatformat:0 }} COP</strong>
+            </div>
+            <div class="receipt-row">
+                <span>Descuento Aplicado:</span>
+                <strong style="color: #dc2626;">-${{ venta.descuento|default:0|floatformat:0 }} COP</strong>
+            </div>
+            <div class="receipt-total-final">
+                <span>TOTAL NETO:</span>
+                <span>${{ venta.total_neto|floatformat:0 }} COP</span>
+            </div>
+        </div>
+
+        <div class="receipt-footer">
+            ¡Gracias por apoyar a las familias campesinas de nuestra región!<br>
+            Frescura que marca la diferencia • 100% Cosecha Natural
+        </div>
+    </main>
+</body>
+</html>
