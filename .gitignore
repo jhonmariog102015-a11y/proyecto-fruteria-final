@@ -1,13 +1,94 @@
-.venv/
+# ==============================================================================
+# .gitignore — Proyecto Frutería "Al Paso" (Django / Python / Web)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. ENTORNOS VIRTUALES Y PAQUETES
+# ------------------------------------------------------------------------------
 venv/
-__pycache__/
-*.pyc
+.venv/
+env/
 .env/
-pruebas/
+ENV/
+env.bak/
+venv.bak/
 
+# ------------------------------------------------------------------------------
+# 2. PYTHON COMPILED BYTECODE Y CACHÉ
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
+# ------------------------------------------------------------------------------
+# 3. BASE DE DATOS LOCAL (EVITA CONFLICTOS BINARIOS EN GIT)
+#    Nota: Para compartir datos entre el equipo use fixtures/datos_iniciales.json
+# ------------------------------------------------------------------------------
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-shm
+*.sqlite3-wal
 
-# Documentación del proyecto excluida de Git
+# ------------------------------------------------------------------------------
+# 4. VARIABLES DE ENTORNO Y CREDENCIALES PRIVADAS
+# ------------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# ------------------------------------------------------------------------------
+# 5. HERRAMIENTAS DE DESARROLLO, AGENTES Y SCRIPTS TEMPORALES
+# ------------------------------------------------------------------------------
+.agents/
+scratch/
+*.log
+local_settings.py
+
+# ------------------------------------------------------------------------------
+# 6. CONFIGURACIÓN DE EDITORES E IDEs
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# ------------------------------------------------------------------------------
+# 7. ARCHIVOS TEMPORALES DEL SISTEMA OPERATIVO
+# ------------------------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ------------------------------------------------------------------------------
+# 8. DOCUMENTACIÓN Y CARPETAS PESADAS FUERA DE CÓDIGO
+# ------------------------------------------------------------------------------
 docuemnto proyecto/
 docuemnto proyecto
 documento proyecto/
@@ -16,4 +97,6 @@ documentos proyecto/
 documentos proyecto
 documentos_proyecto/
 documentos_proyecto
+pruebas/
 *.docx
+*.pdf

@@ -1,0 +1,907 @@
+[
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$amCSrNeT5LgeyPcOperbqd$E0S/z49IxIORpoXyd1pjWi0eCz7LizpsYxHrUWosXsA=",
+    "last_login": "2026-10-19T16:48:38.054Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin32@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-15T13:01:49.528Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$LIm9jzJ4BZW3z2N6smTjZu$oq0kpGdNGnUhrxGkeAvkxDC8Yrgqbc3qi9TGdxr63UQ=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "empleado_caja",
+    "first_name": "Empleado",
+    "last_name": "Caja",
+    "email": "caja@fruteriaelpaso.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T12:47:38.890Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$ox4Mh7VN4vHpScv5ZviTJT$5vtZSaZFhOTuyD7RkgxQkkM5Z5OH3qOXIZda8bnupq4=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "empleado_bodega",
+    "first_name": "Empleado",
+    "last_name": "Bodega",
+    "email": "bodega@fruteriaelpaso.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T12:47:39.950Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$QOcJvufJzASAQKHvXV8mCi$3sXFkjAhj7aeQ/MYwlz6qH+LYXYKQAMoCXiMCujUm/w=",
+    "last_login": "2026-10-27T12:54:53.930Z",
+    "is_superuser": true,
+    "username": "guti",
+    "first_name": "Jhon Exander",
+    "last_name": "Gutierrez",
+    "email": "jhonmor777@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T13:03:19.692Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$iJ8JJgjvc2auEzRPJzgGQk$jPcctQB111NnuHFNeU0/9oW/eEWB2EQ7LO4OebNsiB4=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "juan",
+    "first_name": "Juan Carlos",
+    "last_name": "Merchan",
+    "email": "juan@fruteriaelpaso.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T13:03:20.910Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$knCdQkNHaupUeexhjyFMIR$yF+HnaRxaaOYr0IqgauAFtv1l3i28bL/P76RDfQGV6c=",
+    "last_login": "2026-10-19T15:52:09.094Z",
+    "is_superuser": false,
+    "username": "cajero",
+    "first_name": "Cajero",
+    "last_name": "Principal",
+    "email": "cajero@fruteriaelpaso.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T13:03:23.116Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$QvZDF0vx96fpDGIzFCNarL$ECYFfEE8tuUcuJOoN+JrdzU90hbDTM/AXc9EWP/Cink=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "bodega",
+    "first_name": "Bodeguero",
+    "last_name": "Stock",
+    "email": "bodegaprincipal@fruteriaelpaso.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T13:03:25.382Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$aca0cZJRtq9gk7VRwBFA5p$uUbaIQAsTU08mhpTk6TwSY2bw44O2Z2tt/l0QqlL0xI=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "empleado_ventas",
+    "first_name": "Empleado",
+    "last_name": "Ventas",
+    "email": "ventas@fruteriaelpaso.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-14T13:03:26.282Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$fHcVTZBUkSsAzzWxiVAQuD$o+c15wCOmH5kxEfRXQ1oP9dqkpfKgIiwsm2aYLiRLZ4=",
+    "last_login": "2026-10-15T17:04:50.961Z",
+    "is_superuser": false,
+    "username": "mario perez",
+    "first_name": "",
+    "last_name": "",
+    "email": "mario perez@fahsjd.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-15T17:04:49.481Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$OkSevI9bQSJnRzp9WcvkcY$S/aVwkV59K0p8UvKDPO2UctZSAkxkOGZfvHmzeip9Og=",
+    "last_login": "2026-10-22T12:24:40.668Z",
+    "is_superuser": true,
+    "username": "Jhon Mario",
+    "first_name": "",
+    "last_name": "",
+    "email": "jhonmariog102015@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-22T12:24:39.217Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$CP5fFYl9y6FGa4oECJP04D$Ie0OSLZY0HE/fqzj/F/o6QG/jdTdJtVFKiPj6BZoc0E=",
+    "last_login": "2026-10-22T12:32:49.850Z",
+    "is_superuser": false,
+    "username": "Steven Perez",
+    "first_name": "",
+    "last_name": "",
+    "email": "stevenn022007@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-22T12:32:48.380Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$qtmlRc8EzKMLqFO7TK4Ppi$jfEvaG4O4PC7VgDzsxNECaUIgT3I4y5eOemQoK6hg4w=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "mario",
+    "first_name": "Jhon",
+    "last_name": "Mario",
+    "email": "jhonmariog102015@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-26T16:11:10.719Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "principal.categoria",
+  "pk": 6,
+  "fields": {
+    "nombre": "Cítricos",
+    "descripcion": "Frutas cítricas ricas en vitamina C"
+  }
+},
+{
+  "model": "principal.categoria",
+  "pk": 7,
+  "fields": {
+    "nombre": "Tropicales",
+    "descripcion": "Frutas frescas de climas cálidos y tropicales"
+  }
+},
+{
+  "model": "principal.categoria",
+  "pk": 8,
+  "fields": {
+    "nombre": "Berries",
+    "descripcion": "Bayas, fresas y frutos silvestres seleccionados"
+  }
+},
+{
+  "model": "principal.categoria",
+  "pk": 9,
+  "fields": {
+    "nombre": "Importadas",
+    "descripcion": "Frutas premium de exportación e importadas"
+  }
+},
+{
+  "model": "principal.categoria",
+  "pk": 10,
+  "fields": {
+    "nombre": "Exóticas",
+    "descripcion": "Variedades especiales y tradicionales colombianas"
+  }
+},
+{
+  "model": "principal.proveedor",
+  "pk": 1,
+  "fields": {
+    "razon_social": "Agrofrutas del Valle S.A.S.",
+    "nit_rut": "900123456-1",
+    "contacto_nombre": "Carlos Restrepo",
+    "telefono": "3104567890",
+    "email": "ventas@agrofrutasvalle.com",
+    "calificacion_estrellas": "4.8",
+    "estado": "Activo"
+  }
+},
+{
+  "model": "principal.proveedor",
+  "pk": 2,
+  "fields": {
+    "razon_social": "Frutas Campesinas de Boyacá",
+    "nit_rut": "800654321-2",
+    "contacto_nombre": "María Rodríguez",
+    "telefono": "3209876543",
+    "email": "contacto@frutascampesinas.co",
+    "calificacion_estrellas": "4.9",
+    "estado": "Activo"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 8,
+  "fields": {
+    "categoria": 7,
+    "nombre": "Aguacate Hass",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 2 días • Finca El Rosal",
+    "unidad_medida": "kg",
+    "brix_minimo": "0.00",
+    "stock_actual": "120.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "1600.00",
+    "precio_venta_unitario": "2500.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 9,
+  "fields": {
+    "categoria": 8,
+    "nombre": "Fresa Premium",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hoy • Finca Las Delicias",
+    "unidad_medida": "lb",
+    "brix_minimo": "9.00",
+    "stock_actual": "45.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "7400.00",
+    "precio_venta_unitario": "11450.00",
+    "en_oferta": true,
+    "precio_oferta": "9700.00",
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 10,
+  "fields": {
+    "categoria": 8,
+    "nombre": "Arándano",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 1 día • Finca La Sierra",
+    "unidad_medida": "und",
+    "brix_minimo": "10.50",
+    "stock_actual": "35.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "4900.00",
+    "precio_venta_unitario": "7550.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 11,
+  "fields": {
+    "categoria": 7,
+    "nombre": "Mango Tommy",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1553279768-865429fa0078?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 2 días • Finca El Palmar",
+    "unidad_medida": "und",
+    "brix_minimo": "13.50",
+    "stock_actual": "80.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "3300.00",
+    "precio_venta_unitario": "5150.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 12,
+  "fields": {
+    "categoria": 6,
+    "nombre": "Naranja Valencia",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hoy • Finca El Naranjal",
+    "unidad_medida": "kg",
+    "brix_minimo": "11.00",
+    "stock_actual": "250.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "800.00",
+    "precio_venta_unitario": "1200.00",
+    "en_oferta": true,
+    "precio_oferta": "1000.00",
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 13,
+  "fields": {
+    "categoria": 6,
+    "nombre": "Limón Tahití",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1590502593747-42a996133562?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 1 día • Finca Los Limoneros",
+    "unidad_medida": "lb",
+    "brix_minimo": "8.00",
+    "stock_actual": "95.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "2700.00",
+    "precio_venta_unitario": "4150.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 14,
+  "fields": {
+    "categoria": 9,
+    "nombre": "Kiwi",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1585059895524-72359e06133a?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 3 días • Importado de Chile",
+    "unidad_medida": "und",
+    "brix_minimo": "12.00",
+    "stock_actual": "70.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "1100.00",
+    "precio_venta_unitario": "1690.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 15,
+  "fields": {
+    "categoria": 9,
+    "nombre": "Uva Roja Importada",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1537640538966-79f369143f8f?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 4 días • Importado de Perú",
+    "unidad_medida": "lb",
+    "brix_minimo": "16.00",
+    "stock_actual": "40.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "9300.00",
+    "precio_venta_unitario": "14350.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 16,
+  "fields": {
+    "categoria": 7,
+    "nombre": "Piña Golden",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 2 días • Finca El Piñal",
+    "unidad_medida": "und",
+    "brix_minimo": "13.00",
+    "stock_actual": "65.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "5600.00",
+    "precio_venta_unitario": "8550.00",
+    "en_oferta": true,
+    "precio_oferta": "6800.00",
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 17,
+  "fields": {
+    "categoria": 7,
+    "nombre": "Papaya Maradol",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hoy • Finca El Trópico",
+    "unidad_medida": "und",
+    "brix_minimo": "11.50",
+    "stock_actual": "50.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "4400.00",
+    "precio_venta_unitario": "6750.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 18,
+  "fields": {
+    "categoria": 7,
+    "nombre": "Sandía",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 1 día • Finca La Llanura",
+    "unidad_medida": "und",
+    "brix_minimo": "10.00",
+    "stock_actual": "30.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "11000.00",
+    "precio_venta_unitario": "16900.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 19,
+  "fields": {
+    "categoria": 9,
+    "nombre": "Manzana Verde Importada",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 5 días • Importado de Argentina",
+    "unidad_medida": "und",
+    "brix_minimo": "12.50",
+    "stock_actual": "110.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "1700.00",
+    "precio_venta_unitario": "2550.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 20,
+  "fields": {
+    "categoria": 10,
+    "nombre": "Gulupa",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1528825871115-3581a5387919?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hoy • Finca La Montaña",
+    "unidad_medida": "lb",
+    "brix_minimo": "14.50",
+    "stock_actual": "55.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "2800.00",
+    "precio_venta_unitario": "4290.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 21,
+  "fields": {
+    "categoria": 10,
+    "nombre": "Lulo",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1618897996318-5a901fa6ca71?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 1 día • Finca El Valle",
+    "unidad_medida": "lb",
+    "brix_minimo": "9.50",
+    "stock_actual": "85.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "2900.00",
+    "precio_venta_unitario": "4390.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 22,
+  "fields": {
+    "categoria": 10,
+    "nombre": "Uchuva",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 2 días • Finca El Sol",
+    "unidad_medida": "lb",
+    "brix_minimo": "14.00",
+    "stock_actual": "60.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "1500.00",
+    "precio_venta_unitario": "2250.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 23,
+  "fields": {
+    "categoria": 10,
+    "nombre": "Pitahaya Dragón Fruit",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1527325678964-54921661f888?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hoy • Finca El Jardín",
+    "unidad_medida": "und",
+    "brix_minimo": "15.00",
+    "stock_actual": "40.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "6400.00",
+    "precio_venta_unitario": "9850.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.producto",
+  "pk": 24,
+  "fields": {
+    "categoria": 9,
+    "nombre": "Durazno Importado",
+    "icono_emoji": "",
+    "imagen_url": "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=600&auto=format&fit=crop",
+    "origen": "Cosecha: Hace 3 días • Importado de Chile",
+    "unidad_medida": "und",
+    "brix_minimo": "11.00",
+    "stock_actual": "75.000",
+    "stock_minimo": "0.000",
+    "costo_compra": "2500.00",
+    "precio_venta_unitario": "3850.00",
+    "en_oferta": false,
+    "precio_oferta": null,
+    "estado": "Disponible"
+  }
+},
+{
+  "model": "principal.cliente",
+  "pk": 1,
+  "fields": {
+    "tipo_cliente": "DETAL",
+    "cupo_credito": "0.00",
+    "puntos_fidelidad": 150
+  }
+},
+{
+  "model": "principal.cliente",
+  "pk": 2,
+  "fields": {
+    "tipo_cliente": "MAYORISTA",
+    "cupo_credito": "2500000.00",
+    "puntos_fidelidad": 500
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 1,
+  "fields": {
+    "usuario": [
+      "guti"
+    ],
+    "identificador": "guti",
+    "telefono": "3129876543",
+    "rol": "admin",
+    "estado": "exitoso",
+    "fecha_creacion": "2026-10-23T15:35:57.698Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 2,
+  "fields": {
+    "usuario": null,
+    "identificador": "guti",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-23T15:35:58.490Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 3,
+  "fields": {
+    "usuario": null,
+    "identificador": "jhonmariog102015@gmail.com",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-26T16:02:50.034Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 4,
+  "fields": {
+    "usuario": null,
+    "identificador": "mario",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-26T16:02:56.106Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 5,
+  "fields": {
+    "usuario": null,
+    "identificador": "mario",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-26T16:03:06.606Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 6,
+  "fields": {
+    "usuario": null,
+    "identificador": "mario",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-26T16:03:33.385Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 7,
+  "fields": {
+    "usuario": null,
+    "identificador": "Jhon Mario",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-26T16:10:08.858Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 8,
+  "fields": {
+    "usuario": null,
+    "identificador": "jhonmariog102015@gmail.com",
+    "telefono": null,
+    "rol": null,
+    "estado": "fallido",
+    "fecha_creacion": "2026-10-26T16:10:09.838Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.registrologin",
+  "pk": 9,
+  "fields": {
+    "usuario": [
+      "guti"
+    ],
+    "identificador": "guti",
+    "telefono": "3129876543",
+    "rol": "admin",
+    "estado": "exitoso",
+    "fecha_creacion": "2026-10-27T12:54:53.921Z",
+    "ip_origen": "127.0.0.1"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 15,
+  "fields": {
+    "usuario": [
+      "admin"
+    ],
+    "telefono": "3101234567",
+    "rol": "admin",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.281Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 16,
+  "fields": {
+    "usuario": [
+      "empleado_caja"
+    ],
+    "telefono": "3214321098",
+    "rol": "cajero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.296Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 17,
+  "fields": {
+    "usuario": [
+      "empleado_bodega"
+    ],
+    "telefono": "3146543210",
+    "rol": "bodeguero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.311Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 18,
+  "fields": {
+    "usuario": [
+      "guti"
+    ],
+    "telefono": "3129876543",
+    "rol": "admin",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.324Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 19,
+  "fields": {
+    "usuario": [
+      "juan"
+    ],
+    "telefono": "3158765432",
+    "rol": "admin",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.338Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 20,
+  "fields": {
+    "usuario": [
+      "cajero"
+    ],
+    "telefono": "3205432109",
+    "rol": "cajero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.353Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 21,
+  "fields": {
+    "usuario": [
+      "bodega"
+    ],
+    "telefono": "3187654321",
+    "rol": "bodeguero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.367Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 22,
+  "fields": {
+    "usuario": [
+      "empleado_ventas"
+    ],
+    "telefono": "3223210987",
+    "rol": "cajero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.380Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 23,
+  "fields": {
+    "usuario": [
+      "mario perez"
+    ],
+    "telefono": "3132109876",
+    "rol": "cajero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-19T12:42:21.393Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 25,
+  "fields": {
+    "usuario": [
+      "Jhon Mario"
+    ],
+    "telefono": "122335543",
+    "rol": "admin",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-22T12:24:40.641Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 26,
+  "fields": {
+    "usuario": [
+      "Steven Perez"
+    ],
+    "telefono": "2133313",
+    "rol": "cajero",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-22T12:32:49.813Z"
+  }
+},
+{
+  "model": "principal.perfilusuario",
+  "pk": 27,
+  "fields": {
+    "usuario": [
+      "mario"
+    ],
+    "telefono": null,
+    "rol": "admin",
+    "estado": "activo",
+    "fecha_creacion": "2026-10-26T16:11:10.725Z"
+  }
+}
+]
