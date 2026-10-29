@@ -1,19 +1,34 @@
+# ==========================================
+# ENTORNO VIRTUAL Y PYTHON
+# ==========================================
 .venv/
 venv/
+ENV/
 __pycache__/
+*.py[cod]
 *.pyc
+
+# ==========================================
+# CONFIGURACIÓN Y VARIABLES DE ENTORNO
+# ==========================================
+.env
 .env/
+
+# ==========================================
+# BASE DE DATOS LOCAL (SQLite)
+# ==========================================
+db.sqlite3
+
+
+# ==========================================
+# CARPETAS DE PRUEBAS
+# ==========================================
 pruebas/
 
-
-
-# Documentación del proyecto excluida de Git
-docuemnto proyecto/
-docuemnto proyecto
+# ==========================================
+# DOCUMENTACIÓN DEL PROYECTO Y ARCHIVOS WORD
+# ==========================================
 documento proyecto/
-documento proyecto
 documentos proyecto/
-documentos proyecto
 documentos_proyecto/
-documentos_proyecto
 *.docx

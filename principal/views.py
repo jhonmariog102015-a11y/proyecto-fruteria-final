@@ -8,10 +8,10 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout, login as auth_login
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count, Case, When, Value, IntegerField
+from django.db.models import Count, Case, When, Value, IntegerField, Avg
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -20,7 +20,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
-from .models import Producto, Categoria, Proveedor, PerfilUsuario, Venta
+from .models import Producto, Categoria, Proveedor, PerfilUsuario, Venta, Cliente
 from .forms import ProductoForm, CategoriaForm, ProveedorForm
 
 
@@ -52,13 +52,16 @@ def inicio(request):
     categorias = Categoria.objects.all()
     # Producto destacado para el Hero dinámico asimétrico
     producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
+    productos_oferta = productos.filter(en_oferta=True)
 
     context = {
         'titulo': 'Al Paso Frutería — Mercado Campesino',
         'productos': productos,
+        'productos_oferta': productos_oferta,
         'categorias': categorias,
         'producto_destacado': producto_destacado,
         'total_productos': productos.count(),
+        'total_ofertas': productos_oferta.count(),
     }
     return render(request, 'principal/index.html', context)
 
@@ -104,8 +107,9 @@ def dashboard_view(request):
     total_ofertas = productos.filter(en_oferta=True).count()
     total_usuarios = User.objects.count()
 
-    # Conteo para filtros rápidos
-    total_bajo_stock = sum(1 for p in productos if p.stock_actual <= p.stock_minimo)
+    # Conteo y lista para alertas de inventario
+    productos_bajo_stock = [p for p in productos if p.stock_actual <= p.stock_minimo]
+    total_bajo_stock = len(productos_bajo_stock)
     total_agotados = sum(1 for p in productos if p.stock_actual <= 0 or p.estado == 'Agotado')
 
     # Métricas financieras del catálogo
@@ -125,9 +129,12 @@ def dashboard_view(request):
     chart_prod_precios = [float(p.precio_efectivo) for p in top_prods]
     chart_prod_margenes = [float(p.margen_ganancia) for p in top_prods]
 
-    # Proveedores y productores aliados
+    # Proveedores y productores aliados (Métricas de Abastecimiento)
     proveedores = Proveedor.objects.all().order_by('razon_social')
     total_proveedores = proveedores.count()
+    total_prov_activos = proveedores.filter(estado='Activo').count()
+    total_prov_inactivos = total_proveedores - total_prov_activos
+    total_prov_con_telefono = proveedores.exclude(telefono__isnull=True).exclude(telefono='').count()
 
     # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
     # Sincronización de perfiles administrativos y métricas del equipo de gestión
@@ -177,12 +184,17 @@ def dashboard_view(request):
         'proveedores': proveedores,
         'perfiles_usuarios': perfiles_usuarios,
         'ventas': ventas,
+        'clientes': Cliente.objects.all(),
         'total_productos': total_productos,
         'total_ofertas': total_ofertas,
         'total_bajo_stock': total_bajo_stock,
+        'productos_bajo_stock': productos_bajo_stock,
         'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,
+        'total_prov_activos': total_prov_activos,
+        'total_prov_inactivos': total_prov_inactivos,
+        'total_prov_con_telefono': total_prov_con_telefono,
         'total_activos': total_activos,
         'total_superadmins': total_superadmins,
         'total_bodegueros': total_bodegueros,
@@ -196,6 +208,7 @@ def dashboard_view(request):
         'ventas_hoy_ingresos': ventas_hoy_ingresos,
         'ticket_promedio': ticket_promedio,
         'inversion_total': inversion_total,
+        'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
         'valor_venta_potencial': valor_venta_potencial,
         'ganancia_potencial': ganancia_potencial,
         'margen_promedio': margen_promedio,
@@ -576,6 +589,106 @@ def eliminar_proveedor_dashboard(request, id_proveedor):
     return redirect('dashboard')
 
 
+@login_required
+def crear_venta_dashboard(request):
+    """
+    CRUD VENTAS: REGISTRO DE NUEVA TRANSACCIÓN DESDE EL DASHBOARD (MODAL / VENTANA)
+    """
+    if request.method == 'POST':
+        id_cliente = request.POST.get('id_cliente')
+        origen_venta = request.POST.get('origen_venta', 'Tienda Física').strip()
+        subtotal_raw = request.POST.get('subtotal', '0').strip()
+        descuento_raw = request.POST.get('descuento', '0').strip()
+        total_neto_raw = request.POST.get('total_neto', '0').strip()
+        medio_pago = request.POST.get('medio_pago', 'Efectivo').strip()
+        estado_venta = request.POST.get('estado_venta', 'Completada').strip()
+
+        try:
+            subtotal = Decimal(subtotal_raw) if subtotal_raw else Decimal('0.00')
+            descuento = Decimal(descuento_raw) if descuento_raw else Decimal('0.00')
+            total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
+        except Exception:
+            subtotal = Decimal('0.00')
+            descuento = Decimal('0.00')
+            total_neto = Decimal('0.00')
+
+        if descuento > subtotal:
+            descuento = subtotal
+            total_neto = Decimal('0.00')
+
+        cli_id = int(id_cliente) if id_cliente and str(id_cliente).isdigit() else None
+
+        nueva_venta = Venta.objects.create(
+            id_cliente=cli_id,
+            id_usuario_cajero=request.user,
+            origen_venta=origen_venta,
+            subtotal=subtotal,
+            descuento=descuento,
+            total_neto=total_neto,
+            medio_pago=medio_pago,
+            estado_venta=estado_venta
+        )
+        messages.success(request, f"¡Venta #VTA-{nueva_venta.id_venta} registrada exitosamente por ${nueva_venta.total_neto:,.2f} COP!")
+
+    return redirect('/dashboard/#ventas')
+
+
+@login_required
+def editar_venta_dashboard(request, id_venta):
+    """
+    CRUD VENTAS: MODIFICACIÓN DE VENTA DESDE EL DASHBOARD (MODAL / VENTANA)
+    """
+    venta = get_object_or_404(Venta, pk=id_venta)
+    if request.method == 'POST':
+        id_cliente = request.POST.get('id_cliente')
+        origen_venta = request.POST.get('origen_venta', 'Tienda Física').strip()
+        subtotal_raw = request.POST.get('subtotal', '0').strip()
+        descuento_raw = request.POST.get('descuento', '0').strip()
+        total_neto_raw = request.POST.get('total_neto', '0').strip()
+        medio_pago = request.POST.get('medio_pago', 'Efectivo').strip()
+        estado_venta = request.POST.get('estado_venta', 'Completada').strip()
+
+        try:
+            subtotal = Decimal(subtotal_raw) if subtotal_raw else Decimal('0.00')
+            descuento = Decimal(descuento_raw) if descuento_raw else Decimal('0.00')
+            total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
+        except Exception:
+            subtotal = Decimal('0.00')
+            descuento = Decimal('0.00')
+            total_neto = Decimal('0.00')
+
+        cli_id = int(id_cliente) if id_cliente and str(id_cliente).isdigit() else None
+
+        venta.id_cliente = cli_id
+        venta.origen_venta = origen_venta
+        venta.subtotal = subtotal
+        venta.descuento = descuento
+        venta.total_neto = total_neto
+        venta.medio_pago = medio_pago
+        venta.estado_venta = estado_venta
+        venta.save()
+
+        messages.success(request, f"¡Venta #VTA-{venta.id_venta} actualizada exitosamente!")
+
+    return redirect('/dashboard/#ventas')
+
+
+@login_required
+def eliminar_venta_dashboard(request, id_venta):
+    """
+    CRUD VENTAS: ELIMINACIÓN DE VENTA DESDE EL DASHBOARD (MODAL / VENTANA POST)
+    """
+    if request.method == 'POST':
+        venta = get_object_or_404(Venta, pk=id_venta)
+        num_venta = venta.id_venta
+        venta.delete()
+        messages.success(request, f"La venta #VTA-{num_venta} fue eliminada del sistema.")
+    else:
+        messages.warning(request, "La eliminación de venta requiere confirmación POST.")
+
+    return redirect('/dashboard/#ventas')
+
+
 def error_404_view(request, exception=None):
     """
     MANEJADOR DE ERROR 404 (PÁGINA NO ENCONTRADA)
@@ -617,42 +730,33 @@ def logout_view(request):
     return redirect('index')
 
 
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
 def admin_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: PANEL GENERAL
-    Permite generar reportes técnicos y capturas del estado del admin.
+    Permite generar reportes técnicos y capturas del estado del admin exclusivamente para superusuarios.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
-    user = User.objects.filter(username='admin').first()
-    if user:
-        request.user = user
     return admin.site.index(request)
 
 
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
 def admin_productos_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: APP PRINCIPAL
-    Carga el índice de modelos de la app 'principal' en el panel de Django.
+    Carga el índice de modelos de la app 'principal' en el panel de Django exclusivamente para superusuarios.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
-    user = User.objects.filter(username='admin').first()
-    if user:
-        request.user = user
     return admin.site.app_index(request, 'principal')
 
 
+@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
 def admin_producto_list_preview(request):
     """
     PREVISUALIZACIÓN DE AUDITORÍA: LISTADO DE PRODUCTOS
-    Genera la vista de tabla tabular de productos en el admin de Django.
+    Genera la vista de tabla tabular de productos en el admin de Django exclusivamente para superusuarios.
     """
     from django.contrib import admin
-    from django.contrib.auth.models import User
-    user = User.objects.filter(username='admin').first()
-    if user:
-        request.user = user
     from .models import Producto
     return admin.site._registry[Producto].changelist_view(request)
 
@@ -949,9 +1053,17 @@ def crear_venta(request):
             medio_pago=medio_pago,
             estado_venta=estado_venta
         )
-        return redirect('lista_ventas')
+        messages.success(request, "Venta registrada con éxito.")
+        next_url = request.POST.get('next') or request.GET.get('next')
+        return redirect(next_url if next_url else 'lista_ventas')
         
-    return render(request, 'principal/ventas/venta_form.html')
+    clientes = Cliente.objects.all()
+    productos = Producto.objects.all()
+    return render(request, 'principal/ventas/venta_form.html', {
+        'clientes': clientes,
+        'productos': productos,
+        'titulo': 'Registrar Nueva Venta'
+    })
 
 # Actualizar venta
 @login_required
@@ -959,7 +1071,7 @@ def editar_venta(request, pk):
     venta = get_object_or_404(Venta, pk=pk)
     
     if request.method == 'POST':
-        venta.id_cliente = request.POST.get('id_cliente')
+        venta.id_cliente = request.POST.get('id_cliente') if request.POST.get('id_cliente') else None
         venta.origen_venta = request.POST.get('origen_venta')
         venta.subtotal = request.POST.get('subtotal')
         venta.descuento = request.POST.get('descuento', 0)
@@ -968,9 +1080,18 @@ def editar_venta(request, pk):
         venta.estado_venta = request.POST.get('estado_venta')
         venta.save()
         
-        return redirect('lista_ventas')
+        messages.success(request, f"Venta #{venta.id_venta} actualizada exitosamente.")
+        next_url = request.POST.get('next') or request.GET.get('next')
+        return redirect(next_url if next_url else 'lista_ventas')
         
-    return render(request, 'principal/ventas/venta_form.html', {'venta': venta})
+    clientes = Cliente.objects.all()
+    productos = Producto.objects.all()
+    return render(request, 'principal/ventas/venta_form.html', {
+        'venta': venta,
+        'clientes': clientes,
+        'productos': productos,
+        'titulo': f'Editar Venta #{venta.id_venta}'
+    })
 
 
 @login_required
@@ -983,7 +1104,8 @@ def eliminar_venta(request, pk):
         num_venta = venta.id_venta
         venta.delete()
         messages.success(request, f"La venta #{num_venta} fue eliminada del sistema.")
-        return redirect('lista_ventas')
+        next_url = request.POST.get('next') or request.GET.get('next')
+        return redirect(next_url if next_url else 'lista_ventas')
 
     return render(request, 'principal/ventas/venta_confirm_delete.html', {
         'venta': venta,

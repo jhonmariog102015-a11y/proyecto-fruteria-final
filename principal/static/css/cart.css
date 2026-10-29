@@ -518,6 +518,13 @@
         right: 20px;
         width: 54px;
         height: 54px;
+        transition: bottom 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Cuando la barra móvil está visible, el botón de WhatsApp se eleva para no tapar */
+    body.has-mobile-cart .whatsapp-floating-btn,
+    .mobile-floating-cart-bar.visible ~ .whatsapp-floating-btn {
+        bottom: 84px;
     }
 
     .whatsapp-floating-btn svg {
@@ -529,4 +536,1113 @@
         display: none;
     }
 }
+
+/* ==============================================================================
+   7. MENÚ DESPLEGABLE DE CATÁLOGO (Navbar Dropdown)
+   ============================================================================== */
+.nav-item-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 135px;
+    width: 135px;
+}
+
+.nav-link-dropdown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.nav-item-dropdown .nav-cat-label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item-dropdown .dropdown-arrow {
+    position: absolute;
+    right: -13px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-block;
+    transition: transform 0.25s ease;
+    font-size: 0.72rem;
+    line-height: 1;
+    color: #64748B;
+}
+
+.nav-item-dropdown:hover .dropdown-arrow,
+.nav-item-dropdown.open .dropdown-arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    min-width: 230px;
+    background: #ffffff;
+    border: 1px solid #e2ece3;
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgba(26, 58, 38, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+    padding: 0.6rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 200;
+}
+
+/* Puente invisible para mantener el hover suave sin perder foco */
+.dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+}
+
+.nav-item-dropdown:hover .dropdown-menu,
+.nav-item-dropdown:focus-within .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #2e382e;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-item .item-icon {
+    font-size: 1.05rem;
+    width: 22px;
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background: #f0f7f2;
+    color: #1e3a29;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #edf2ee;
+    margin: 4px 6px;
+}
+
+.dropdown-item.featured {
+    font-weight: 700;
+    color: #1e3a29;
+    background: #f4faf5;
+}
+
+/* ==============================================================================
+   7.1 CATEGORÍAS ILUSTRADAS EN EL NAVBAR (Frutas, Carnes, Lácteos e Inicio)
+   ============================================================================== */
+.nav-link-cat {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+    gap: 4px;
+    padding: 0.35rem 0.4rem;
+    flex: 0 0 135px;
+    width: 135px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+}
+
+.nav-item-dropdown .nav-link-cat {
+    width: 100%;
+    flex: 1 1 auto;
+}
+
+.nav-link-cat:hover {
+    transform: translateY(-2px);
+    background: #f0f7f2;
+    box-shadow: 0 3px 10px rgba(30, 58, 41, 0.06);
+}
+
+.nav-link-cat .cat-nav-icon {
+    width: 28px;
+    height: 28px;
+    display: block;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.nav-link-cat:hover .cat-nav-icon {
+    transform: scale(1.12);
+}
+
+.nav-link-cat .nav-cat-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #475569;
+    white-space: normal;
+    line-height: 1.15;
+    text-align: center;
+    text-wrap: balance;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.3em;
+    margin-top: 2px;
+    letter-spacing: -0.15px;
+    transition: color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.nav-link-cat:hover .nav-cat-label,
+.nav-link-cat.active .nav-cat-label,
+.nav-link-dropdown.active .nav-cat-label {
+    color: #1a3a26;
+    font-weight: 700;
+}
+
+.nav-link-cat.active .nav-cat-label,
+.nav-link-dropdown.active .nav-cat-label {
+    border-bottom: 2.5px solid var(--orange, #E65100);
+    padding-bottom: 2px;
+}
+
+/* Adaptación responsive para el menú móvil */
+@media (max-width: 900px) {
+    .nav-link-cat {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 0.65rem 0.85rem;
+        width: 100%;
+        flex: 1 1 100%;
+        border-radius: 10px;
+    }
+
+    .nav-link-cat:hover {
+        background: #f0f7f2;
+        transform: translateX(4px);
+    }
+
+    .nav-link-cat .cat-nav-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-link-cat .nav-cat-label {
+        font-size: 0.95rem;
+        text-align: left;
+        white-space: nowrap;
+        margin-top: 0;
+    }
+
+    .nav-divider {
+        width: 100%;
+        height: 1px;
+        background: #e2e8f0;
+        margin: 0.35rem 0;
+    }
+
+    .nav-item-dropdown {
+        width: 100%;
+        flex: 1 1 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-item-dropdown .nav-link-dropdown {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.65rem 0.85rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .nav-item-dropdown .dropdown-arrow {
+        position: static;
+        transform: none;
+        margin-left: 0.5rem;
+    }
+
+    .nav-item-dropdown:hover .dropdown-arrow,
+    .nav-item-dropdown.open .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+
+    .nav-item-dropdown .dropdown-menu {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        border: 1px solid #e2ece3;
+        margin-top: 0.4rem;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        padding: 0.5rem;
+        background: #fcfdfc;
+    }
+}
+
+/* ==============================================================================
+   8. BUSCADOR INTEGRADO EN EL NAVBAR
+   ============================================================================== */
+.nav-search-form {
+    display: flex;
+    align-items: center;
+    background: #f3f5f3;
+    border: 1px solid #dfe5df;
+    border-radius: 999px;
+    padding: 3px 6px 3px 14px;
+    transition: all 0.25s ease;
+    width: 200px;
+}
+
+.nav-search-form:focus-within {
+    width: 240px;
+    background: #ffffff;
+    border-color: #2e6b43;
+    box-shadow: 0 0 0 3px rgba(46, 107, 67, 0.12);
+}
+
+.nav-search-input {
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    color: #1a1a1a;
+    width: 100%;
+    outline: none;
+}
+
+.nav-search-input::placeholder {
+    color: #8c9b90;
+    font-size: 0.82rem;
+}
+
+.nav-search-btn {
+    border: none;
+    background: #1e3a29;
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.nav-search-btn:hover {
+    background: #2e6b43;
+    transform: scale(1.05);
+}
+
+@media (max-width: 992px) {
+    .nav-search-form {
+        display: none;
+    }
+}
+
+/* ==============================================================================
+   9. BARRA FLOTANTE MÓVIL INFERIOR DE CANASTA (Mobile Bottom Bar)
+   ============================================================================== */
+.mobile-floating-cart-bar {
+    position: fixed;
+    bottom: -80px;
+    left: 14px;
+    right: 14px;
+    background: #1e3a29;
+    color: #ffffff;
+    padding: 0.8rem 1.2rem;
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 998;
+    cursor: pointer;
+    transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.mobile-floating-cart-bar.visible {
+    bottom: 14px;
+}
+
+.cart-bar-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cart-bar-count {
+    font-size: 0.78rem;
+    color: #a4c7b0;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.cart-bar-total {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.cart-bar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #4caf70;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+@media (min-width: 769px) {
+    .mobile-floating-cart-bar {
+        display: none !important;
+    }
+}
+
+/* ==============================================================================
+   10. PIE DE PÁGINA PROFESIONAL (Footer con Acceso Empleados)
+   ============================================================================== */
+.footer-main {
+    background: #13271a;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: 'DM Sans', sans-serif;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 2rem;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1.2fr 1fr;
+    gap: 2.5rem;
+}
+
+.footer-col h4 {
+    font-family: 'Syne', sans-serif;
+    color: #ffffff;
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    position: relative;
+    padding-bottom: 0.4rem;
+}
+
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #4caf70;
+}
+
+.footer-brand-desc {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    margin-top: 1rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.footer-badge-campesino {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(76, 175, 112, 0.15);
+    border: 1px solid rgba(76, 175, 112, 0.3);
+    color: #79d698;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    margin-top: 1.1rem;
+}
+
+.footer-links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.footer-links-list a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s, transform 0.2s;
+    display: inline-block;
+}
+
+.footer-links-list a:hover {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.footer-contact-info p {
+    font-size: 0.86rem;
+    line-height: 1.55;
+    margin-bottom: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.footer-contact-info strong {
+    color: #ffffff;
+}
+
+.footer-contact-info a {
+    color: #79d698;
+    text-decoration: none;
+}
+
+.footer-contact-info a:hover {
+    text-decoration: underline;
+}
+
+.footer-employee-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1.1rem;
+}
+
+.footer-employee-card p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.8rem;
+    line-height: 1.4;
+}
+
+.btn-footer-employee {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 0.55rem 1rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-footer-employee:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.footer-bottom-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1.2rem 2rem;
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+@media (max-width: 900px) {
+    .footer-container {
+        grid-template-columns: 1fr 1fr;
+        padding: 2.5rem 1.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 580px) {
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    .footer-bottom-bar {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ==============================================================================
+   BARRA DE ICONOS DE ACCIÓN UNIFICADA (LUPA, HOMBRE, CORAZÓN, CARRITO)
+   Inspirado en ecommerce modernos de alta gama (Shopify / Zara)
+   ============================================================================== */
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.nav-actions .nav-icon-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #1e293b !important;
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.nav-actions .nav-icon-action-btn:hover {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #15803d !important;
+    transform: translateY(-1px);
+}
+
+.nav-actions .nav-icon-action-btn svg {
+    display: block;
+    color: currentColor;
+    transition: transform 0.2s ease;
+}
+
+.nav-actions .nav-icon-action-btn:hover svg {
+    transform: scale(1.08);
+}
+
+/* Badge circular negro (Exacto al de referencia del usuario con fondo negro y número blanco) */
+.nav-action-badge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    min-width: 19px;
+    height: 19px;
+    background: #000000 !important;
+    color: #ffffff !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Indicador de estado verde si el usuario está autenticado */
+.user-auth-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 9px;
+    height: 9px;
+    background: #10b981;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+}
+
+/* Utilidad accesible para lectores de pantalla */
+.sr-only,
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* 2. Hombre / Popover de Usuario */
+.nav-user-wrap {
+    position: relative;
+}
+
+.nav-user-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: -10px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 1.1rem;
+    width: 270px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+    display: none;
+    z-index: 1000;
+    animation: popoverFadeIn 0.2s ease forwards;
+}
+
+@keyframes popoverFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-user-wrap.active .nav-user-popover {
+    display: block;
+}
+
+.user-popover-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.75rem;
+}
+
+.user-popover-header.unauth {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-bottom: 0.9rem;
+}
+
+.user-popover-header.unauth strong {
+    font-size: 0.95rem;
+    color: #0f172a;
+}
+
+.user-popover-header.unauth small {
+    color: #64748b;
+    font-size: 0.8rem;
+}
+
+.user-popover-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #1e3a29;
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+.user-popover-meta strong {
+    display: block;
+    color: #0f172a;
+    font-size: 0.9rem;
+}
+
+.user-popover-meta small {
+    display: block;
+    color: #059669;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.user-popover-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.07);
+    margin: 0.75rem 0;
+}
+
+.user-popover-link {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.user-popover-action-btn,
+.user-popover-register-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155 !important;
+    text-decoration: none !important;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    box-sizing: border-box;
+    transition: all 0.18s ease;
+}
+
+.user-popover-action-btn {
+    margin-bottom: 0.55rem;
+}
+
+.user-popover-action-btn svg,
+.user-popover-register-btn svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    color: inherit;
+}
+
+.user-popover-action-btn:hover,
+.user-popover-register-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a !important;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.user-popover-logout-form {
+    margin: 0;
+}
+
+.user-popover-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    padding: 0.45rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.user-popover-logout-btn:hover {
+    background: #fca5a5;
+    color: #991b1b;
+}
+
+/* 3. Drawer de Favoritos */
+.fav-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: 1050;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.fav-drawer-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.fav-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 380px;
+    background: #ffffff;
+    box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
+    z-index: 1060;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.fav-drawer.open {
+    transform: translateX(0);
+}
+
+.fav-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.fav-drawer-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fav-drawer-title-wrap h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.close-fav-btn {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    line-height: 1;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.close-fav-btn:hover {
+    color: #0f172a;
+}
+
+.fav-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+
+.fav-empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+}
+
+.fav-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.7;
+}
+
+.fav-empty-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.35rem;
+}
+
+.fav-empty-subtitle {
+    display: block;
+    color: #64748b;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-fav-go-catalog {
+    display: inline-block;
+    background: #1e3a29;
+    color: #ffffff !important;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 999px;
+    transition: all 0.2s ease;
+}
+
+.btn-fav-go-catalog:hover {
+    background: #2e7d32;
+    transform: translateY(-1px);
+}
+
+.fav-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.fav-item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fafaf9;
+    transition: all 0.2s ease;
+}
+
+.fav-item-row:hover {
+    background: #f5f5f4;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.fav-item-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #ffffff;
+}
+
+.fav-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fav-item-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.fav-item-details h4 {
+    margin: 0 0 2px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fav-item-price {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1e3a29;
+}
+
+.fav-item-origin {
+    display: block;
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.fav-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.btn-fav-add-cart {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #1e3a29;
+    color: #ffffff;
+    border: none;
+    padding: 0.45rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.btn-fav-add-cart:hover {
+    background: #2e7d32;
+    transform: translateY(-1px);
+}
+
+.btn-fav-remove {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.18s ease;
+}
+
+.btn-fav-remove:hover {
+    color: #dc2626;
+}
+
+/* 4. Botón Corazón en Tarjeta de Frutas */
+.btn-card-fav {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 5;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* En el catálogo de frutas: alinea limpiamente a la derecha sin superponerse a badges */
+.card-top .btn-card-fav {
+    position: static;
+    margin-left: auto;
+}
+
+/* En el carrusel principal: esquina superior derecha sobre el banner */
+.card-img-wrap .btn-card-fav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.btn-card-fav:hover {
+    background: #ffffff;
+    color: #e11d48;
+    transform: scale(1.15);
+}
+
+.btn-card-fav.is-fav {
+    background: #ffffff;
+    color: #e11d48;
+    border-color: rgba(225, 29, 72, 0.3);
+}
+
+.btn-card-fav.is-fav svg {
+    fill: #e11d48;
+    stroke: #e11d48;
+}
+
+@media (max-width: 640px) {
+    .nav-actions .nav-icon-action-btn {
+        width: 38px;
+        height: 38px;
+    }
+    .nav-search-dropdown-form {
+        width: calc(100vw - 32px);
+        right: -80px;
+    }
+    .nav-user-popover {
+        right: -50px;
+        width: 260px;
+    }
+}
+
 

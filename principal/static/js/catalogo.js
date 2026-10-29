@@ -1,8 +1,8 @@
 /**
  * ==============================================================================
  * CATÁLOGO DE FRUTAS (principal/static/js/catalogo.js)
- * El Paso Frutería — Filtros por chips, búsqueda en vivo y contador reactivo.
- * La gestión de la canasta de compra y WhatsApp es controlada por cart.js.
+ * Al Paso Frutería — Filtros por chips, búsqueda en vivo, lectura de parámetros
+ * URL (?categoria=..., ?filtro=ofertas, ?q=...) y contador reactivo.
  * ==============================================================================
  */
 
@@ -80,6 +80,51 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.focus();
             applyFilters();
         });
+    }
+
+    // Leer parámetros URL (para navegación directa desde menú navbar o tarjetas)
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlCat = urlParams.get('categoria');
+        const urlFiltro = urlParams.get('filtro');
+        const urlQ = urlParams.get('q');
+
+        if (urlFiltro === 'ofertas') {
+            const ofertaChip = document.querySelector('.filter-chip[data-filter="ofertas"]');
+            if (ofertaChip) {
+                chips.forEach(c => c.classList.remove('active'));
+                ofertaChip.classList.add('active');
+                activeFilter = 'ofertas';
+            }
+        } else if (urlCat) {
+            const catClean = urlCat.trim().toLowerCase();
+            if (catClean === 'frutas' || catClean === 'frutas-y-verduras') {
+                const todasChip = document.querySelector('.filter-chip[data-filter="all"]');
+                if (todasChip) {
+                    chips.forEach(c => c.classList.remove('active'));
+                    todasChip.classList.add('active');
+                    activeFilter = 'all';
+                }
+            } else {
+                const catChip = document.querySelector(`.filter-chip[data-filter="${catClean}"]`);
+                if (catChip) {
+                    chips.forEach(c => c.classList.remove('active'));
+                    catChip.classList.add('active');
+                    activeFilter = catClean;
+                } else {
+                    chips.forEach(c => c.classList.remove('active'));
+                    activeFilter = catClean;
+                }
+            }
+        }
+
+        if (urlQ && searchInput) {
+            searchInput.value = urlQ;
+            searchQuery = urlQ.trim().toLowerCase();
+            if (clearSearchBtn) clearSearchBtn.style.display = 'flex';
+        }
+    } catch (e) {
+        console.error('Error parseando parámetros URL:', e);
     }
 
     // Inicializar filtros

@@ -73,7 +73,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 3.5rem;
+    padding: 0.95rem clamp(1.2rem, 2.5vw, 3rem);
     background: rgba(250, 250, 247, 0.95);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border-color);
@@ -88,6 +88,7 @@ body {
     gap: 0.8rem;
     text-decoration: none;
     flex-shrink: 0;
+    z-index: 2;
 }
 
 .navbar-logo {
@@ -133,17 +134,32 @@ body {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 2.2rem;
+    justify-content: center;
+    gap: clamp(1rem, 1.8vw, 2.2rem);
+}
+
+@media (min-width: 1025px) {
+    .nav-links {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+    }
 }
 
 .nav-link {
     text-decoration: none;
     color: var(--text-secondary);
     font-size: 0.92rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
+    font-weight: 600;
+    transition: color 0.2s ease, background 0.2s ease;
     position: relative;
-    padding-bottom: 4px;
+    padding: 0.35rem 0.55rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .nav-link.active,
@@ -155,12 +171,17 @@ body {
 .nav-link.active::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: -2px;
+    left: 8px;
+    right: 8px;
     height: 2.5px;
     background: var(--orange);
     border-radius: 2px;
+}
+
+.nav-link-cat.active::after,
+.nav-link-dropdown.active::after {
+    display: none;
 }
 
 .nav-actions {
@@ -168,6 +189,7 @@ body {
     align-items: center;
     gap: 1rem;
     flex-shrink: 0;
+    z-index: 2;
 }
 
 .btn-nav-cart {
@@ -663,6 +685,21 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.1rem;
+    gap: 10px;
+}
+
+.card-top-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.card-badges-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
 }
 
 .fruit-visual {
@@ -727,7 +764,7 @@ body {
     color: #ffffff;
     border-color: #d32f2f;
     font-weight: 700;
-    margin-left: 6px;
+    margin-left: 0;
 }
 
 .fruit-category {
@@ -1162,6 +1199,8 @@ body {
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1100px) {
     .navbar {
+        display: flex;
+        justify-content: space-between;
         gap: 0.65rem;
         padding: 0.75rem clamp(0.65rem, 2vw, 1.5rem);
     }

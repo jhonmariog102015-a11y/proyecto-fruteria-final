@@ -15,21 +15,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <!-- Estilos específicos de cada página y carrito universal -->
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1.1">
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1.2">
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
 
+
     <!-- ====================================================================== -->
     <!-- 1. BARRA SUPERIOR DE ANUNCIOS (Announcement Bar)                      -->
     <!-- ====================================================================== -->
     <div class="announcement-bar">
-        <p>Frescura que marca la diferencia &nbsp;|&nbsp; Calidad, frescura y precios bajos &nbsp;|&nbsp; Envíos diarios en tu ciudad</p>
+        <p>Frescura que marca la diferencia &nbsp;|&nbsp; Cosecha diaria campesina de Boyacá &nbsp;|&nbsp; Envíos a domicilio en Sogamoso: 300 123 4567</p>
     </div>
 
     <!-- ====================================================================== -->
     <!-- 2. BARRA DE NAVEGACIÓN PRINCIPAL (Header & Navbar)                    -->
+    <!-- Reorganizada según propuesta de diseño de tienda orientada al cliente  -->
     <!-- ====================================================================== -->
     <header class="navbar">
         <!-- Logotipo oficial transparente -->
@@ -37,36 +39,213 @@
             <img class="navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería">
         </a>
 
-        <!-- Enlaces de navegación con detección activa de URL -->
+        <!-- Enlaces de navegación con menú Inicio desplegable y categorías ilustradas -->
         <nav class="nav-links" id="mainNavLinks">
-            <a href="{% url 'index' %}" class="nav-link {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'inicio' %}active{% endif %}">Inicio</a>
-            <a href="{% url 'index' %}#lo-que-tenemos" class="nav-link">Categorías</a>
-            <a href="{% url 'index' %}#carrusel-frutas" class="nav-link">Temporada</a>
-            <a href="{% url 'catalogo_frutas' %}" class="nav-link {% if request.resolver_match.url_name == 'catalogo_frutas' or request.resolver_match.url_name == 'catalogo' %}active{% endif %}">Catálogo</a>
-            <a href="{% url 'index' %}#nosotros" class="nav-link">Nosotros</a>
-            <a href="{% url 'index' %}#horarios" class="nav-link">Horarios</a>
+            <!-- 1. Menú Desplegable de Inicio (contiene Portada, Cómo Pedir, Nosotros, Contacto) -->
+            <div class="nav-item-dropdown">
+                <a href="{% url 'index' %}" class="nav-link nav-link-cat nav-link-dropdown {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'inicio' %}active{% endif %}" title="Inicio">
+                    <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <!-- Sol campesino de fondo -->
+                        <circle cx="37" cy="13" r="6" fill="#FFC400" stroke="#1E293B" stroke-width="2"/>
+                        <!-- Paredes de la casa campesina blanca -->
+                        <rect x="11" y="21" width="26" height="20" rx="2" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5"/>
+                        <!-- Techo campesino verde esmeralda -->
+                        <path d="M7 23L24 8l17 15" stroke="#1E293B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M10 22L24 10l14 12" fill="#2E7D32"/>
+                        <!-- Puerta de madera amarilla con arco -->
+                        <path d="M20 41V29a4 4 0 0 1 8 0v12" fill="#FFC400" stroke="#1E293B" stroke-width="2"/>
+                        <!-- Ventana superior circular con marco -->
+                        <circle cx="24" cy="18" r="3" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.8"/>
+                    </svg>
+                    <span class="nav-cat-label">Inicio<span class="dropdown-arrow">▾</span></span>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="{% url 'index' %}" class="dropdown-item featured">
+                        <span class="item-icon">🏡</span>
+                        <span>Portada Principal</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'catalogo_frutas' %}" class="dropdown-item">
+                        <span class="item-icon">🧺</span>
+                        <span>Catálogo Completo</span>
+                    </a>
+                    <a href="{% url 'catalogo_frutas' %}?filtro=ofertas" class="dropdown-item">
+                        <span class="item-icon">🔥</span>
+                        <span>Ofertas de la Semana</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'index' %}#como-pedir" class="dropdown-item">
+                        <span class="item-icon">📋</span>
+                        <span>Cómo Pedir</span>
+                    </a>
+                    <a href="{% url 'index' %}#nosotros" class="dropdown-item">
+                        <span class="item-icon">🌱</span>
+                        <span>Nosotros</span>
+                    </a>
+                    <a href="{% url 'index' %}#contacto" class="dropdown-item">
+                        <span class="item-icon">📞</span>
+                        <span>Contacto</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 4. Categoría: Frutas y Verduras -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=frutas" class="nav-link nav-link-cat" title="Frutas y Verduras">
+                <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <!-- Manzana al fondo -->
+                    <path d="M22 14c-2.5-3-6-3-9-1.5C9.5 14 8 18 8 23c0 7 6 12 11 12 2.5 0 3.5-1.5 5.5-1.5" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M18 10c0-3 2-6 5-7 0 3-2 6-5 7z" fill="#2E7D32" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                    <!-- Rodaja / cebolla -->
+                    <path d="M22 25a8 8 0 1 0 0 16 8 8 0 0 0 0-16z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5"/>
+                    <path d="M22 29a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" stroke="#1E293B" stroke-width="2"/>
+                    <!-- Zanahoria amarilla al frente -->
+                    <path d="M12 40l28-7c1.5-.4 2.5-1.8 2.2-3.3l-.3-1.4c-.4-1.5-1.9-2.5-3.4-2.1L10 33a4 4 0 0 0 2 7z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Hojas -->
+                    <path d="M10 36c-2 1-4 1-6 0M9 34c-1-2-2-4-2-6M11 37c-1 3-2 5-4 6" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M20 34l1 3M28 32l1 3M35 30l1 3" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="nav-cat-label">Frutas y Verduras</span>
+            </a>
+
+            <!-- 5. Categoría: Carne, Pollo y Pescado -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=carnes" class="nav-link nav-link-cat" title="Carne, Pollo y Pescado">
+                <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <!-- Bistec de carne -->
+                    <path d="M10 24c-3 4-3 10 1 14s12 4 17 0c4-3 5-8 2-12s-8-5-12-4-5-2-8 2z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="17" cy="30" r="3" fill="#F8FAFC" stroke="#1E293B" stroke-width="2"/>
+                    <path d="M11 28c3 1 6 3 9 2M13 35c3 1 7 0 10-2" stroke="#1E293B" stroke-width="1.8" stroke-linecap="round"/>
+                    <!-- Pez amarillo arriba -->
+                    <path d="M28 14c4-4 11-4 15-1-1 3-1 6 1 8-4 3-11 3-15-1 3-1 4-2 4-3s-1-2-4-3z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="39" cy="16" r="1.2" fill="#1E293B"/>
+                    <path d="M35 15c-1 1-1 2 0 3" stroke="#1E293B" stroke-width="1.8" stroke-linecap="round"/>
+                    <!-- Presa de pollo a la derecha -->
+                    <path d="M28 32c2-3 6-5 9-3s4 7 1 10-8 2-10-1c-1-1-1-4 0-6z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M37 39l4 4M39 45a2 2 0 1 0 3-3" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="nav-cat-label">Carne, Pollo y Pescado</span>
+            </a>
+
+            <!-- 6. Categoría: Lácteos, Huevos y Refrigerados -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=lacteos" class="nav-link nav-link-cat" title="Lácteos, Huevos y Refrigerados">
+                <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <!-- Botella de leche -->
+                    <path d="M17 12h8v4l3 4v18a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3V20l3-4v-4z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M18 8h6a1 1 0 0 1 1 1v3h-8V9a1 1 0 0 1 1-1z" fill="#F1F5F9" stroke="#1E293B" stroke-width="2"/>
+                    <path d="M14 26h14" stroke="#1E293B" stroke-width="2" stroke-dasharray="2 2"/>
+                    <!-- Queso amarillo en cuña con huequitos -->
+                    <path d="M26 29l16-4v12a3 3 0 0 1-3 3H27a2 2 0 0 1-2-2V30l1-1z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M26 29l-3 4 16-1 3-3-16 0z" fill="#FFE082" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                    <!-- Huequitos del queso -->
+                    <circle cx="31" cy="35" r="1.8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.8"/>
+                    <circle cx="37" cy="33" r="1.3" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.5"/>
+                    <circle cx="35" cy="38" r="1.5" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.8"/>
+                </svg>
+                <span class="nav-cat-label">Lácteos, Huevos y Refrigerados</span>
+            </a>
         </nav>
 
-        <!-- Acciones del Navbar (Carrito y Autenticación) -->
+        <!-- Acciones del Navbar (Usuario, Favoritos y Carrito) -->
         <div class="nav-actions">
+            <!-- 1. Hombre (Usuario / Iniciar Sesión / Panel Admin) -->
+            {% if user.is_authenticated %}
+            <div class="nav-user-wrap" id="navUserWrap">
+                <a href="{% url 'dashboard' %}" class="nav-icon-action-btn btn-nav-admin" id="navUserTrigger" aria-label="Panel Admin" title="Panel Admin ({{ user.username|capfirst }})">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="user-auth-indicator" title="Sesión activa"></span>
+                    <span class="sr-only">Panel Admin</span>
+                </a>
+
+                <!-- Menú flotante de administración para usuario autenticado -->
+                <div class="nav-user-popover" id="navUserPopover">
+                    <div class="user-popover-header">
+                        <div class="user-popover-avatar">{{ user.username|slice:":2"|upper }}</div>
+                        <div class="user-popover-meta">
+                            <strong>{{ user.username|capfirst }}</strong>
+                            <small>{% if user.is_superuser %}Super Administrador{% else %}{{ user.perfil.get_rol_display|default:user.perfil.rol|capfirst|default:"Personal" }}{% endif %}</small>
+                        </div>
+                    </div>
+                    <div class="user-popover-divider"></div>
+                    <a href="{% url 'dashboard' %}" class="user-popover-link">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path>
+                        </svg>
+                        <span>Ir al Panel de Control</span>
+                    </a>
+                    {% if user.is_superuser %}
+                    <a href="/admin/" class="user-popover-link django-admin-link" target="_blank" rel="noopener">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                        <span>Django Admin ↗</span>
+                    </a>
+                    {% endif %}
+                    <div class="user-popover-divider"></div>
+                    <form action="{% url 'logout' %}" method="post" class="user-popover-logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="user-popover-logout-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            <span>Cerrar Sesión</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <!-- Icono Hombre para visitante: Menú desplegable Tu Cuenta Al Paso -->
+            <div class="nav-user-wrap" id="navUserWrap">
+                <button type="button" class="nav-icon-action-btn btn-nav-login" id="navUserTrigger" aria-label="Iniciar Sesión" title="Iniciar Sesión o Registrarse">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="sr-only">Iniciar Sesión</span>
+                </button>
+                <div class="nav-user-popover" id="navUserPopover">
+                    <div class="user-popover-header unauth">
+                        <strong>Tu Cuenta Al Paso</strong>
+                        <small>Acceso al sistema y pedidos</small>
+                    </div>
+                    <a href="{% url 'login' %}" class="btn-nav-login user-popover-action-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        <span>Iniciar Sesión</span>
+                    </a>
+                    <a href="{% url 'registro' %}" class="user-popover-register-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                        <span>Registrarse / Crear Cuenta</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 3. Corazón (Frutas Favoritas con Badge circular negro) -->
+            <button type="button" class="nav-icon-action-btn" id="favToggleBtn" aria-label="Ver frutas favoritas" title="Mis Frutas Favoritas">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span class="nav-action-badge" id="favBadge">0</span>
+            </button>
+
+            <!-- 4. Carrito (Pedido de la persona con Badge circular negro) -->
             {% block nav_cart %}
-            <button class="btn-nav-cart" id="cartToggleBtn" aria-label="Ver canasta de compra">
-                Mi Canasta <span class="cart-count-badge" id="cartBadge">0</span>
+            <button type="button" class="nav-icon-action-btn btn-nav-cart" id="cartToggleBtn" aria-label="Ver canasta de compra" title="Mi Canasta de Pedido">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1.2"></circle>
+                    <circle cx="20" cy="21" r="1.2"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="nav-action-badge cart-count-badge" id="cartBadge">0</span>
             </button>
             {% endblock %}
-
-            {% if user.is_authenticated %}
-                <a class="btn-admin" href="{% url 'dashboard' %}">Panel Admin</a>
-                <form action="{% url 'logout' %}" method="post" class="nav-logout-form">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-logout">Salir</button>
-                </form>
-            {% else %}
-                <a class="btn-login" href="{% url 'login' %}">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    <span>Ingresar</span>
-                </a>
-            {% endif %}
 
             <!-- Botón Hamburguesa móvil -->
             <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú" aria-expanded="false">
@@ -97,17 +276,113 @@
     </a>
 
     <!-- ====================================================================== -->
-    <!-- 5. PIE DE PÁGINA (Footer)                                              -->
+    <!-- 5. BARRA INFERIOR FIJA DE CANASTA EN MÓVIL (Mobile Floating Cart Bar)  -->
+    <!-- Se activa automáticamente cuando el cliente agrega productos          -->
     <!-- ====================================================================== -->
-    <footer class="footer">
-        <a class="footer-brand" href="{% url 'index' %}" aria-label="Al Paso Frutería, inicio">
-            <img class="footer-logo navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería">
-        </a>
-        <p class="footer-copy">© 2026 Al Paso Frutería. Calidad, frescura y sabor directo de los mejores campos.</p>
+    <div class="mobile-floating-cart-bar" id="mobileCartBar" onclick="document.getElementById('cartToggleBtn').click()">
+        <div class="cart-bar-info">
+            <span class="cart-bar-count"><span id="mobileCartCount">0</span> productos</span>
+            <span class="cart-bar-total" id="mobileCartTotal">$0</span>
+        </div>
+        <span class="cart-bar-action">
+            <span>Ver mi Canasta</span>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </span>
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- 6. PIE DE PÁGINA PROFESIONAL (Footer con Acceso Empleados)             -->
+    <!-- ====================================================================== -->
+    <footer class="footer-main">
+        <div class="footer-container">
+            <!-- Columna 1: Marca y Filosofía -->
+            <div class="footer-col">
+                <a class="footer-brand" href="{% url 'index' %}" aria-label="Al Paso Frutería, inicio">
+                    <img class="footer-logo navbar-logo" src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería">
+                </a>
+                <p class="footer-brand-desc">
+                    Frutas y productos de cosecha campesina directa. Del campo boyacense a tu mesa, garantizando frescura, dulzor natural y precios justos sin intermediarios.
+                </p>
+                <div class="footer-badge-campesino">
+                    <span>🌱</span> 100% Cosecha Directa de Finca
+                </div>
+            </div>
+
+            <!-- Columna 2: Navegación Rápida -->
+            <div class="footer-col">
+                <h4>Navegación</h4>
+                <ul class="footer-links-list">
+                    <li><a href="{% url 'index' %}">Inicio</a></li>
+                    <li><a href="{% url 'catalogo_frutas' %}">Catálogo Completo</a></li>
+                    <li><a href="{% url 'catalogo_frutas' %}?filtro=ofertas">Ofertas de Temporada</a></li>
+                    <li><a href="{% url 'index' %}#como-pedir">¿Cómo Pedir?</a></li>
+                    <li><a href="{% url 'index' %}#nosotros">Nuestra Historia</a></li>
+                    <li><a href="{% url 'index' %}#contacto">Horarios y Contacto</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Información de Contacto -->
+            <div class="footer-col">
+                <h4>Atención y Pedidos</h4>
+                <div class="footer-contact-info">
+                    <p><strong>Ubicación:</strong><br>Sogamoso, Boyacá — Sector Mercado Campesino</p>
+                    <p><strong>Horario de Atención:</strong><br>Lunes a Sábado: 6:30 AM – 6:00 PM<br>Domingos: 7:00 AM – 1:00 PM</p>
+                    <p><strong>Teléfono / WhatsApp:</strong><br><a href="tel:+573001234567">300 123 4567</a></p>
+                </div>
+            </div>
+
+            <!-- Columna 4: Portal Interno para Empleados (Propuesta Claude) -->
+            <div class="footer-col">
+                <h4>Portal Interno</h4>
+                <div class="footer-employee-card">
+                    <p>Acceso restringido para personal de bodega, caja y administración.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn-footer-employee">
+                            <span>📊</span> Panel de Control
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-footer-employee">
+                            <span>🔐</span> Acceso Empleados
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de Copyright Inferior -->
+        <div class="footer-bottom-bar">
+            <span>© 2026 Al Paso Frutería. Calidad, frescura y sabor directo de los mejores campos.</span>
+            <span>Comercio Justo y Tradición Campesina</span>
+        </div>
     </footer>
 
     <!-- ====================================================================== -->
-    <!-- 6. DRAWER LATERAL DE CANASTA Y CONTENEDOR DE TOASTS                    -->
+    <!-- 6.5. DRAWER LATERAL DE FRUTAS FAVORITAS                                -->
+    <!-- ====================================================================== -->
+    <div class="fav-drawer-overlay" id="favOverlay"></div>
+    <aside class="fav-drawer" id="favDrawer" aria-label="Frutas favoritas">
+        <div class="fav-drawer-header">
+            <div class="fav-drawer-title-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#e11d48" stroke="#e11d48" stroke-width="1.8">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <h3>Mis Frutas Favoritas</h3>
+            </div>
+            <button type="button" class="close-fav-btn" id="closeFavBtn" aria-label="Cerrar favoritos">&times;</button>
+        </div>
+        <div class="fav-drawer-body">
+            <div id="favEmptyState" class="fav-empty-state">
+                <div class="fav-empty-icon">🤍</div>
+                <p class="fav-empty-title">Aún no tienes favoritas guardadas</p>
+                <small class="fav-empty-subtitle">Toca el corazón en cualquier fruta para guardarla aquí y pedirla rápido.</small>
+                <a href="{% url 'catalogo_frutas' %}" class="btn-fav-go-catalog">Ver Catálogo de Frutas</a>
+            </div>
+            <div id="favItemsList" class="fav-items-list"></div>
+        </div>
+    </aside>
+
+    <!-- ====================================================================== -->
+    <!-- 7. DRAWER LATERAL DE CANASTA Y CONTENEDOR DE TOASTS                    -->
     <!-- ====================================================================== -->
     <div class="cart-overlay" id="cartOverlay"></div>
     <aside class="cart-drawer" id="cartDrawer" aria-label="Canasta de compra">
@@ -148,7 +423,7 @@
     <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
     <!-- ====================================================================== -->
-    <!-- 7. SCRIPTS GLOBALES Y ESPECÍFICOS                                     -->
+    <!-- 8. SCRIPTS GLOBALES Y ESPECÍFICOS                                     -->
     <!-- ====================================================================== -->
     <script>
         // Control interactivo del menú hamburguesa en dispositivos móviles
@@ -162,7 +437,7 @@
                 hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
             });
 
-            mainNavLinks.querySelectorAll('.nav-link').forEach((link) => {
+            mainNavLinks.querySelectorAll('.nav-link:not(.nav-link-dropdown)').forEach((link) => {
                 link.addEventListener('click', () => {
                     hamburgerBtn.classList.remove('open');
                     mainNavLinks.classList.remove('active-menu');
@@ -171,7 +446,8 @@
             });
         }
     </script>
-    <script src="{% static 'js/cart.js' %}?v=1.0"></script>
+    <script src="{% static 'js/cart.js' %}?v=1.2"></script>
+    <script src="{% static 'js/favoritos.js' %}?v=1.0"></script>
     {% block extra_js %}{% endblock %}
 
 </body>

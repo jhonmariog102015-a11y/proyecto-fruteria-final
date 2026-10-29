@@ -740,6 +740,50 @@ class UsuariosRolesDashboardTestCase(TestCase):
         self.assertContains(response, 'Solo Administrador')
         self.assertNotContains(response, 'onclick="abrirModalNuevoUsuario()"')
 
+    def test_boton_iniciar_sesion_visible_para_anonimos(self):
+        """Verifica que el boton Iniciar Sesion sea visible y destacado para usuarios anonimos."""
+        self.client.logout()
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'btn-nav-login')
+        self.assertContains(response, 'Iniciar Sesión')
+        self.assertNotContains(response, 'btn-nav-admin')
+
+    def test_boton_panel_admin_visible_para_autenticados(self):
+        """Verifica que para usuarios autenticados se muestre el boton directo Panel Admin."""
+        self.client.login(username='super_boss', password='password123')
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'btn-nav-admin')
+        self.assertContains(response, 'Panel Admin')
+        self.assertNotContains(response, 'btn-nav-login')
+
+    def test_django_admin_solo_accesible_para_superadmin(self):
+        """Verifica que /admin/ rechace staff no-superadmin y permita acceso a superadmin."""
+        # 1. Staff normal sin superusuario
+        self.client.login(username='carlos_bodega', password='password123')
+        # Asegurar is_staff=True pero is_superuser=False
+        self.bodeguero.is_staff = True
+        self.bodeguero.is_superuser = False
+        self.bodeguero.save()
+        res_staff = self.client.get('/admin/')
+        # Debe redirigir al login del admin porque no tiene permiso
+        self.assertEqual(res_staff.status_code, 302)
+
+        # 2. Superusuario
+        self.client.login(username='super_boss', password='password123')
+        res_super = self.client.get('/admin/')
+        self.assertEqual(res_super.status_code, 200)
+
+    def test_dashboard_oculta_django_admin_para_no_superadmin(self):
+        """Verifica que el dashboard oculte enlaces a Django Admin si el usuario no es superadmin."""
+        self.client.login(username='ana_caja', password='password123')
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Django Admin ↗')
+        self.assertNotContains(response, 'href="/admin/principal/producto/"')
+        self.assertNotContains(response, 'href="/admin/principal/proveedor/"')
+
 
 class VentasTestCase(TestCase):
     def setUp(self):
@@ -814,6 +858,45 @@ class VentasTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Gestión de Ventas')
         self.assertContains(response, 'seccion-ventas')
+        self.assertContains(response, 'modalNuevaVenta')
+        self.assertContains(response, 'modalEditarVenta')
+        self.assertContains(response, 'modalEliminarVenta')
+        self.assertContains(response, 'abrirModalNuevaVenta')
+
+    def test_crear_venta_dashboard(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('dashboard_crear_venta'), {
+            'origen_venta': 'Tienda Virtual',
+            'subtotal': '35000',
+            'descuento': '5000',
+            'total_neto': '30000',
+            'medio_pago': 'Transferencia Bancaria',
+            'estado_venta': 'Completada'
+        })
+        self.assertRedirects(response, '/dashboard/#ventas')
+        self.assertTrue(Venta.objects.filter(origen_venta='Tienda Virtual', total_neto=Decimal('30000.00')).exists())
+
+    def test_editar_venta_dashboard(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('dashboard_editar_venta', args=[self.venta.pk]), {
+            'origen_venta': 'Venta Mayorista',
+            'subtotal': '50000',
+            'descuento': '10000',
+            'total_neto': '40000',
+            'medio_pago': 'Nequi',
+            'estado_venta': 'Completada'
+        })
+        self.assertRedirects(response, '/dashboard/#ventas')
+        self.venta.refresh_from_db()
+        self.assertEqual(self.venta.origen_venta, 'Venta Mayorista')
+        self.assertEqual(self.venta.total_neto, Decimal('40000.00'))
+
+    def test_eliminar_venta_dashboard(self):
+        self.client.login(username='cajero_test', password='password123')
+        response = self.client.post(reverse('dashboard_eliminar_venta', args=[self.venta.pk]))
+        self.assertRedirects(response, '/dashboard/#ventas')
+        self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
+
 
 
 

@@ -54,7 +54,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.2rem 3.5rem;
+    padding: 0.95rem clamp(1.2rem, 2.5vw, 3rem);
     background: #fff;
     border-bottom: 1px solid #E5E7EB;
     position: sticky;
@@ -69,6 +69,7 @@ body {
     flex: 0 1 auto;
     min-width: 0;
     text-decoration: none;
+    z-index: 2;
 }
 
 .navbar-logo {
@@ -111,18 +112,33 @@ body {
 
 .nav-links {
     display: flex;
-    gap: 2.5rem;
     align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 1.8vw, 2.2rem);
+}
+
+@media (min-width: 1025px) {
+    .nav-links {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+    }
 }
 
 .nav-link {
     text-decoration: none;
     color: var(--muted);
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.2s;
+    font-size: 0.92rem;
+    font-weight: 600;
+    transition: color 0.2s ease, background 0.2s ease;
     position: relative;
-    padding-bottom: 4px;
+    padding: 0.35rem 0.55rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .nav-link.active,
@@ -133,12 +149,17 @@ body {
 .nav-link.active::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
+    bottom: -2px;
+    left: 8px;
+    right: 8px;
+    height: 2.5px;
     background: var(--orange);
-    border-radius: 1px;
+    border-radius: 2px;
+}
+
+.nav-link-cat.active::after,
+.nav-link-dropdown.active::after {
+    display: none;
 }
 
 .nav-actions {
@@ -146,6 +167,7 @@ body {
     align-items: center;
     gap: 1rem;
     list-style: none;
+    z-index: 2;
 }
 
 .nav-actions form {
@@ -406,21 +428,25 @@ body {
 }
 
 .hero-eyebrow {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.8rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 3px;
     color: var(--green-accent);
     margin-bottom: 1.2rem;
+    padding: 0 14px;
     border-left: 3px solid var(--green-accent);
-    padding-left: 12px;
+    border-right: 3px solid var(--green-accent);
 }
 
 .masthead-logo-container {
     width: min(100%, 620px);
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-bottom: 1rem;
 }
 
@@ -431,10 +457,11 @@ body {
     max-width: 430px;
     filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.22));
     transition: transform 0.3s ease;
+    transform: translateX(-3.5px);
 }
 
 .masthead-logo:hover {
-    transform: scale(1.02);
+    transform: translateX(-3.5px) scale(1.02);
 }
 
 .hero-title {
@@ -791,10 +818,17 @@ body {
     transform: scale(1.08);
 }
 
-.badge-tag-fresh {
+.card-img-badges-row {
     position: absolute;
     top: 10px;
     left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 3;
+}
+
+.badge-tag-fresh {
     background: rgba(26, 58, 38, 0.88);
     backdrop-filter: blur(4px);
     color: #fff;
@@ -1257,6 +1291,7 @@ body {
     }
 
     .navbar {
+        display: flex;
         position: sticky;
         top: 0;
         gap: 0.5rem;
@@ -1703,9 +1738,6 @@ body {
    ESTILOS PARA OFERTAS Y PROMOCIONES (CONTROL DE MARGEN Y DESCUENTOS)
    ========================================================================== */
 .badge-tag-oferta {
-    position: absolute;
-    top: 10px;
-    right: 10px;
     background: #d32f2f;
     color: #fff;
     font-size: 0.72rem;
@@ -1713,7 +1745,6 @@ body {
     padding: 3px 8px;
     border-radius: 20px;
     box-shadow: 0 2px 6px rgba(211, 47, 47, 0.4);
-    z-index: 2;
     display: inline-flex;
     align-items: center;
     gap: 3px;
@@ -1724,3 +1755,229 @@ body {
     color: #9ca3af;
     font-size: 0.85rem;
 }
+
+/* ==========================================================================
+   ESTILOS ADICIONALES PARA DISEÑO DE PRUEBA: BUSCADOR HERO, CÓMO PEDIR, CONTACTO
+   ========================================================================== */
+.hero-search-bar {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 6px 8px 6px 20px;
+    width: min(100%, 560px);
+    margin: 1.5rem auto 2.2rem;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-search-bar:focus-within {
+    border-color: var(--green-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.hero-search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text);
+    background: transparent;
+    padding: 0.4rem 0.5rem;
+}
+
+.hero-search-bar input::placeholder {
+    color: #8c9b90;
+    font-size: 0.88rem;
+}
+
+.hero-search-bar button {
+    background: var(--green-deep);
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.7rem 1.6rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.hero-search-bar button:hover {
+    background: var(--green-mid);
+    transform: scale(1.02);
+}
+
+@media (max-width: 580px) {
+    .hero-search-bar {
+        flex-direction: column;
+        border-radius: 16px;
+        padding: 10px;
+        gap: 8px;
+    }
+    .hero-search-bar button {
+        width: 100%;
+        border-radius: 10px;
+        padding: 0.65rem 1rem;
+    }
+}
+
+.carousel-subtext {
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+}
+
+/* ─── CÓMO PEDIR EN 3 PASOS ─── */
+.how-to-order {
+    padding: 6rem 4rem;
+    background: #ffffff;
+    border-top: 1px solid #eef2ef;
+    border-bottom: 1px solid #eef2ef;
+}
+
+.how-to-order .text-center {
+    text-align: center;
+}
+
+.how-steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.2rem;
+    margin-top: 3.5rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step-card {
+    background: #fafaf7;
+    border: 1px solid #e8ede9;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.step-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(26, 58, 38, 0.08);
+    border-color: var(--green-accent);
+    background: #ffffff;
+}
+
+.step-num-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: var(--green-mid);
+    background: #eef6f0;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+}
+
+.step-icon-circle {
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    background: var(--green-deep);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    margin-bottom: 1.6rem;
+    box-shadow: 0 8px 18px rgba(26, 58, 38, 0.22);
+}
+
+.step-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--green-deep);
+    margin-bottom: 0.8rem;
+}
+
+.step-card p {
+    font-size: 0.94rem;
+    line-height: 1.65;
+    color: var(--muted);
+    flex-grow: 1;
+}
+
+.how-to-order-cta {
+    margin-top: 3.5rem;
+    text-align: center;
+}
+
+.schedule-cta-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.schedule-whatsapp-btn {
+    display: inline-block;
+    background: #25D366;
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 1rem 2.2rem;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+}
+
+.schedule-whatsapp-btn:hover {
+    background: #20BA5A;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.45);
+}
+
+@media (max-width: 900px) {
+    .how-to-order {
+        padding: 4rem 1.8rem;
+    }
+    .how-steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .categories {
+        padding: 4rem 1.5rem;
+    }
+    .cat-grid {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+    }
+    .cat-card {
+        height: 220px;
+    }
+}
+
+@media (max-width: 580px) {
+    .cat-grid {
+        grid-template-columns: 1fr;
+    }
+    .schedule-grid {
+        flex-direction: column;
+        gap: 1.8rem;
+    }
+    .divider {
+        display: none;
+    }
+}
+

@@ -60,13 +60,22 @@
         <article class="fruit-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
             <div>
                 <div class="card-top">
-                    <div class="fruit-visual">
-                        <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
+                    <div class="card-top-left">
+                        <div class="fruit-visual">
+                            <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
+                        </div>
+                        <div class="card-badges-col">
+                            <span class="badge-fresco"><span class="dot"></span>fresco</span>
+                            {% if producto.en_oferta and producto.precio_oferta %}
+                            <span class="badge-fresco badge-oferta">-{{ producto.porcentaje_descuento }}%</span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <span class="badge-fresco"><span class="dot"></span>fresco</span>
-                    {% if producto.en_oferta and producto.precio_oferta %}
-                    <span class="badge-fresco badge-oferta">-{{ producto.porcentaje_descuento }}%</span>
-                    {% endif %}
+                    <button type="button" class="btn-card-fav" aria-label="Agregar a favoritos" title="Agregar a favoritos" data-id="{{ producto.id_producto }}" data-nombre="{{ producto.nombre }}" data-precio="{% if producto.en_oferta and producto.precio_oferta %}{{ producto.precio_oferta }}{% else %}{{ producto.precio_venta_unitario }}{% endif %}" data-imagen="{{ producto.imagen_url|default:'' }}" data-unidad="{{ producto.unidad_medida }}" data-origen="{{ producto.origen }}">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </button>
                 </div>
                 <span class="fruit-category">{{ producto.categoria.nombre }}</span>
                 <h3>{{ producto.nombre }}</h3>
