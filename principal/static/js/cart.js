@@ -23,9 +23,15 @@
         if (stored) {
             cart = JSON.parse(stored);
         }
-        const storedOrder = localStorage.getItem(ACTIVE_ORDER_KEY);
-        if (storedOrder) {
-            activeVentaId = parseInt(storedOrder, 10) || null;
+        if (!Array.isArray(cart) || cart.length === 0) {
+            cart = [];
+            activeVentaId = null;
+            try { localStorage.removeItem(ACTIVE_ORDER_KEY); } catch (e) {}
+        } else {
+            const storedOrder = localStorage.getItem(ACTIVE_ORDER_KEY);
+            if (storedOrder) {
+                activeVentaId = parseInt(storedOrder, 10) || null;
+            }
         }
     } catch (e) {
         cart = [];
@@ -180,6 +186,8 @@
 
         list.innerHTML = '';
 
+        const btnClear = document.getElementById('btnClearCart');
+
         if (cart.length === 0) {
             if (emptyMsg) emptyMsg.style.display = 'block';
             if (totalAmount) totalAmount.textContent = '$0';
@@ -187,6 +195,7 @@
                 btnWhatsapp.classList.add('disabled');
                 btnWhatsapp.disabled = true;
             }
+            if (btnClear) btnClear.style.display = 'none';
             return;
         }
 
@@ -201,6 +210,7 @@
             btnWhatsapp.classList.remove('disabled');
             btnWhatsapp.disabled = false;
         }
+        if (btnClear) btnClear.style.display = 'block';
 
         cart.forEach(item => {
             const subtotal = item.precio * (item.cantidad || 1);
@@ -284,7 +294,7 @@
         }, 250);
     }
 
-    async function sincronizarPedidoConServidor() {
+    async function sincronizarPedidoConServidor(finalizar = false, nuevoPedido = false) {
         const total = Math.round(getCartTotal());
         if (cart.length === 0 && !activeVentaId) {
             return null;
@@ -298,15 +308,17 @@
                     'X-CSRFToken': getCsrfToken(),
                 },
                 body: JSON.stringify({
-                    id_venta: activeVentaId,
+                    id_venta: nuevoPedido ? null : activeVentaId,
                     total: total,
                     items: cart,
+                    finalizar: Boolean(finalizar),
+                    nuevo_pedido: Boolean(nuevoPedido),
                 }),
             });
             if (!resp.ok) return null;
             const data = await resp.json();
             if (data && data.ok) {
-                if (data.eliminada || cart.length === 0) {
+                if (data.eliminada || cart.length === 0 || data.finalizado || finalizar) {
                     activeVentaId = null;
                     localStorage.removeItem(ACTIVE_ORDER_KEY);
                 } else if (data.id_venta) {
@@ -428,29 +440,107 @@
         btn.addEventListener('click', async () => {
             if (cart.length === 0) return;
 
-            // Asegurar sincronización inmediata antes de abrir WhatsApp
-            await sincronizarPedidoConServidor();
+            btn.disabled = true;
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span>Procesando pedido...</span>';
 
-            const total = getCartTotal();
-            let lineas = [];
-            const refPedido = activeVentaId ? ` (Pedido #VTA-${activeVentaId})` : '';
-            lineas.push(`¡Hola, Al Paso Frutería! Deseo confirmar mi pedido campesino${refPedido}:`);
-            lineas.push('');
+            try {
+                // Sincronizar y finalizar pedido en el servidor para cerrar este registro contable
+                const syncData = await sincronizarPedidoConServidor(true);
+                const idVentaFinal = (syncData && syncData.id_venta) || activeVentaId;
+                const refPedido = idVentaFinal ? ` (Pedido #VTA-${idVentaFinal})` : '';
 
-            cart.forEach((item, index) => {
-                const sub = Math.round(item.precio * (item.cantidad || 1)).toLocaleString('es-CO');
-                lineas.push(`${index + 1}. ${item.nombre} x ${item.cantidad} ${item.unidad || 'kg'} — $${sub}`);
-            });
+                const total = getCartTotal();
+                let lineas = [];
+                lineas.push(`¡Hola, Al Paso Frutería! Deseo confirmar mi pedido campesino${refPedido}:`);
+                lineas.push('');
 
-            lineas.push('');
-            lineas.push(`Total Estimado: $${Math.round(total).toLocaleString('es-CO')} COP`);
-            lineas.push('¿Tienen disponibilidad para envío hoy? ¡Gracias!');
+                cart.forEach((item, index) => {
+                    const sub = Math.round(item.precio * (item.cantidad || 1)).toLocaleString('es-CO');
+                    lineas.push(`${index + 1}. ${item.nombre} x ${item.cantidad} ${item.unidad || 'kg'} — $${sub}`);
+                });
 
-            const textoCodificado = encodeURIComponent(lineas.join('\n'));
-            const urlWa = `https://wa.me/${WHATSAPP_PHONE}?text=${textoCodificado}`;
-            window.open(urlWa, '_blank');
+                lineas.push('');
+                lineas.push(`Total Estimado: $${Math.round(total).toLocaleString('es-CO')} COP`);
+                lineas.push('¿Tienen disponibilidad para envío hoy? ¡Gracias!');
+
+                const textoCodificado = encodeURIComponent(lineas.join('\n'));
+                const urlWa = `https://wa.me/${WHATSAPP_PHONE}?text=${textoCodificado}`;
+                window.open(urlWa, '_blank');
+
+                // VACIAR LA CANASTA Y DESVINCULAR EL PEDIDO:
+                // Esto garantiza que el pedido recién hecho quede guardado en la BD
+                // y que el próximo pedido que haga el cliente genere un NUEVO registro
+                // sin sobreescribir ni modificar el anterior.
+                cart = [];
+                activeVentaId = null;
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.removeItem(ACTIVE_ORDER_KEY);
+                } catch (e) {}
+
+                updateCartUI();
+                actualizarIndicadorPedidoActivo();
+
+                if (typeof window.closeCartDrawer === 'function') {
+                    window.closeCartDrawer();
+                }
+
+                if (typeof window.showToast === 'function') {
+                    const msg = idVentaFinal
+                        ? `¡Pedido #VTA-${idVentaFinal} enviado a WhatsApp! Tu canasta está lista para una nueva orden.`
+                        : '¡Pedido enviado a WhatsApp! Tu canasta está lista para una nueva orden.';
+                    window.showToast(msg);
+                }
+            } catch (err) {
+                console.error('Error al procesar pedido por WhatsApp:', err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
         });
     }
+
+    // Función global para vaciar la canasta e iniciar un nuevo pedido independiente
+    window.vaciarCarrito = async function () {
+        if (cart.length === 0) return;
+        const confirmacion = window.confirm('¿Deseas vaciar tu canasta e iniciar un nuevo pedido?');
+        if (!confirmacion) return;
+
+        const ventaAnterior = activeVentaId;
+        cart = [];
+        activeVentaId = null;
+
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(ACTIVE_ORDER_KEY);
+        } catch (e) {}
+
+        // Si había una venta activa en borrador en el servidor, notificar eliminación
+        if (ventaAnterior) {
+            try {
+                await fetch('/api/pedido-whatsapp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        id_venta: ventaAnterior,
+                        total: 0,
+                        items: [],
+                        nuevo_pedido: true
+                    }),
+                });
+            } catch (e) {}
+        }
+
+        updateCartUI();
+        actualizarIndicadorPedidoActivo();
+        if (typeof window.showToast === 'function') {
+            window.showToast('Canasta vaciada. Lista para un nuevo pedido.');
+        }
+    };
 
     // Inicialización al cargar el DOM
     document.addEventListener('DOMContentLoaded', () => {

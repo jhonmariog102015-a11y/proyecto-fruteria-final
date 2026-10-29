@@ -995,10 +995,13 @@ def registrar_pedido_whatsapp(request):
     ENDPOINT API: REGISTRO Y ACTUALIZACIÓN EN TIEMPO REAL DE PEDIDOS DEL CARRITO
     ----------------------------------------------------------------------------
     NOTA TÉCNICA PARA EL EQUIPO (GAES):
-    Permite tanto crear un pedido nuevo desde el carrito como actualizar en tiempo
-    real un pedido existente ('id_venta') cuando el cliente o usuario modifica
-    las cantidades o productos de su canasta, reflejándose de inmediato para todos
-    los usuarios y administradores.
+    1. Permite tanto sincronizar en tiempo real el pedido en borrador mientras el cliente
+       arma su canasta.
+    2. Cuando el cliente envía el pedido por WhatsApp ('finalizar=True') o inicia un 'nuevo_pedido',
+       se confirma y desvincula la sesión ('active_venta_id'), permitiendo que el siguiente
+       pedido cree una NUEVA Venta en la base de datos sin sobreescribir la anterior.
+    3. Si la venta asociada ya no está en estado 'Pendiente' (por ejemplo, ya fue cobrada
+       o completada en caja), se crea automáticamente una nueva venta independiente.
     """
     if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
@@ -1010,7 +1013,15 @@ def registrar_pedido_whatsapp(request):
 
     items = payload.get('items') or []
     total_raw = payload.get('total', 0)
-    id_venta_raw = payload.get('id_venta') or request.session.get('active_venta_id')
+    finalizar = bool(payload.get('finalizar', False))
+    forzar_nuevo = bool(payload.get('nuevo_pedido', False))
+    if forzar_nuevo:
+        id_venta_raw = None
+        request.session.pop('active_venta_id', None)
+    elif 'id_venta' in payload:
+        id_venta_raw = payload.get('id_venta')
+    else:
+        id_venta_raw = request.session.get('active_venta_id')
 
     try:
         monto = Decimal(str(total_raw))
@@ -1034,6 +1045,10 @@ def registrar_pedido_whatsapp(request):
     venta_existente = None
     if id_venta_raw and str(id_venta_raw).isdigit():
         venta_existente = Venta.objects.filter(pk=int(id_venta_raw)).first()
+        # Si la venta ya fue completada o anulada, NO sobreescribir: forzar nueva venta
+        if venta_existente and venta_existente.estado_venta != 'Pendiente':
+            venta_existente = None
+            request.session.pop('active_venta_id', None)
 
     # Si el usuario vació su carrito y tenía un pedido pendiente, se elimina/cancela en tiempo real
     if monto <= Decimal('0.00'):
@@ -1042,24 +1057,40 @@ def registrar_pedido_whatsapp(request):
             venta_existente.delete()
             request.session.pop('active_venta_id', None)
             return JsonResponse({'ok': True, 'deleted': True, 'eliminada': True, 'id_venta': None, 'eliminado': vid}, status=200)
+        request.session.pop('active_venta_id', None)
         return JsonResponse({'ok': False, 'error': 'Monto de pedido inválido.'}, status=400)
+
+    # Determinar cliente asociado si está autenticado
+    id_cliente = None
+    if request.user.is_authenticated:
+        cli = Cliente.objects.filter(pk=request.user.id).first()
+        id_cliente = cli.id_cliente if cli else request.user.id
 
     if venta_existente:
         venta_existente.subtotal = monto
         venta_existente.total_neto = max(Decimal('0.00'), monto - (venta_existente.descuento or Decimal('0.00')))
         venta_existente.fecha_venta = timezone.now()
+        if id_cliente and not venta_existente.id_cliente:
+            venta_existente.id_cliente = id_cliente
         venta_existente.save()
-        request.session['active_venta_id'] = venta_existente.id_venta
+
+        # Si el cliente finalizó su pedido (enviado a WhatsApp), liberar sesión para que el próximo sea nuevo
+        if finalizar:
+            request.session.pop('active_venta_id', None)
+        else:
+            request.session['active_venta_id'] = venta_existente.id_venta
+
         return JsonResponse({
             'ok': True,
             'updated': True,
+            'finalizado': finalizar,
             'id_venta': venta_existente.id_venta,
             'codigo': f'#VTA-{venta_existente.id_venta}',
             'total_neto': float(venta_existente.total_neto),
         }, status=200)
 
     # Determinar usuario responsable para nuevo registro contable
-    if request.user.is_authenticated:
+    if request.user.is_authenticated and es_personal_operativo(request.user):
         cajero = request.user
     else:
         cajero = (
@@ -1071,6 +1102,7 @@ def registrar_pedido_whatsapp(request):
         return JsonResponse({'ok': False, 'error': 'No hay cajero disponible.'}, status=503)
 
     nueva_venta = Venta.objects.create(
+        id_cliente=id_cliente,
         id_usuario_cajero=cajero,
         origen_venta='WhatsApp',
         medio_pago='Transferencia',
@@ -1079,10 +1111,17 @@ def registrar_pedido_whatsapp(request):
         total_neto=monto,
         estado_venta='Pendiente',
     )
-    request.session['active_venta_id'] = nueva_venta.id_venta
+
+    # Si se finaliza de inmediato, no dejamos la sesión atada a este pedido
+    if finalizar:
+        request.session.pop('active_venta_id', None)
+    else:
+        request.session['active_venta_id'] = nueva_venta.id_venta
+
     return JsonResponse({
         'ok': True,
         'updated': False,
+        'finalizado': finalizar,
         'id_venta': nueva_venta.id_venta,
         'codigo': f'#VTA-{nueva_venta.id_venta}',
         'total_neto': float(nueva_venta.total_neto),

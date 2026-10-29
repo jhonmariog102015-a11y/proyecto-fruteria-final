@@ -969,6 +969,53 @@ class VentasTestCase(TestCase):
         self.assertEqual(venta_creada.estado_venta, 'Pendiente')
         self.assertEqual(venta_creada.total_neto, Decimal('24500.00'))
 
+    def test_cliente_puede_hacer_multiples_pedidos_independientes(self):
+        """Verifica que un cliente pueda hacer varios pedidos sin que se sobreescriba el anterior."""
+        import json
+        # Pedido 1: Cliente arma pedido de $15.000 y lo envía por WhatsApp (finalizar=True)
+        resp1 = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'id_venta': None,
+                'total': 15000,
+                'items': [{'id': '1', 'nombre': 'Manzana', 'precio': 5000, 'cantidad': 3}],
+                'finalizar': True,
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp1.status_code, 201)
+        data1 = resp1.json()
+        self.assertTrue(data1['ok'])
+        self.assertTrue(data1['finalizado'])
+        id_pedido_1 = data1['id_venta']
+
+        # Pedido 2: El mismo cliente inicia una nueva compra de $22.000 (id_venta=None)
+        resp2 = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'id_venta': None,
+                'total': 22000,
+                'items': [{'id': '2', 'nombre': 'Pera', 'precio': 11000, 'cantidad': 2}],
+                'finalizar': True,
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp2.status_code, 201)
+        data2 = resp2.json()
+        self.assertTrue(data2['ok'])
+        id_pedido_2 = data2['id_venta']
+
+        # Validar que son dos ventas DISTINTAS en la base de datos
+        self.assertNotEqual(id_pedido_1, id_pedido_2)
+
+        venta1 = Venta.objects.get(pk=id_pedido_1)
+        venta2 = Venta.objects.get(pk=id_pedido_2)
+
+        # La venta 1 NO fue sobreescrita y mantiene su valor original
+        self.assertEqual(venta1.total_neto, Decimal('15000.00'))
+        # La venta 2 tiene su propio valor independiente
+        self.assertEqual(venta2.total_neto, Decimal('22000.00'))
+
     def test_exportar_ventas_csv_y_recibo_venta(self):
         """Verifica la exportación de ventas a CSV y el comprobante imprimible."""
         self.client.login(username='cajero_test', password='password123')
