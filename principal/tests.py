@@ -60,7 +60,7 @@ from django.urls import reverse
 class DashboardCrudTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username='admin_test', password='password123')
+        self.user = User.objects.create_user(username='admin_test', password='password123', is_staff=True)
         self.client.login(username='admin_test', password='password123')
         self.categoria = Categoria.objects.create(nombre="Cítricos", descripcion="Frutas ácidas")
 
@@ -176,7 +176,7 @@ class ProveedorFormTestCase(TestCase):
 class ProveedorDashboardCrudTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username='admin_prov', password='password123')
+        self.user = User.objects.create_user(username='admin_prov', password='password123', is_staff=True)
         self.client.login(username='admin_prov', password='password123')
 
     def test_crear_proveedor_dashboard(self):
@@ -232,7 +232,7 @@ class ProveedorDashboardCrudTestCase(TestCase):
 class ExportarInventarioCsvTestCase(TestCase):
     def setUp(self):
         User = get_user_model()
-        self.user = User.objects.create_user(username='admin_csv', password='password123')
+        self.user = User.objects.create_user(username='admin_csv', password='password123', is_staff=True)
         self.client.login(username='admin_csv', password='password123')
         self.cat = Categoria.objects.create(nombre="Frutas Exóticas")
         self.prod = Producto.objects.create(
@@ -411,7 +411,7 @@ class FormulariosCrudTests(TestCase):
 class CrudProductoFbvTests(TestCase):
     def setUp(self):
         usuario = get_user_model().objects.create_user(
-            username="gestor", password="Clave-segura-123"
+            username="gestor", password="Clave-segura-123", is_staff=True
         )
         self.client.force_login(usuario)
         self.categoria = Categoria.objects.create(nombre="Frutas")
@@ -489,7 +489,7 @@ class CrudProductoFbvTests(TestCase):
 class CrudCategoriaCbvTests(TestCase):
     def setUp(self):
         usuario = get_user_model().objects.create_user(
-            username="gestor_cat", password="Clave-segura-123"
+            username="gestor_cat", password="Clave-segura-123", is_staff=True
         )
         self.client.force_login(usuario)
         self.categoria = Categoria.objects.create(nombre="Tropicales")
@@ -559,6 +559,15 @@ class SeguridadCrudTests(TestCase):
         respuesta = self.client.post(reverse("logout"))
         self.assertRedirects(respuesta, reverse("index"))
         self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_cliente_publico_bloqueado_en_dashboard_y_crud(self):
+        cliente = get_user_model().objects.create_user(
+            username="comprador_publico", password="Clave-segura-123", is_staff=False
+        )
+        self.client.force_login(cliente)
+        for ruta in [reverse("dashboard"), reverse("principal:producto_listar"), reverse("dashboard_exportar_ventas_csv")]:
+            res = self.client.get(ruta)
+            self.assertRedirects(res, reverse("index"))
 
 
 class UsuariosRolesDashboardTestCase(TestCase):
@@ -791,7 +800,8 @@ class VentasTestCase(TestCase):
         self.user = User.objects.create_user(
             username='cajero_test',
             email='cajero@fruteria.com',
-            password='password123'
+            password='password123',
+            is_staff=True
         )
         self.venta = Venta.objects.create(
             id_usuario_cajero=self.user,
@@ -807,50 +817,73 @@ class VentasTestCase(TestCase):
         self.assertIn(str(self.venta.id_venta), str(self.venta))
         self.assertIn('14000.00', str(self.venta))
 
-    def test_lista_ventas_requiere_login(self):
-        response = self.client.get(reverse('lista_ventas'))
-        self.assertEqual(response.status_code, 302)
-
-    def test_lista_ventas_autenticado(self):
+    def test_dashboard_resumen_muestra_filtro_ganancias_y_tablas_reales(self):
+        """Verifica que el Resumen muestre el filtro de ganancias (Día/Mes/Año) y elimine el módulo secundario."""
         self.client.login(username='cajero_test', password='password123')
-        response = self.client.get(reverse('lista_ventas'))
+        response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Gestión de Ventas')
-        self.assertContains(response, '14000')
+        self.assertContains(response, 'panelFiltroGanancias')
+        self.assertContains(response, 'tablaGananciasVentasBody')
+        self.assertContains(response, 'tablaRentabilidadProductosBody')
+        self.assertContains(response, 'globalSearchDropdown')
+        self.assertNotContains(response, 'Ver Módulo Completo')
 
-    def test_crear_venta_post(self):
-        self.client.login(username='cajero_test', password='password123')
-        response = self.client.post(reverse('crear_venta'), {
-            'origen_venta': 'Domicilio / WhatsApp',
-            'subtotal': '25000',
-            'descuento': '2000',
-            'total_neto': '23000',
-            'medio_pago': 'Nequi',
-            'estado_venta': 'Completada'
-        })
-        self.assertRedirects(response, reverse('lista_ventas'))
-        self.assertTrue(Venta.objects.filter(medio_pago='Nequi', total_neto=Decimal('23000.00')).exists())
+    def test_api_estado_tiempo_real_devuelve_metricas_y_ganancias_reales(self):
+        """Verifica el endpoint de tiempo real con ganancias por Día, Mes, Año y General."""
+        response = self.client.get(reverse('api_estado_tiempo_real'))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['ok'])
+        self.assertIn('ganancias_periodos', data)
+        for periodo in ('dia', 'mes', 'anio', 'general', 'catalogo'):
+            self.assertIn(periodo, data['ganancias_periodos'])
+            self.assertIn('ganancia', data['ganancias_periodos'][periodo])
+        self.assertGreaterEqual(data['ganancias_periodos']['dia']['ingresos'], 14000.0)
+        self.assertGreaterEqual(len(data['ventas']), 1)
 
-    def test_editar_venta_post(self):
-        self.client.login(username='cajero_test', password='password123')
-        response = self.client.post(reverse('editar_venta', args=[self.venta.pk]), {
-            'origen_venta': 'Tienda Física',
-            'subtotal': '15000',
-            'descuento': '3000',
-            'total_neto': '12000',
-            'medio_pago': 'Daviplata',
-            'estado_venta': 'Completada'
-        })
-        self.assertRedirects(response, reverse('lista_ventas'))
-        self.venta.refresh_from_db()
-        self.assertEqual(self.venta.medio_pago, 'Daviplata')
-        self.assertEqual(self.venta.total_neto, Decimal('12000.00'))
+    def test_api_pedido_whatsapp_actualiza_y_elimina_en_tiempo_real(self):
+        """Verifica que si el cliente modifica su pedido en el carrito, la venta se actualice en tiempo real."""
+        import json
+        # 1. Crear pedido inicial
+        resp_crear = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'total': 15000,
+                'items': [{'id': '1', 'nombre': 'Piña Golden', 'precio': 7500, 'cantidad': 2}],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp_crear.status_code, 201)
+        id_venta = resp_crear.json()['id_venta']
 
-    def test_eliminar_venta_post(self):
-        self.client.login(username='cajero_test', password='password123')
-        response = self.client.post(reverse('eliminar_venta', args=[self.venta.pk]))
-        self.assertRedirects(response, reverse('lista_ventas'))
-        self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
+        # 2. Modificar cantidades del pedido existente en tiempo real
+        resp_mod = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'id_venta': id_venta,
+                'total': 30000,
+                'items': [{'id': '1', 'nombre': 'Piña Golden', 'precio': 7500, 'cantidad': 4}],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp_mod.status_code, 200)
+        self.assertTrue(resp_mod.json()['updated'])
+        venta_db = Venta.objects.get(pk=id_venta)
+        self.assertEqual(venta_db.total_neto, Decimal('30000.00'))
+
+        # 3. Vaciar carrito elimina el pedido pendiente en tiempo real
+        resp_del = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'id_venta': id_venta,
+                'total': 0,
+                'items': [],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp_del.status_code, 200)
+        self.assertTrue(resp_del.json()['eliminada'])
+        self.assertFalse(Venta.objects.filter(pk=id_venta).exists())
 
     def test_dashboard_muestra_ventas(self):
         self.client.login(username='cajero_test', password='password123')
@@ -897,10 +930,73 @@ class VentasTestCase(TestCase):
         self.assertRedirects(response, '/dashboard/#ventas')
         self.assertFalse(Venta.objects.filter(pk=self.venta.pk).exists())
 
+    def test_login_redireccion_inteligente_por_rol(self):
+        """Verifica que el login redirija clientes a la tienda ('/') y personal al '/dashboard/'."""
+        User = get_user_model()
+        cliente = User.objects.create_user(username='cliente_tienda', password='password123', is_staff=False)
+        cliente.perfil.rol = 'cliente'
+        cliente.perfil.save()
 
+        resp_cliente = self.client.post(reverse('login_direct'), {
+            'username': 'cliente_tienda',
+            'password': 'password123',
+        })
+        self.assertRedirects(resp_cliente, reverse('index'))
+        self.client.logout()
 
+        resp_cajero = self.client.post(reverse('login_direct'), {
+            'username': 'cajero_test',
+            'password': 'password123',
+        })
+        self.assertRedirects(resp_cajero, reverse('dashboard'))
 
+    def test_api_pedido_whatsapp_registra_venta_pendiente(self):
+        """Verifica que el endpoint de WhatsApp cree automáticamente una Venta Pendiente."""
+        import json
+        resp = self.client.post(
+            reverse('api_pedido_whatsapp'),
+            data=json.dumps({
+                'total': 24500,
+                'items': [{'id': '1', 'nombre': 'Mango Tommy', 'precio': 12250, 'cantidad': 2}],
+            }),
+            content_type='application/json',
+        )
+        self.assertEqual(resp.status_code, 201)
+        data = resp.json()
+        self.assertTrue(data['ok'])
+        venta_creada = Venta.objects.get(pk=data['id_venta'])
+        self.assertEqual(venta_creada.origen_venta, 'WhatsApp')
+        self.assertEqual(venta_creada.estado_venta, 'Pendiente')
+        self.assertEqual(venta_creada.total_neto, Decimal('24500.00'))
 
+    def test_exportar_ventas_csv_y_recibo_venta(self):
+        """Verifica la exportación de ventas a CSV y el comprobante imprimible."""
+        self.client.login(username='cajero_test', password='password123')
+        resp_csv = self.client.get(reverse('dashboard_exportar_ventas_csv'))
+        self.assertEqual(resp_csv.status_code, 200)
+        self.assertIn('text/csv', resp_csv['Content-Type'])
+        contenido_csv = resp_csv.content.decode('utf-8-sig')
+        self.assertIn(f'#VTA-{self.venta.id_venta}', contenido_csv)
 
+        resp_recibo = self.client.get(reverse('dashboard_recibo_venta', args=[self.venta.id_venta]))
+        self.assertEqual(resp_recibo.status_code, 200)
+        self.assertContains(resp_recibo, f'#VTA-{self.venta.id_venta}')
+        self.assertContains(resp_recibo, 'Imprimir / Guardar PDF')
 
+    def test_catalogo_frutas_muestra_estado_agotado(self):
+        """Verifica que los productos sin stock o en estado Agotado deshabiliten el botón de compra."""
+        cat = Categoria.objects.create(nombre='Tropicales Test')
+        Producto.objects.create(
+            nombre='Maracuyá Sin Stock',
+            categoria=cat,
+            costo_compra=Decimal('2000.00'),
+            precio_venta_unitario=Decimal('3800.00'),
+            stock_actual=Decimal('0.000'),
+            stock_minimo=Decimal('5.000'),
+            estado='Agotado',
+        )
+        resp = self.client.get(reverse('catalogo_frutas'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'badge-agotado')
+        self.assertContains(resp, 'add-btn-disabled')
 

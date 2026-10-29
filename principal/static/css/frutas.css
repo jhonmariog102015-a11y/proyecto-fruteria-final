@@ -100,37 +100,6 @@ body {
     object-position: left center;
 }
 
-.brand-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
-    background: var(--green-deep);
-    color: #FFFFFF;
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(26, 58, 38, 0.2);
-}
-
-.brand-name {
-    font-family: var(--font-heading);
-    font-size: 1.3rem;
-    font-weight: 800;
-    line-height: 1.1;
-    color: var(--green-deep);
-}
-
-.brand-tagline {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--orange);
-    font-weight: 700;
-}
-
 .nav-links {
     display: flex;
     align-items: center;
@@ -216,71 +185,6 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-.btn-admin,
-.btn-login,
-.btn-logout {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.65rem 1.2rem;
-    border-radius: 8px;
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.btn-admin {
-    background-color: var(--green-mid);
-    color: #ffffff !important;
-    border: none;
-}
-
-.btn-admin:hover {
-    background-color: var(--green-deep);
-    transform: translateY(-1px);
-}
-
-.btn-login {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.7rem 1.4rem;
-    border-radius: 4px;
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: background 0.2s ease, transform 0.15s ease;
-    cursor: pointer;
-    background: var(--orange);
-    color: #FFFFFF !important;
-    border: none;
-}
-
-.btn-login svg {
-    color: #FFFFFF;
-    flex-shrink: 0;
-}
-
-.btn-login:hover {
-    background: #D0560A;
-    color: #FFFFFF !important;
-    transform: translateY(-2px);
-}
-
-.btn-logout {
-    background-color: transparent;
-    color: #d32f2f;
-    border: 1px solid transparent;
-}
-
-.btn-logout:hover {
-    background-color: rgba(211, 47, 47, 0.05);
-    border-color: rgba(211, 47, 47, 0.2);
-}
 
 /* ─── BOTÓN FLOTANTE PERSISTENTE DE WHATSAPP ─── */
 .whatsapp-floating-btn {
@@ -731,11 +635,6 @@ body {
     opacity: 1;
 }
 
-.fruit-card-emoji {
-    position: relative;
-    z-index: 2;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
 
 .badge-fresco {
     display: inline-flex;
@@ -897,261 +796,43 @@ body {
     color: var(--text-secondary);
 }
 
-/* ─── DRAWER DEL CARRITO (CANASTA) ─── */
-.cart-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(4px);
-    z-index: 998;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.cart-overlay.open {
-    opacity: 1;
-    visibility: visible;
-}
-
-.cart-drawer {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    max-width: 420px;
-    background: #FFFFFF;
-    border-left: 1px solid var(--border-color);
-    box-shadow: -8px 0 35px rgba(0, 0, 0, 0.15);
-    z-index: 999;
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    flex-direction: column;
-}
-
-.cart-drawer.open {
-    transform: translateX(0);
-}
-
-.cart-drawer-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.cart-drawer-header h3 {
-    font-family: var(--font-heading);
-    font-size: 1.3rem;
+/* ==========================================================================
+   NOTA TÉCNICA PARA EL EQUIPO (GAES):
+   1. Se eliminó el bloque duplicado del Drawer del Carrito (~255 líneas)
+      ya que se carga globalmente desde 'css/cart.css' en 'base.html'.
+   2. Se agregaron los estilos de estado 'Agotado' sincronizados con el
+      inventario real del Dashboard (stock_actual <= 0 o estado == 'Agotado').
+   ========================================================================== */
+.badge-fresco.badge-agotado {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fecaca;
     font-weight: 700;
-    color: var(--green-deep);
 }
 
-.close-cart-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.3rem;
-    cursor: pointer;
-    padding: 5px;
-    transition: color 0.2s;
+.badge-fresco.badge-agotado .dot {
+    background: #dc2626;
+    box-shadow: 0 0 6px #dc2626;
 }
 
-.close-cart-btn:hover {
-    color: var(--text-primary);
+.fruit-card.card-agotada {
+    opacity: 0.78;
 }
 
-.cart-drawer-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
+.fruit-card.card-agotada .fruit-visual img {
+    filter: grayscale(35%);
 }
 
-.cart-empty-msg {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-muted);
-}
-
-.cart-empty-msg span {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 1rem;
-}
-
-.cart-item {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.9rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.cart-item-emoji {
-    font-size: 1.5rem;
-    width: 42px;
-    height: 42px;
-    background: var(--bg-subtle);
-    border-radius: 8px;
-    display: grid;
-    place-items: center;
-}
-
-.cart-item-details {
-    flex: 1;
-}
-
-.cart-item-title {
-    font-weight: 600;
-    font-size: 0.92rem;
-    color: var(--text-primary);
-}
-
-.cart-item-unit {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-}
-
-.cart-item-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: var(--bg-subtle);
-    border: 1px solid #E5E7EB;
-    border-radius: 6px;
-    padding: 2px 4px;
-}
-
-.qty-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    cursor: pointer;
-    width: 22px;
-    height: 22px;
-    font-weight: 700;
-    display: grid;
-    place-items: center;
-    border-radius: 4px;
-}
-
-.qty-btn:hover {
-    background: #E5E7EB;
-}
-
-.qty-val {
-    font-size: 0.85rem;
-    font-weight: 700;
-    min-width: 18px;
-    text-align: center;
-    color: var(--text-primary);
-}
-
-.cart-item-subtotal {
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: var(--orange);
-    min-width: 65px;
-    text-align: right;
-}
-
-.cart-item-remove {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 4px;
-    font-size: 0.85rem;
-}
-
-.cart-item-remove:hover {
-    color: #EF4444;
-}
-
-.cart-drawer-footer {
-    padding: 1.5rem;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-    background: #F9FAFB;
-}
-
-.cart-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.2rem;
-}
-
-.cart-total-row span {
+.add-btn.add-btn-disabled,
+.add-btn:disabled {
+    background: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    box-shadow: none !important;
     font-size: 0.95rem;
-    color: var(--text-secondary);
 }
-
-.cart-total-row strong {
-    font-family: var(--font-heading);
-    font-size: 1.45rem;
-    color: var(--green-deep);
-}
-
-.btn-whatsapp-order {
-    width: 100%;
-    background: #25D366;
-    color: #FFFFFF;
-    border: none;
-    padding: 1rem;
-    border-radius: 8px;
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
-    transition: all 0.2s ease;
-}
-
-.btn-whatsapp-order:hover {
-    background: #1ebe5c;
-    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.4);
-}
-
-.btn-whatsapp-order.disabled {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* ─── NOTIFICACIÓN TOAST ─── */
-.fruit-toast {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--green-deep);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
-    padding: 0.85rem 1.6rem;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    box-shadow: 0 10px 30px rgba(26, 58, 38, 0.3);
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.fruit-toast.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-}
-
 /* ─── PIE DE PÁGINA (FOOTER IDÉNTICO A INDEX) ─── */
 .footer {
     background: var(--green-deep);
@@ -1178,23 +859,6 @@ body {
     object-position: left center;
 }
 
-.footer .brand-name {
-    color: #FFFFFF;
-}
-
-.footer .brand-tagline {
-    color: var(--orange);
-}
-
-.footer .brand-icon {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.footer-copy {
-    font-size: 0.85rem;
-    color: #9CA3AF;
-}
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1100px) {

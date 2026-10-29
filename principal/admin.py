@@ -1,5 +1,20 @@
+# ==============================================================================
+# CONFIGURACIÓN DEL PANEL ADMINISTRATIVO DE DJANGO (principal/admin.py)
+# ==============================================================================
+# NOTA TÉCNICA PARA EL EQUIPO (GAES):
+# - Se eliminó la duplicidad de código donde 'PerfilUsuarioInline' y
+#   'CustomUserAdmin' estaban declarados dos veces en este archivo.
+# - Se añadió soporte visual (insignia azul) para el rol 'cliente' en el listado
+#   de usuarios y perfiles del administrador.
+# - El acceso a '/admin/' está restringido exclusivamente a Super Administradores
+#   mediante 'superuser_only_has_permission'.
+# ==============================================================================
+
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from .models import Categoria, Proveedor, Producto, Cliente, RegistroLogin, PerfilUsuario, Venta
 
 
@@ -75,7 +90,6 @@ class ProductoAdmin(admin.ModelAdmin):
         )
 
 
-
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')
@@ -100,56 +114,6 @@ class VentaAdmin(admin.ModelAdmin):
     ordering = ('-fecha_venta',)
 
 
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
-from django.utils.safestring import mark_safe
-
-
-class PerfilUsuarioInline(admin.StackedInline):
-    model = PerfilUsuario
-    can_delete = False
-    verbose_name_plural = 'Perfil del Usuario (Rol, Teléfono y Estado)'
-    fk_name = 'usuario'
-    extra = 0
-
-
-# Re-registrar User para unificar el perfil sin duplicidad de tablas o columnas en el admin
-try:
-    admin.site.unregister(User)
-except admin.sites.NotRegistered:
-    pass
-
-
-@admin.register(User)
-class CustomUserAdmin(BaseUserAdmin):
-    inlines = (PerfilUsuarioInline,)
-    list_display = ('username', 'email', 'mostrar_rol', 'mostrar_telefono', 'mostrar_estado', 'is_staff')
-    list_filter = ('is_active', 'is_staff', 'is_superuser', 'perfil__rol', 'perfil__estado')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'perfil__telefono')
-
-    @admin.display(description="Rol en el Sistema", ordering="perfil__rol")
-    def mostrar_rol(self, obj):
-        if obj.is_superuser or (hasattr(obj, 'perfil') and obj.perfil.rol == 'admin'):
-            return mark_safe('<span style="background:#fee2e2; color:#b91c1c; padding:3px 8px; border-radius:4px; font-weight:700;">Super Admin</span>')
-        rol = getattr(obj.perfil, 'rol', None) if hasattr(obj, 'perfil') else None
-        if rol == 'bodeguero':
-            return mark_safe('<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:4px; font-weight:700;">Bodeguero</span>')
-        elif rol == 'cajero':
-            return mark_safe('<span style="background:#d1fae5; color:#047857; padding:3px 8px; border-radius:4px; font-weight:700;">Cajero</span>')
-        return mark_safe('<span style="color:#64748b;">—</span>')
-
-    @admin.display(description="Teléfono")
-    def mostrar_telefono(self, obj):
-        return getattr(obj.perfil, 'telefono', '—') if hasattr(obj, 'perfil') else '—'
-
-    @admin.display(description="Estado", ordering="perfil__estado")
-    def mostrar_estado(self, obj):
-        estado = getattr(obj.perfil, 'estado', 'activo') if hasattr(obj, 'perfil') else ('activo' if obj.is_active else 'inactivo')
-        if estado == 'activo' and obj.is_active:
-            return mark_safe('<span style="background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:4px; font-weight:600;">Activo</span>')
-        return mark_safe('<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:4px; font-weight:600;">Inactivo</span>')
-
-
 @admin.register(RegistroLogin)
 class RegistroLoginAdmin(admin.ModelAdmin):
     list_display = ('fecha_creacion', 'identificador', 'rol', 'telefono', 'estado', 'ip_origen')
@@ -159,9 +123,6 @@ class RegistroLoginAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False  # Los registros son automáticos, no se crean a mano
-
-
-from django.utils.safestring import mark_safe
 
 
 @admin.register(PerfilUsuario)
@@ -179,6 +140,8 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
             return mark_safe('<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:4px; font-weight:700;">Bodeguero</span>')
         elif obj.rol == 'cajero':
             return mark_safe('<span style="background:#d1fae5; color:#047857; padding:3px 8px; border-radius:4px; font-weight:700;">Cajero</span>')
+        elif obj.rol == 'cliente':
+            return mark_safe('<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-weight:700;">Cliente</span>')
         return obj.get_rol_display()
 
     @admin.display(description="Estado", ordering="estado")
@@ -191,10 +154,6 @@ class PerfilUsuarioAdmin(admin.ModelAdmin):
 # ==============================================================================
 # INTEGRACIÓN DE PERFIL INSTITUCIONAL EN EL ADMINISTRADOR DE USUARIOS DE DJANGO
 # ==============================================================================
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.contrib.auth.models import User
-
-
 class PerfilUsuarioInline(admin.StackedInline):
     model = PerfilUsuario
     can_delete = False
@@ -225,6 +184,8 @@ class CustomUserAdmin(BaseUserAdmin):
             return mark_safe('<span style="background:#fef3c7; color:#b45309; padding:3px 8px; border-radius:4px; font-weight:700;">Bodeguero</span>')
         elif rol == 'cajero':
             return mark_safe('<span style="background:#d1fae5; color:#047857; padding:3px 8px; border-radius:4px; font-weight:700;">Cajero</span>')
+        elif rol == 'cliente':
+            return mark_safe('<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-weight:700;">Cliente</span>')
         return mark_safe('<span style="color:#64748b;">—</span>')
 
     @admin.display(description="Teléfono")
@@ -247,5 +208,5 @@ def superuser_only_has_permission(request):
     """Garantiza que el panel nativo de Django (/admin/) sea accesible únicamente para Super Admins."""
     return bool(request.user and request.user.is_active and request.user.is_superuser)
 
-admin.site.has_permission = superuser_only_has_permission
 
+admin.site.has_permission = superuser_only_has_permission

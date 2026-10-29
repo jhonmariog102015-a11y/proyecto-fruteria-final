@@ -5,7 +5,7 @@
 {% block meta_description %}Catálogo completo de frutas frescas cultivadas directamente en el campo. Variedades cítricas, tropicales, berries, importadas y exóticas.{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/frutas.css' %}?v=2.2">
+<link rel="stylesheet" href="{% static 'css/frutas.css' %}?v=2.3">
 {% endblock %}
 
 {% block content %}
@@ -54,10 +54,14 @@
     </div>
 
     <!-- CUADRÍCULA DE TARJETAS DE FRUTAS -->
+    <!-- NOTA TÉCNICA PARA EL EQUIPO (GAES):
+         Sincronización visual con el inventario real: cuando producto.estado == 'Agotado'
+         o producto.stock_actual <= 0, la tarjeta muestra la insignia roja 'Agotado' y
+         deshabilita el botón '+' para impedir pedidos de productos sin existencias. -->
     <div class="fruits-grid" id="fruitsGrid">
 
         {% for producto in productos %}
-        <article class="fruit-card" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
+        <article class="fruit-card{% if producto.estado == 'Agotado' or producto.stock_actual <= 0 %} card-agotada{% endif %}" data-id="{{ producto.id_producto }}" data-categoria="{% if 'ít' in producto.categoria.nombre %}citricos{% elif 'rop' in producto.categoria.nombre %}tropicales{% elif 'err' in producto.categoria.nombre %}berries{% elif 'mpor' in producto.categoria.nombre %}importadas{% elif 'xót' in producto.categoria.nombre %}exoticas{% else %}{{ producto.categoria.nombre|lower|slugify }}{% endif %}{% if producto.en_oferta %} ofertas{% endif %}">
             <div>
                 <div class="card-top">
                     <div class="card-top-left">
@@ -65,7 +69,11 @@
                             <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
                         </div>
                         <div class="card-badges-col">
+                            {% if producto.estado == 'Agotado' or producto.stock_actual <= 0 %}
+                            <span class="badge-fresco badge-agotado"><span class="dot"></span>Agotado</span>
+                            {% else %}
                             <span class="badge-fresco"><span class="dot"></span>fresco</span>
+                            {% endif %}
                             {% if producto.en_oferta and producto.precio_oferta %}
                             <span class="badge-fresco badge-oferta">-{{ producto.porcentaje_descuento }}%</span>
                             {% endif %}
@@ -93,7 +101,11 @@
                     {% endif %}
                     <span class="price-unit">desde / {{ producto.unidad_medida }}</span>
                 </div>
+                {% if producto.estado == 'Agotado' or producto.stock_actual <= 0 %}
+                <button class="add-btn add-btn-disabled" disabled aria-label="{{ producto.nombre }} agotado" title="Producto agotado temporalmente">✕</button>
+                {% else %}
                 <button class="add-btn" aria-label="Añadir {{ producto.nombre }}">＋</button>
+                {% endif %}
             </div>
         </article>
         {% endfor %}

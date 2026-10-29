@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <!-- Estilos específicos de cada página y carrito universal -->
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1.3">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -92,17 +92,15 @@
             <!-- 4. Categoría: Frutas y Verduras -->
             <a href="{% url 'catalogo_frutas' %}?categoria=frutas" class="nav-link nav-link-cat" title="Frutas y Verduras">
                 <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Manzana al fondo -->
-                    <path d="M22 14c-2.5-3-6-3-9-1.5C9.5 14 8 18 8 23c0 7 6 12 11 12 2.5 0 3.5-1.5 5.5-1.5" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M18 10c0-3 2-6 5-7 0 3-2 6-5 7z" fill="#2E7D32" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
-                    <!-- Rodaja / cebolla -->
-                    <path d="M22 25a8 8 0 1 0 0 16 8 8 0 0 0 0-16z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5"/>
-                    <path d="M22 29a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" stroke="#1E293B" stroke-width="2"/>
-                    <!-- Zanahoria amarilla al frente -->
-                    <path d="M12 40l28-7c1.5-.4 2.5-1.8 2.2-3.3l-.3-1.4c-.4-1.5-1.9-2.5-3.4-2.1L10 33a4 4 0 0 0 2 7z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <!-- Hojas -->
-                    <path d="M10 36c-2 1-4 1-6 0M9 34c-1-2-2-4-2-6M11 37c-1 3-2 5-4 6" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M20 34l1 3M28 32l1 3M35 30l1 3" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Manzana Roja Campesina (Fruta) -->
+                    <path d="M14 10c0-4 4-5 6-3 0 4-4 5-6 3z" fill="#22C55E" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M15 12c1-3 2.5-5 4-6" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M16 14c-3-2-7-1-9.5 1.5C3.5 19 3.5 26.5 6.5 31c2.5 3.5 6 5 9.5 5 2 0 3-.7 4-.7s2 .7 4 .7c3.5 0 7-1.5 9.5-5 3-4.5 3-12-.5-15.5-2.5-2.5-6.5-3.5-9.5-1.5-1.5 1-6 1-7.5 0z" fill="#EF4444" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M8 19c-1 3 0 7 1.5 8.5" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Zanahoria Naranja (Verdura) -->
+                    <path d="M37 12c1-4 4-6 6-7M37 12c3-1 6 0 8 2M37 12c0-3-2-6-4-7" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round"/>
+                    <path d="M31 16c1.5-1.5 4.5-.5 6 1l2 2c1.5 1.5 1 4 0 5.5l-9 16c-.8 1.5-2.5 1.8-3.5 1-.8-.8-.8-2.2 0-3.5l7-18-2.5-4z" fill="#F97316" stroke="#1E293B" stroke-width="2.4" stroke-linejoin="round"/>
+                    <path d="M34 21l3 1.5M32 26l3 1.5M30 32l2.5 1.5" stroke="#C2410C" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
                 <span class="nav-cat-label">Frutas y Verduras</span>
             </a>
@@ -110,17 +108,19 @@
             <!-- 5. Categoría: Carne, Pollo y Pescado -->
             <a href="{% url 'catalogo_frutas' %}?categoria=carnes" class="nav-link nav-link-cat" title="Carne, Pollo y Pescado">
                 <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Bistec de carne -->
-                    <path d="M10 24c-3 4-3 10 1 14s12 4 17 0c4-3 5-8 2-12s-8-5-12-4-5-2-8 2z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="17" cy="30" r="3" fill="#F8FAFC" stroke="#1E293B" stroke-width="2"/>
-                    <path d="M11 28c3 1 6 3 9 2M13 35c3 1 7 0 10-2" stroke="#1E293B" stroke-width="1.8" stroke-linecap="round"/>
-                    <!-- Pez amarillo arriba -->
-                    <path d="M28 14c4-4 11-4 15-1-1 3-1 6 1 8-4 3-11 3-15-1 3-1 4-2 4-3s-1-2-4-3z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="39" cy="16" r="1.2" fill="#1E293B"/>
-                    <path d="M35 15c-1 1-1 2 0 3" stroke="#1E293B" stroke-width="1.8" stroke-linecap="round"/>
-                    <!-- Presa de pollo a la derecha -->
-                    <path d="M28 32c2-3 6-5 9-3s4 7 1 10-8 2-10-1c-1-1-1-4 0-6z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M37 39l4 4M39 45a2 2 0 1 0 3-3" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Pescado azul fresco (Pescado) -->
+                    <path d="M33 11l6-4v8l-6-4z" fill="#0284C7" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M21 11c3-4 10-5 14-1-1 3-1 5 0 7-4 4-11 3-14-1 1-1 1.5-2 1.5-2.5s-.5-1.5-1.5-2.5z" fill="#38BDF8" stroke="#1E293B" stroke-width="2.2" stroke-linejoin="round"/>
+                    <circle cx="30" cy="9.5" r="1.3" fill="#1E293B"/>
+                    <!-- Bistec de carne roja (Carne) -->
+                    <path d="M6 24c-2 4-1 9 2 12s8 3 13 1c3-1 5-4 5-7s-1-7-4-9-8-1-11 0-3 0-5 3z" fill="#E11D48" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M8 34c3 2 7 1 11 0" stroke="#FFE4E6" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="28" r="3" fill="#FFFFFF" stroke="#1E293B" stroke-width="2"/>
+                    <path d="M12 28h5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Muslo de pollo dorado (Pollo) -->
+                    <path d="M33 34l7 7M36 43a2 2 0 1 0 3-3" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M24 28c3-4 8-5 12-2s4 8 1 11-8 2-11 0c-3-2-4-5-2-9z" fill="#F59E0B" stroke="#1E293B" stroke-width="2.4" stroke-linejoin="round"/>
+                    <path d="M28 30c1-2 4-3 6-1" stroke="#FEF3C7" stroke-width="2" stroke-linecap="round"/>
                 </svg>
                 <span class="nav-cat-label">Carne, Pollo y Pescado</span>
             </a>
@@ -128,17 +128,19 @@
             <!-- 6. Categoría: Lácteos, Huevos y Refrigerados -->
             <a href="{% url 'catalogo_frutas' %}?categoria=lacteos" class="nav-link nav-link-cat" title="Lácteos, Huevos y Refrigerados">
                 <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Botella de leche -->
-                    <path d="M17 12h8v4l3 4v18a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3V20l3-4v-4z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M18 8h6a1 1 0 0 1 1 1v3h-8V9a1 1 0 0 1 1-1z" fill="#F1F5F9" stroke="#1E293B" stroke-width="2"/>
-                    <path d="M14 26h14" stroke="#1E293B" stroke-width="2" stroke-dasharray="2 2"/>
-                    <!-- Queso amarillo en cuña con huequitos -->
-                    <path d="M26 29l16-4v12a3 3 0 0 1-3 3H27a2 2 0 0 1-2-2V30l1-1z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M26 29l-3 4 16-1 3-3-16 0z" fill="#FFE082" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
-                    <!-- Huequitos del queso -->
-                    <circle cx="31" cy="35" r="1.8" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.8"/>
-                    <circle cx="37" cy="33" r="1.3" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.5"/>
-                    <circle cx="35" cy="38" r="1.5" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.8"/>
+                    <!-- Botella de Leche fresca (Lácteos) -->
+                    <path d="M11 14h8v3l3 4v17a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V21l3-4v-3z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M12 9h6a1 1 0 0 1 1 1v4h-8v-4a1 1 0 0 1 1-1z" fill="#0284C7" stroke="#1E293B" stroke-width="2"/>
+                    <rect x="9" y="24" width="12" height="7" rx="1" fill="#E0F2FE" stroke="#1E293B" stroke-width="1.8"/>
+                    <!-- Cuña de Queso Suizo (Refrigerados) -->
+                    <path d="M24 22l18-4v16a3 3 0 0 1-3 3H25a2 2 0 0 1-2-2V23l1-1z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
+                    <path d="M24 22l-4 4 18-1 4-3-18 0z" fill="#FDE047" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
+                    <circle cx="31" cy="29" r="2.2" fill="#EAB308" stroke="#1E293B" stroke-width="1.5"/>
+                    <circle cx="37" cy="26" r="1.4" fill="#EAB308" stroke="#1E293B" stroke-width="1.5"/>
+                    <circle cx="35" cy="33" r="1.8" fill="#EAB308" stroke="#1E293B" stroke-width="1.5"/>
+                    <!-- Huevo de Granja (Huevos) -->
+                    <ellipse cx="21" cy="35" rx="5.5" ry="7" fill="#FED7AA" stroke="#1E293B" stroke-width="2.2"/>
+                    <path d="M19 32c0-1.5 1-2.5 2-2.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
                 <span class="nav-cat-label">Lácteos, Huevos y Refrigerados</span>
             </a>
@@ -446,7 +448,7 @@
             });
         }
     </script>
-    <script src="{% static 'js/cart.js' %}?v=1.2"></script>
+    <script src="{% static 'js/cart.js' %}?v=2.0"></script>
     <script src="{% static 'js/favoritos.js' %}?v=1.0"></script>
     {% block extra_js %}{% endblock %}
 

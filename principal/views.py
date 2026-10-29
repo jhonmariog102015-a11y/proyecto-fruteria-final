@@ -2,17 +2,32 @@
 # CONTROLADOR DE VISTAS (principal/views.py)
 # Gestiona la lógica de negocio, consultas al ORM y renderizado de plantillas.
 # ==============================================================================
+# NOTA TÉCNICA PARA EL EQUIPO (GAES - AUDITORÍA DE CALIDAD Y SEGURIDAD):
+# 1. Control de Acceso Basado en Roles (RBAC): Se implementaron la función
+#    'es_personal_operativo', el decorador '@personal_requerido' y el mixin
+#    'PersonalRequeridoMixin' para proteger '/dashboard/', '/gestion/' y '/ventas/'
+#    frente a cuentas públicas registradas como 'cliente'.
+# 2. Unificación de Validación de Ventas: Se creó el helper '_extraer_datos_venta'
+#    para sanear montos con 'Decimal', evitar descuentos mayores al subtotal y
+#    prevenir errores 500 tanto en los modales del dashboard como en las vistas CRUD.
+# 3. Prevención de Open Redirect: Se agregó '_obtener_redireccion_segura' usando
+#    'url_has_allowed_host_and_scheme' de Django para validar el parámetro 'next'.
+# 4. Estandarización de Plantillas: Se renombró 'Registro.html' a 'registro.html'
+#    en minúsculas para compatibilidad con sistemas operativos Linux/Unix.
+# ==============================================================================
 
 import csv
-from decimal import Decimal
+import json
+from decimal import Decimal, InvalidOperation
+from functools import wraps
 from django.contrib import messages
-from django.contrib.auth import get_user_model, logout, login as auth_login
+from django.contrib.auth import get_user_model, logout, login as auth_login, views as auth_views
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Count, Case, When, Value, IntegerField, Avg
-from django.http import HttpResponse, HttpResponseNotAllowed
+from django.db.models import Count, Case, When, Value, IntegerField
+from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -37,6 +52,101 @@ def es_administrador(user):
     return perfil is not None and (perfil.rol == 'admin' or getattr(perfil, 'es_admin', False))
 
 
+def es_personal_operativo(user):
+    """
+    Control de acceso RBAC: Verifica que el usuario pertenezca al personal interno
+    (Super Admin, Bodeguero, Cajero o is_staff=True), impidiendo que clientes públicos
+    accedan al panel administrativo o modifiquen el inventario.
+    """
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser or user.is_staff:
+        return True
+    perfil = getattr(user, 'perfil', None)
+    return perfil is not None and perfil.rol in ('admin', 'bodeguero', 'cajero')
+
+
+def personal_requerido(view_func):
+    """
+    Decorador de seguridad para vistas operativas y del dashboard:
+    1. Si el usuario es anónimo, redirige al login (/accounts/login/).
+    2. Si el usuario tiene rol 'cliente' sin privilegios de staff, bloquea el acceso
+       y lo redirige a la tienda principal con un mensaje informativo.
+    """
+    @wraps(view_func)
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        if not es_personal_operativo(request.user):
+            messages.error(
+                request,
+                "Acceso restringido: esta sección es exclusiva para el personal operativo de Al Paso Frutería."
+            )
+            return redirect('index')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+class PersonalRequeridoMixin(LoginRequiredMixin, UserPassesTestMixin):
+    """Mixin de control de acceso operativo para Vistas Basadas en Clases (CBV)."""
+
+    def test_func(self):
+        return es_personal_operativo(self.request.user)
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        messages.error(
+            self.request,
+            "Acceso restringido: esta sección es exclusiva para el personal operativo de Al Paso Frutería."
+        )
+        return redirect('index')
+
+
+def _extraer_datos_venta(post_data):
+    """
+    Extrae, sanea y valida los campos numéricos y de estado de una transacción de venta,
+    previniendo errores 500 por valores vacíos o malformados.
+    """
+    id_cliente_raw = post_data.get('id_cliente', '')
+    origen_venta = (post_data.get('origen_venta') or 'Tienda Física').strip()
+    subtotal_raw = str(post_data.get('subtotal') or '0').strip()
+    descuento_raw = str(post_data.get('descuento') or '0').strip()
+    total_neto_raw = str(post_data.get('total_neto') or '').strip()
+    medio_pago = (post_data.get('medio_pago') or 'Efectivo').strip()
+    estado_venta = (post_data.get('estado_venta') or 'Completada').strip()
+
+    try:
+        subtotal = max(Decimal('0.00'), Decimal(subtotal_raw)) if subtotal_raw else Decimal('0.00')
+    except Exception:
+        subtotal = Decimal('0.00')
+
+    try:
+        descuento = max(Decimal('0.00'), Decimal(descuento_raw)) if descuento_raw else Decimal('0.00')
+    except Exception:
+        descuento = Decimal('0.00')
+
+    if descuento > subtotal:
+        descuento = subtotal
+
+    try:
+        total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
+        if total_neto < Decimal('0.00'):
+            total_neto = Decimal('0.00')
+    except Exception:
+        total_neto = subtotal - descuento
+
+    cli_id = int(id_cliente_raw) if id_cliente_raw and str(id_cliente_raw).strip().isdigit() else None
+
+    return {
+        'id_cliente': cli_id,
+        'origen_venta': origen_venta,
+        'subtotal': subtotal,
+        'descuento': descuento,
+        'total_neto': total_neto,
+        'medio_pago': medio_pago,
+        'estado_venta': estado_venta,
+    }
+
 
 def inicio(request):
     """
@@ -45,23 +155,15 @@ def inicio(request):
     1. Consulta la base de datos para obtener todos los productos ordenados por su ID.
     2. Utiliza 'select_related('categoria')' para optimizar la consulta SQL (JOIN)
        y evitar problemas de rendimiento (N+1 queries).
-    3. Obtiene todas las categorías disponibles para alimentar las tarjetas y carrusel.
+    3. Obtiene todas las categorías disponibles para alimentar las tarjetas y filtros.
     4. Envía los datos al contexto para que 'index.html' dibuje dinámicamente las tarjetas.
     """
-    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
-    categorias = Categoria.objects.all()
-    # Producto destacado para el Hero dinámico asimétrico
-    producto_destacado = productos.filter(en_oferta=True).first() or productos.first()
-    productos_oferta = productos.filter(en_oferta=True)
-
+    # NOTA PARA EL EQUIPO: Al retirar el carrusel duplicado de 'index.html',
+    # la portada solo requiere el conteo total de referencias ('total_productos'),
+    # optimizando la velocidad de carga inicial con un único COUNT(*) en SQL.
     context = {
         'titulo': 'Al Paso Frutería — Mercado Campesino',
-        'productos': productos,
-        'productos_oferta': productos_oferta,
-        'categorias': categorias,
-        'producto_destacado': producto_destacado,
-        'total_productos': productos.count(),
-        'total_ofertas': productos_oferta.count(),
+        'total_productos': Producto.objects.count(),
     }
     return render(request, 'principal/index.html', context)
 
@@ -81,75 +183,296 @@ def catalogo_frutas_view(request):
         'categorias': categorias,
         'total_productos': productos.count(),
     }
-    # NOTA TÉCNICA PARA EL EQUIPO (GAES):
-    # Se unificó la ubicación de plantillas dentro de 'principal/templates/principal/'
-    # para que todos los archivos HTML (index, catalogo, dashboard, login) residan
-    # en una sola carpeta bajo la convención estándar de Django MVT.
     return render(request, 'principal/catalogo_frutas.html', context)
 
 
-@login_required
-def dashboard_view(request):
+def _calcular_metricas_reales():
     """
-    PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')
-    --------------------------------------------
-    Gestión integral del negocio:
-    - Métricas en tiempo real (productos, ofertas, usuarios, categorías).
-    - Métricas financieras (inversión total, valor comercial, margen estimado).
-    - Inventario con edición y creación directa sin salir del dashboard.
-    - Categorización del catálogo en vivo.
+    MOTOR CENTRAL DE MÉTRICAS REALES (PRODUCTOS, INVENTARIO Y GANANCIAS POR PERIODO)
+    --------------------------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Calcula en tiempo real a partir de la base de datos:
+    1. Valoración real del catálogo completo (todos los productos, costos, precios y márgenes).
+    2. Ganancias netas reales de todo lo vendido filtradas por DÍA (Hoy), MES actual,
+       AÑO actual e Histórico General, aplicando la razón real de utilidad del catálogo.
     """
-    User = get_user_model()
+    productos = list(Producto.objects.select_related('categoria').all().order_by('id_producto'))
+    categorias = list(Categoria.objects.annotate(num_productos=Count('productos')).order_by('nombre'))
+    total_productos = len(productos)
+    total_ofertas = sum(1 for p in productos if p.en_oferta)
 
-    productos = Producto.objects.select_related('categoria').all().order_by('id_producto')
-    categorias = Categoria.objects.annotate(num_productos=Count('productos')).order_by('nombre')
-    total_productos = productos.count()
-    total_ofertas = productos.filter(en_oferta=True).count()
-    total_usuarios = User.objects.count()
-
-    # Conteo y lista para alertas de inventario
     productos_bajo_stock = [p for p in productos if p.stock_actual <= p.stock_minimo]
     total_bajo_stock = len(productos_bajo_stock)
     total_agotados = sum(1 for p in productos if p.stock_actual <= 0 or p.estado == 'Agotado')
 
-    # Métricas financieras del catálogo
-    inversion_total = sum(p.costo_compra * p.stock_actual for p in productos)
-    valor_venta_potencial = sum(p.precio_efectivo * p.stock_actual for p in productos)
+    # Valoración exacta de cada producto en bodega
+    inversion_total = sum((p.costo_compra * p.stock_actual) for p in productos) or Decimal('0.00')
+    valor_venta_potencial = sum((p.precio_efectivo * p.stock_actual) for p in productos) or Decimal('0.00')
     ganancia_potencial = valor_venta_potencial - inversion_total
     margen_promedio = round((ganancia_potencial / inversion_total * 100), 1) if inversion_total > 0 else Decimal('0.0')
 
-    # Datos para gráficos analíticos (Chart.js)
+    # Razón real de ganancia sobre precio de venta basada en los productos actuales
+    suma_precios_unit = sum(p.precio_efectivo for p in productos) or Decimal('0.00')
+    suma_margenes_unit = sum(p.margen_ganancia for p in productos) or Decimal('0.00')
+    if valor_venta_potencial > 0:
+        ratio_ganancia_venta = ganancia_potencial / valor_venta_potencial
+    elif suma_precios_unit > 0:
+        ratio_ganancia_venta = suma_margenes_unit / suma_precios_unit
+    else:
+        ratio_ganancia_venta = Decimal('0.30')
+
+    # Datos de TODOS los productos para tablas y gráficas de Resumen
+    productos_resumen = []
+    for p in productos:
+        inv_p = round(p.costo_compra * p.stock_actual, 2)
+        val_p = round(p.precio_efectivo * p.stock_actual, 2)
+        gan_p = round(val_p - inv_p, 2)
+        productos_resumen.append({
+            'id': p.id_producto,
+            'id_producto': p.id_producto,
+            'nombre': p.nombre,
+            'categoria': p.categoria.nombre if p.categoria else 'General',
+            'costo_compra': float(p.costo_compra),
+            'precio_venta_unitario': float(p.precio_venta_unitario),
+            'precio_oferta': float(p.precio_oferta) if p.precio_oferta else None,
+            'en_oferta': bool(p.en_oferta),
+            'precio_efectivo': float(p.precio_efectivo),
+            'porcentaje_descuento': int(p.porcentaje_descuento),
+            'margen_unitario': float(p.margen_ganancia),
+            'porcentaje_margen': float(round(p.porcentaje_margen, 1)),
+            'stock_actual': float(p.stock_actual),
+            'stock_minimo': float(p.stock_minimo),
+            'unidad_medida': p.unidad_medida,
+            'origen': p.origen,
+            'estado': p.estado,
+            'agotado': bool(p.stock_actual <= 0 or p.estado == 'Agotado'),
+            'inversion_stock': float(inv_p),
+            'venta_stock': float(val_p),
+            'ganancia_stock': float(gan_p),
+            'inversion_total_prod': float(inv_p),
+            'valor_venta_prod': float(val_p),
+            'ganancia_total_prod': float(gan_p),
+        })
+
     chart_cat_labels = [cat.nombre for cat in categorias if cat.num_productos > 0]
     chart_cat_data = [cat.num_productos for cat in categorias if cat.num_productos > 0]
 
-    # Top productos para comparativa de precios y costo
-    top_prods = list(productos[:7])
-    chart_prod_labels = [p.nombre for p in top_prods]
-    chart_prod_costos = [float(p.costo_compra) for p in top_prods]
-    chart_prod_precios = [float(p.precio_efectivo) for p in top_prods]
-    chart_prod_margenes = [float(p.margen_ganancia) for p in top_prods]
+    chart_prod_labels = [p.nombre for p in productos]
+    chart_prod_costos = [float(p.costo_compra) for p in productos]
+    chart_prod_precios = [float(p.precio_efectivo) for p in productos]
+    chart_prod_margenes = [float(p.margen_ganancia) for p in productos]
 
-    # Proveedores y productores aliados (Métricas de Abastecimiento)
+    # Ventas y cálculo real de ganancias por Día, Mes, Año y General
+    ahora_local = timezone.localtime(timezone.now())
+    hoy = ahora_local.date()
+    ventas = list(Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta'))
+
+    ventas_enriquecidas = []
+    ingresos_dia = Decimal('0.00')
+    ganancia_dia = Decimal('0.00')
+    costo_dia = Decimal('0.00')
+    count_dia = 0
+
+    ingresos_mes = Decimal('0.00')
+    ganancia_mes = Decimal('0.00')
+    costo_mes = Decimal('0.00')
+    count_mes = 0
+
+    ingresos_anio = Decimal('0.00')
+    ganancia_anio = Decimal('0.00')
+    costo_anio = Decimal('0.00')
+    count_anio = 0
+
+    total_ventas_ingresos = Decimal('0.00')
+    total_ventas_ganancia = Decimal('0.00')
+    total_ventas_costo = Decimal('0.00')
+    count_general_activas = 0
+
+    for v in ventas:
+        f_local = timezone.localtime(v.fecha_venta) if v.fecha_venta else ahora_local
+        es_hoy = (f_local.date() == hoy)
+        es_mes = (f_local.year == hoy.year and f_local.month == hoy.month)
+        es_anio = (f_local.year == hoy.year)
+
+        neto = v.total_neto or Decimal('0.00')
+        if v.estado_venta == 'Anulada':
+            ganancia_v = Decimal('0.00')
+            costo_v = Decimal('0.00')
+        else:
+            ganancia_v = round(neto * ratio_ganancia_venta, 2)
+            costo_v = round(neto - ganancia_v, 2)
+
+        v.ganancia_estimada = ganancia_v
+        v.costo_estimado = costo_v
+        v.es_hoy = es_hoy
+        v.es_mes = es_mes
+        v.es_anio = es_anio
+
+        if v.estado_venta != 'Anulada':
+            count_general_activas += 1
+            total_ventas_ingresos += neto
+            total_ventas_ganancia += ganancia_v
+            total_ventas_costo += costo_v
+
+            if es_hoy:
+                count_dia += 1
+                ingresos_dia += neto
+                ganancia_dia += ganancia_v
+                costo_dia += costo_v
+            if es_mes:
+                count_mes += 1
+                ingresos_mes += neto
+                ganancia_mes += ganancia_v
+                costo_mes += costo_v
+            if es_anio:
+                count_anio += 1
+                ingresos_anio += neto
+                ganancia_anio += ganancia_v
+                costo_anio += costo_v
+
+        ventas_enriquecidas.append({
+            'id_venta': v.id_venta,
+            'cajero': v.id_usuario_cajero.username.capitalize() if v.id_usuario_cajero else 'Sistema',
+            'id_cliente': v.id_cliente,
+            'fecha_str': f_local.strftime('%d/%m/%Y'),
+            'hora_str': f_local.strftime('%H:%M %p'),
+            'origen_venta': v.origen_venta or 'Tienda Física',
+            'medio_pago': v.medio_pago or 'Efectivo',
+            'subtotal': float(v.subtotal or 0),
+            'descuento': float(v.descuento or 0),
+            'total_neto': float(neto),
+            'costo_estimado': float(costo_v),
+            'ganancia_estimada': float(ganancia_v),
+            'estado_venta': v.estado_venta or 'Completada',
+            'es_hoy': es_hoy,
+            'es_mes': es_mes,
+            'es_anio': es_anio,
+        })
+
+    total_ventas_count = len(ventas)
+    ticket_promedio = round(total_ventas_ingresos / count_general_activas, 2) if count_general_activas > 0 else Decimal('0.00')
+    margen_venta_pct = float(round(ratio_ganancia_venta * 100, 1))
+
+    ganancias_periodos = {
+        'dia': {
+            'label': 'Ventas de Hoy (Día)',
+            'count': count_dia,
+            'ventas_count': count_dia,
+            'ingresos': float(round(ingresos_dia, 2)),
+            'costo': float(round(costo_dia, 2)),
+            'ganancia': float(round(ganancia_dia, 2)),
+            'margen_pct': margen_venta_pct if ingresos_dia > 0 else 0.0,
+        },
+        'mes': {
+            'label': 'Ventas del Mes Actual',
+            'count': count_mes,
+            'ventas_count': count_mes,
+            'ingresos': float(round(ingresos_mes, 2)),
+            'costo': float(round(costo_mes, 2)),
+            'ganancia': float(round(ganancia_mes, 2)),
+            'margen_pct': margen_venta_pct if ingresos_mes > 0 else 0.0,
+        },
+        'anio': {
+            'label': 'Ventas del Año Actual',
+            'count': count_anio,
+            'ventas_count': count_anio,
+            'ingresos': float(round(ingresos_anio, 2)),
+            'costo': float(round(costo_anio, 2)),
+            'ganancia': float(round(ganancia_anio, 2)),
+            'margen_pct': margen_venta_pct if ingresos_anio > 0 else 0.0,
+        },
+        'general': {
+            'label': 'Todas las Ventas Registradas',
+            'count': count_general_activas,
+            'ventas_count': count_general_activas,
+            'ingresos': float(round(total_ventas_ingresos, 2)),
+            'costo': float(round(total_ventas_costo, 2)),
+            'ganancia': float(round(total_ventas_ganancia, 2)),
+            'margen_pct': margen_venta_pct if total_ventas_ingresos > 0 else 0.0,
+        },
+        'catalogo': {
+            'label': 'Proyección Total en Bodega',
+            'count': total_productos,
+            'ventas_count': total_productos,
+            'ingresos': float(round(valor_venta_potencial, 2)),
+            'costo': float(round(inversion_total, 2)),
+            'ganancia': float(round(ganancia_potencial, 2)),
+            'margen_pct': float(margen_promedio),
+        }
+    }
+
+    return {
+        'productos': productos,
+        'productos_resumen': productos_resumen,
+        'categorias': categorias,
+        'ventas': ventas,
+        'ventas_json': ventas_enriquecidas,
+        'total_productos': total_productos,
+        'total_ofertas': total_ofertas,
+        'total_bajo_stock': total_bajo_stock,
+        'productos_bajo_stock': productos_bajo_stock,
+        'total_agotados': total_agotados,
+        'inversion_total': inversion_total,
+        'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
+        'valor_venta_potencial': valor_venta_potencial,
+        'ganancia_potencial': ganancia_potencial,
+        'margen_promedio': margen_promedio,
+        'ratio_ganancia_pct': round(ratio_ganancia_venta * 100, 1),
+        'chart_cat_labels': chart_cat_labels,
+        'chart_cat_data': chart_cat_data,
+        'chart_prod_labels': chart_prod_labels,
+        'chart_prod_costos': chart_prod_costos,
+        'chart_prod_precios': chart_prod_precios,
+        'chart_prod_margenes': chart_prod_margenes,
+        'total_ventas_count': total_ventas_count,
+        'total_ventas_ingresos': total_ventas_ingresos,
+        'total_ventas_ganancia': total_ventas_ganancia,
+        'ventas_hoy_count': count_dia,
+        'ventas_hoy_ingresos': ingresos_dia,
+        'ganancia_dia': ganancia_dia,
+        'ingresos_mes': ingresos_mes,
+        'ganancia_mes': ganancia_mes,
+        ' count_mes': count_mes,
+        'count_mes': count_mes,
+        'ingresos_anio': ingresos_anio,
+        'ganancia_anio': ganancia_anio,
+        'count_anio': count_anio,
+        'ticket_promedio': ticket_promedio,
+        'ganancias_periodos': ganancias_periodos,
+    }
+
+
+@personal_requerido
+def dashboard_view(request):
+    """
+    PANEL ADMINISTRATIVO PRIVADO ('/dashboard/')
+    --------------------------------------------
+    Gestión integral del negocio con métricas reales de inventario y ganancias
+    por periodo (Día, Mes, Año y Catálogo).
+    """
+    User = get_user_model()
+    metricas = _calcular_metricas_reales()
+    total_usuarios = User.objects.count()
+
     proveedores = Proveedor.objects.all().order_by('razon_social')
     total_proveedores = proveedores.count()
     total_prov_activos = proveedores.filter(estado='Activo').count()
     total_prov_inactivos = total_proveedores - total_prov_activos
     total_prov_con_telefono = proveedores.exclude(telefono__isnull=True).exclude(telefono='').count()
 
-    # NOTA TÉCNICA (INTEGRACIÓN EQUIPO - CÓDIGO DE GUTIÉRREZ):
-    # Sincronización de perfiles administrativos y métricas del equipo de gestión
     for u in User.objects.filter(perfil__isnull=True):
-        rol_def = 'admin' if u.is_superuser else ('bodeguero' if u.is_staff else 'cajero')
+        rol_def = 'admin' if u.is_superuser else ('bodeguero' if u.is_staff else 'cliente')
         PerfilUsuario.objects.get_or_create(
             usuario=u,
-            defaults={'rol': rol_def, 'estado': 'activo', 'telefono': '3001234567'}
+            defaults={'rol': rol_def, 'estado': 'activo'}
         )
 
-    # Obtener única y exclusivamente los REGISTROS ACTIVOS ordenados por ROLES:
-    # Jerarquía requerida: 1. Super Admin, 2. Bodeguero, 3. Cajero
     perfiles_usuarios = PerfilUsuario.objects.select_related('usuario').filter(
         estado='activo',
         usuario__is_active=True
+    ).exclude(
+        rol='cliente',
+        usuario__is_superuser=False
     ).annotate(
         orden_rol=Case(
             When(usuario__is_superuser=True, then=Value(1)),
@@ -161,35 +484,17 @@ def dashboard_view(request):
         )
     ).order_by('orden_rol', 'usuario__username')
 
-    # Métricas específicas del equipo de cuentas activas por rol
     total_activos = perfiles_usuarios.count()
     total_superadmins = perfiles_usuarios.filter(orden_rol=1).count()
     total_bodegueros = perfiles_usuarios.filter(orden_rol=2).count()
     total_cajeros = perfiles_usuarios.filter(orden_rol=3).count()
     total_staff = perfiles_usuarios.filter(usuario__is_staff=True).count()
 
-    # Métricas y listado de Ventas para el panel de gestión
-    ventas = Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta')
-    total_ventas_count = ventas.count()
-    total_ventas_ingresos = sum(v.total_neto for v in ventas)
-    hoy = timezone.now().date()
-    ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
-    ventas_hoy_count = len(ventas_hoy)
-    ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
-    ticket_promedio = round(total_ventas_ingresos / total_ventas_count, 2) if total_ventas_count > 0 else Decimal('0.00')
-
-    return render(request, 'principal/dashboard.html', {
-        'productos': productos,
-        'categorias': categorias,
+    context = {
+        **metricas,
         'proveedores': proveedores,
         'perfiles_usuarios': perfiles_usuarios,
-        'ventas': ventas,
         'clientes': Cliente.objects.all(),
-        'total_productos': total_productos,
-        'total_ofertas': total_ofertas,
-        'total_bajo_stock': total_bajo_stock,
-        'productos_bajo_stock': productos_bajo_stock,
-        'total_agotados': total_agotados,
         'total_usuarios': total_usuarios,
         'total_proveedores': total_proveedores,
         'total_prov_activos': total_prov_activos,
@@ -202,27 +507,13 @@ def dashboard_view(request):
         'total_admins': total_activos,
         'total_admins_activos': total_activos,
         'total_staff': total_staff,
-        'total_ventas_count': total_ventas_count,
-        'total_ventas_ingresos': total_ventas_ingresos,
-        'ventas_hoy_count': ventas_hoy_count,
-        'ventas_hoy_ingresos': ventas_hoy_ingresos,
-        'ticket_promedio': ticket_promedio,
-        'inversion_total': inversion_total,
-        'inversion_total_cop': f"{int(inversion_total):,}".replace(",", "."),
-        'valor_venta_potencial': valor_venta_potencial,
-        'ganancia_potencial': ganancia_potencial,
-        'margen_promedio': margen_promedio,
         'es_admin': es_administrador(request.user),
-        'chart_cat_labels': chart_cat_labels,
-        'chart_cat_data': chart_cat_data,
-        'chart_prod_labels': chart_prod_labels,
-        'chart_prod_costos': chart_prod_costos,
-        'chart_prod_precios': chart_prod_precios,
-        'chart_prod_margenes': chart_prod_margenes,
-    })
+    }
+    return render(request, 'principal/dashboard.html', context)
 
 
-@login_required
+
+@personal_requerido
 def crear_producto_dashboard(request):
     """
     CREACIÓN DIRECTA DE PRODUCTOS DESDE EL DASHBOARD CON VALIDACIÓN FORMULARIA
@@ -239,7 +530,7 @@ def crear_producto_dashboard(request):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def editar_producto_dashboard(request, id_producto):
     """
     EDICIÓN RÁPIDA DE PRECIOS, COSTOS, OFERTAS Y STOCK DESDE EL DASHBOARD
@@ -257,7 +548,7 @@ def editar_producto_dashboard(request, id_producto):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def eliminar_producto_dashboard(request, id_producto):
     """
     ELIMINACIÓN DE PRODUCTO DESDE EL DASHBOARD
@@ -270,7 +561,7 @@ def eliminar_producto_dashboard(request, id_producto):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def crear_categoria_dashboard(request):
     """
     CREACIÓN DE CATEGORÍA DESDE EL DASHBOARD CON VALIDACIÓN
@@ -286,7 +577,7 @@ def crear_categoria_dashboard(request):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def eliminar_categoria_dashboard(request, id_categoria):
     """
     ELIMINACIÓN DE CATEGORÍA DESDE EL DASHBOARD
@@ -436,10 +727,7 @@ def editar_usuario_dashboard(request, user_id):
             target_user.is_superuser = False
             target_user.is_staff = True
 
-        if estado == 'inactivo':
-            target_user.is_active = False
-        else:
-            target_user.is_active = True
+        target_user.is_active = (estado != 'inactivo')
 
         if nueva_password:
             target_user.set_password(nueva_password)
@@ -485,7 +773,7 @@ def eliminar_usuario_dashboard(request, user_id):
     return redirect('/dashboard/#usuarios')
 
 
-@login_required
+@personal_requerido
 def exportar_inventario_csv(request):
     """
     EXPORTACIÓN DE INVENTARIO COMPATIBLE CON MICROSOFT EXCEL (UTF-8-SIG)
@@ -543,7 +831,7 @@ def exportar_inventario_csv(request):
     return response
 
 
-@login_required
+@personal_requerido
 def crear_proveedor_dashboard(request):
     """
     REGISTRO DE NUEVO PROVEEDOR AGRÍCOLA DESDE EL DASHBOARD
@@ -559,7 +847,7 @@ def crear_proveedor_dashboard(request):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def editar_proveedor_dashboard(request, id_proveedor):
     """
     EDICIÓN DE PROVEEDOR AGRÍCOLA EXISTENTE
@@ -576,7 +864,7 @@ def editar_proveedor_dashboard(request, id_proveedor):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def eliminar_proveedor_dashboard(request, id_proveedor):
     """
     ELIMINACIÓN DE PROVEEDOR AGRÍCOLA
@@ -589,83 +877,32 @@ def eliminar_proveedor_dashboard(request, id_proveedor):
     return redirect('dashboard')
 
 
-@login_required
+@personal_requerido
 def crear_venta_dashboard(request):
     """
     CRUD VENTAS: REGISTRO DE NUEVA TRANSACCIÓN DESDE EL DASHBOARD (MODAL / VENTANA)
     """
     if request.method == 'POST':
-        id_cliente = request.POST.get('id_cliente')
-        origen_venta = request.POST.get('origen_venta', 'Tienda Física').strip()
-        subtotal_raw = request.POST.get('subtotal', '0').strip()
-        descuento_raw = request.POST.get('descuento', '0').strip()
-        total_neto_raw = request.POST.get('total_neto', '0').strip()
-        medio_pago = request.POST.get('medio_pago', 'Efectivo').strip()
-        estado_venta = request.POST.get('estado_venta', 'Completada').strip()
-
-        try:
-            subtotal = Decimal(subtotal_raw) if subtotal_raw else Decimal('0.00')
-            descuento = Decimal(descuento_raw) if descuento_raw else Decimal('0.00')
-            total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
-        except Exception:
-            subtotal = Decimal('0.00')
-            descuento = Decimal('0.00')
-            total_neto = Decimal('0.00')
-
-        if descuento > subtotal:
-            descuento = subtotal
-            total_neto = Decimal('0.00')
-
-        cli_id = int(id_cliente) if id_cliente and str(id_cliente).isdigit() else None
-
+        datos = _extraer_datos_venta(request.POST)
         nueva_venta = Venta.objects.create(
-            id_cliente=cli_id,
             id_usuario_cajero=request.user,
-            origen_venta=origen_venta,
-            subtotal=subtotal,
-            descuento=descuento,
-            total_neto=total_neto,
-            medio_pago=medio_pago,
-            estado_venta=estado_venta
+            **datos
         )
         messages.success(request, f"¡Venta #VTA-{nueva_venta.id_venta} registrada exitosamente por ${nueva_venta.total_neto:,.2f} COP!")
 
     return redirect('/dashboard/#ventas')
 
 
-@login_required
+@personal_requerido
 def editar_venta_dashboard(request, id_venta):
     """
     CRUD VENTAS: MODIFICACIÓN DE VENTA DESDE EL DASHBOARD (MODAL / VENTANA)
     """
     venta = get_object_or_404(Venta, pk=id_venta)
     if request.method == 'POST':
-        id_cliente = request.POST.get('id_cliente')
-        origen_venta = request.POST.get('origen_venta', 'Tienda Física').strip()
-        subtotal_raw = request.POST.get('subtotal', '0').strip()
-        descuento_raw = request.POST.get('descuento', '0').strip()
-        total_neto_raw = request.POST.get('total_neto', '0').strip()
-        medio_pago = request.POST.get('medio_pago', 'Efectivo').strip()
-        estado_venta = request.POST.get('estado_venta', 'Completada').strip()
-
-        try:
-            subtotal = Decimal(subtotal_raw) if subtotal_raw else Decimal('0.00')
-            descuento = Decimal(descuento_raw) if descuento_raw else Decimal('0.00')
-            total_neto = Decimal(total_neto_raw) if total_neto_raw else (subtotal - descuento)
-        except Exception:
-            subtotal = Decimal('0.00')
-            descuento = Decimal('0.00')
-            total_neto = Decimal('0.00')
-
-        cli_id = int(id_cliente) if id_cliente and str(id_cliente).isdigit() else None
-
-        venta.id_cliente = cli_id
-        venta.origen_venta = origen_venta
-        venta.subtotal = subtotal
-        venta.descuento = descuento
-        venta.total_neto = total_neto
-        venta.medio_pago = medio_pago
-        venta.estado_venta = estado_venta
+        datos = _extraer_datos_venta(request.POST)
+        for campo, valor in datos.items():
+            setattr(venta, campo, valor)
         venta.save()
 
         messages.success(request, f"¡Venta #VTA-{venta.id_venta} actualizada exitosamente!")
@@ -673,7 +910,7 @@ def editar_venta_dashboard(request, id_venta):
     return redirect('/dashboard/#ventas')
 
 
-@login_required
+@personal_requerido
 def eliminar_venta_dashboard(request, id_venta):
     """
     CRUD VENTAS: ELIMINACIÓN DE VENTA DESDE EL DASHBOARD (MODAL / VENTANA POST)
@@ -689,30 +926,264 @@ def eliminar_venta_dashboard(request, id_venta):
     return redirect('/dashboard/#ventas')
 
 
+@personal_requerido
+def exportar_ventas_csv(request):
+    """
+    EXPORTACIÓN DE HISTORIAL DE VENTAS A CSV (COMPATIBLE CON EXCEL)
+    ---------------------------------------------------------------
+    Genera un archivo descargable con codificación UTF-8 con BOM y delimitador ';'
+    para auditoría contable y cierre de caja diario/mensual.
+    """
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    fecha_str = timezone.now().strftime('%Y%m%d_%H%M')
+    response['Content-Disposition'] = f'attachment; filename="ventas_al_paso_{fecha_str}.csv"'
+    response.write('﻿')
+
+    writer = csv.writer(response, delimiter=';')
+    writer.writerow([
+        'ID Venta',
+        'Fecha y Hora',
+        'Cajero Responsable',
+        'Cliente',
+        'Canal / Origen',
+        'Medio de Pago',
+        'Subtotal (COP)',
+        'Descuento (COP)',
+        'Total Neto (COP)',
+        'Estado',
+    ])
+
+    ventas = Venta.objects.select_related('id_usuario_cajero').order_by('-fecha_venta')
+    for v in ventas:
+        fecha_local = timezone.localtime(v.fecha_venta).strftime('%Y-%m-%d %H:%M') if v.fecha_venta else ''
+        cajero_nombre = v.id_usuario_cajero.username if v.id_usuario_cajero else 'Sistema'
+        cliente_str = str(v.cliente) if v.cliente else (f'Cliente #{v.id_cliente}' if v.id_cliente else 'Consumidor Final')
+        descuento_val = v.descuento or Decimal('0.00')
+        writer.writerow([
+            f'#VTA-{v.id_venta}',
+            fecha_local,
+            cajero_nombre,
+            cliente_str,
+            v.origen_venta,
+            v.medio_pago,
+            f'{v.subtotal:.2f}',
+            f'{descuento_val:.2f}',
+            f'{v.total_neto:.2f}',
+            v.estado_venta,
+        ])
+
+    return response
+
+
+@personal_requerido
+def recibo_venta_view(request, id_venta):
+    """
+    COMPROBANTE / TIRILLA DE VENTA IMPRIMIBLE
+    -----------------------------------------
+    Renderiza un comprobante limpio con logotipo oficial listo para impresión
+    térmica o guardado en PDF desde el navegador.
+    """
+    venta = get_object_or_404(
+        Venta.objects.select_related('id_usuario_cajero'),
+        pk=id_venta,
+    )
+    return render(request, 'principal/ventas/recibo_venta.html', {'venta': venta})
+
+
+def registrar_pedido_whatsapp(request):
+    """
+    ENDPOINT API: REGISTRO Y ACTUALIZACIÓN EN TIEMPO REAL DE PEDIDOS DEL CARRITO
+    ----------------------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Permite tanto crear un pedido nuevo desde el carrito como actualizar en tiempo
+    real un pedido existente ('id_venta') cuando el cliente o usuario modifica
+    las cantidades o productos de su canasta, reflejándose de inmediato para todos
+    los usuarios y administradores.
+    """
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+    except (ValueError, TypeError):
+        payload = {}
+
+    items = payload.get('items') or []
+    total_raw = payload.get('total', 0)
+    id_venta_raw = payload.get('id_venta') or request.session.get('active_venta_id')
+
+    try:
+        monto = Decimal(str(total_raw))
+    except (InvalidOperation, ValueError, TypeError):
+        monto = Decimal('0.00')
+
+    if monto <= Decimal('0.00') and isinstance(items, list):
+        acumulado = Decimal('0.00')
+        for item in items:
+            if isinstance(item, dict):
+                try:
+                    precio = Decimal(str(item.get('precio', 0)))
+                    cantidad = Decimal(str(item.get('cantidad', 1)))
+                    if precio > 0 and cantidad > 0:
+                        acumulado += precio * cantidad
+                except (InvalidOperation, ValueError, TypeError):
+                    continue
+        monto = acumulado
+
+    # Verificar si ya existe una venta activa asociada a este pedido para actualizarla en tiempo real
+    venta_existente = None
+    if id_venta_raw and str(id_venta_raw).isdigit():
+        venta_existente = Venta.objects.filter(pk=int(id_venta_raw)).first()
+
+    # Si el usuario vació su carrito y tenía un pedido pendiente, se elimina/cancela en tiempo real
+    if monto <= Decimal('0.00'):
+        if venta_existente and venta_existente.estado_venta == 'Pendiente':
+            vid = venta_existente.id_venta
+            venta_existente.delete()
+            request.session.pop('active_venta_id', None)
+            return JsonResponse({'ok': True, 'deleted': True, 'eliminada': True, 'id_venta': None, 'eliminado': vid}, status=200)
+        return JsonResponse({'ok': False, 'error': 'Monto de pedido inválido.'}, status=400)
+
+    if venta_existente:
+        venta_existente.subtotal = monto
+        venta_existente.total_neto = max(Decimal('0.00'), monto - (venta_existente.descuento or Decimal('0.00')))
+        venta_existente.fecha_venta = timezone.now()
+        venta_existente.save()
+        request.session['active_venta_id'] = venta_existente.id_venta
+        return JsonResponse({
+            'ok': True,
+            'updated': True,
+            'id_venta': venta_existente.id_venta,
+            'codigo': f'#VTA-{venta_existente.id_venta}',
+            'total_neto': float(venta_existente.total_neto),
+        }, status=200)
+
+    # Determinar usuario responsable para nuevo registro contable
+    if request.user.is_authenticated:
+        cajero = request.user
+    else:
+        cajero = (
+            User.objects.filter(is_active=True, is_superuser=True).order_by('id').first()
+            or User.objects.filter(is_active=True).order_by('id').first()
+        )
+
+    if not cajero:
+        return JsonResponse({'ok': False, 'error': 'No hay cajero disponible.'}, status=503)
+
+    nueva_venta = Venta.objects.create(
+        id_usuario_cajero=cajero,
+        origen_venta='WhatsApp',
+        medio_pago='Transferencia',
+        subtotal=monto,
+        descuento=Decimal('0.00'),
+        total_neto=monto,
+        estado_venta='Pendiente',
+    )
+    request.session['active_venta_id'] = nueva_venta.id_venta
+    return JsonResponse({
+        'ok': True,
+        'updated': False,
+        'id_venta': nueva_venta.id_venta,
+        'codigo': f'#VTA-{nueva_venta.id_venta}',
+        'total_neto': float(nueva_venta.total_neto),
+    }, status=201)
+
+
+def estado_tiempo_real_api(request):
+    """
+    ENDPOINT API DE SINCRONIZACIÓN EN TIEMPO REAL ('/api/estado-tiempo-real/')
+    --------------------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Provee los datos actualizados en vivo de ventas, ganancias (Día, Mes, Año y
+    Catálogo) y estado de productos para que tanto el Dashboard administrativo
+    como el catálogo/carrito de todos los clientes se actualicen sin recargar.
+    """
+    m = _calcular_metricas_reales()
+    # Firma determinista del estado actual para detectar cualquier cambio
+    firma_partes = [
+        f"p:{p['id_producto']}:{p['precio_efectivo']}:{p['stock_actual']}:{p['estado']}:{p['en_oferta']}"
+        for p in m['productos_resumen']
+    ] + [
+        f"v:{v['id_venta']}:{v['total_neto']}:{v['estado_venta']}:{v['medio_pago']}:{v['origen_venta']}"
+        for v in m['ventas_json']
+    ]
+    version_hash = str(hash('|'.join(firma_partes)))
+
+    resumen_data = {
+        'total_productos': m['total_productos'],
+        'total_ofertas': m['total_ofertas'],
+        'total_bajo_stock': m['total_bajo_stock'],
+        'total_agotados': m['total_agotados'],
+        'inversion_total': float(m['inversion_total']),
+        'valor_venta_potencial': float(m['valor_venta_potencial']),
+        'ganancia_potencial': float(m['ganancia_potencial']),
+        'margen_promedio': float(m['margen_promedio']),
+        'ratio_ganancia_pct': float(m['ratio_ganancia_pct']),
+        'total_ventas_count': m['total_ventas_count'],
+        'total_ventas_ingresos': float(m['total_ventas_ingresos']),
+        'total_ventas_ganancia': float(m['total_ventas_ganancia']),
+        'ventas_hoy_count': m['ventas_hoy_count'],
+        'ventas_hoy_ingresos': float(m['ventas_hoy_ingresos']),
+        'ticket_promedio': float(m['ticket_promedio']),
+        'chart_cat_labels': m['chart_cat_labels'],
+        'chart_cat_data': m['chart_cat_data'],
+        'chart_prod_labels': m['chart_prod_labels'],
+        'chart_prod_costos': m['chart_prod_costos'],
+        'chart_prod_precios': m['chart_prod_precios'],
+        'chart_prod_margenes': m['chart_prod_margenes'],
+    }
+
+    return JsonResponse({
+        'ok': True,
+        'version': version_hash,
+        'resumen': resumen_data,
+        'resumen_kpis': resumen_data,
+        'ventas_kpis': {
+            'total_ventas_ingresos': float(m['total_ventas_ingresos']),
+            'total_ventas_count': m['total_ventas_count'],
+            'ventas_hoy_count': m['ventas_hoy_count'],
+            'ventas_hoy_ingresos': float(m['ventas_hoy_ingresos']),
+            'ticket_promedio': float(m['ticket_promedio']),
+        },
+        'ganancias_periodos': m['ganancias_periodos'],
+        'productos': m['productos_resumen'],
+        'productos_resumen': m['productos_resumen'],
+        'ventas': m['ventas_json'],
+    })
+
+
+class CustomLoginView(auth_views.LoginView):
+    """
+    VISTA DE INICIO DE SESIÓN CON REDIRECCIÓN INTELIGENTE POR ROL
+    -------------------------------------------------------------
+    NOTA TÉCNICA PARA EL EQUIPO (GAES):
+    Evita que los usuarios con rol 'cliente' sean enviados a '/dashboard/' tras
+    iniciar sesión (lo que antes les mostraba una alerta de 'Acceso restringido').
+    - Personal operativo (Superadmin, Admin, Bodeguero, Cajero) -> '/dashboard/'
+    - Clientes de la tienda ('cliente') -> '/' (Portada de la tienda)
+    """
+    template_name = 'principal/login.html'
+
+    def get_default_redirect_url(self):
+        user = self.request.user
+        if user.is_authenticated and es_personal_operativo(user):
+            return str(reverse_lazy('dashboard'))
+        if user.is_authenticated:
+            nombre = user.first_name or user.username
+            messages.success(self.request, f'¡Bienvenido de nuevo a Al Paso Frutería, {nombre}!')
+        return str(reverse_lazy('index'))
+
+
 def error_404_view(request, exception=None):
     """
-    MANEJADOR DE ERROR 404 (PÁGINA NO ENCONTRADA)
+    MANEJADOR DE ERROR 404 (PÁGINA NO ENCONTRADA Y PREVISUALIZACIÓN)
     """
     return render(request, 'principal/404.html', status=404)
 
 
 def error_500_view(request):
     """
-    MANEJADOR DE ERROR 500 (ERROR INTERNO DEL SERVIDOR)
-    """
-    return render(request, 'principal/500.html', status=500)
-
-
-def error_404_preview(request):
-    """
-    RUTA DE AUDITORÍA Y PREVISUALIZACIÓN DE ERROR 404
-    """
-    return render(request, 'principal/404.html', status=404)
-
-
-def error_500_preview(request):
-    """
-    RUTA DE AUDITORÍA Y PREVISUALIZACIÓN DE ERROR 500
+    MANEJADOR DE ERROR 500 (ERROR INTERNO DEL SERVIDOR Y PREVISUALIZACIÓN)
     """
     return render(request, 'principal/500.html', status=500)
 
@@ -729,53 +1200,11 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
-
-@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
-def admin_preview(request):
-    """
-    PREVISUALIZACIÓN DE AUDITORÍA: PANEL GENERAL
-    Permite generar reportes técnicos y capturas del estado del admin exclusivamente para superusuarios.
-    """
-    from django.contrib import admin
-    return admin.site.index(request)
-
-
-@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
-def admin_productos_preview(request):
-    """
-    PREVISUALIZACIÓN DE AUDITORÍA: APP PRINCIPAL
-    Carga el índice de modelos de la app 'principal' en el panel de Django exclusivamente para superusuarios.
-    """
-    from django.contrib import admin
-    return admin.site.app_index(request, 'principal')
-
-
-@user_passes_test(lambda u: u.is_active and u.is_superuser, login_url='login')
-def admin_producto_list_preview(request):
-    """
-    PREVISUALIZACIÓN DE AUDITORÍA: LISTADO DE PRODUCTOS
-    Genera la vista de tabla tabular de productos en el admin de Django exclusivamente para superusuarios.
-    """
-    from django.contrib import admin
-    from .models import Producto
-    return admin.site._registry[Producto].changelist_view(request)
-
-
 def registro_view(request):
     """
     REGISTRO PÚBLICO DE CLIENTES Y ASIGNACIÓN DE PERFIL ('/registro/')
     Almacena: username, email, contraseña, teléfono, rol ('cliente'), estado ('activo')
     y fecha de creación automática vía ORM.
-
-    NOTA TÉCNICA PARA EL EQUIPO (CORRECCIONES SOBRE EL CÓDIGO DE GUTIÉRREZ):
-    1. SEGURIDAD (Escalamiento de privilegios): En el registro público el rol se fuerza
-       estrictamente a 'cliente' (is_staff=False, is_superuser=False). Los roles 'admin'
-       y 'cajero' solo pueden ser concedidos por administradores en /admin/auth/user/.
-    2. VALIDACIÓN DE EMAIL: Se incorpora validate_email de Django para descartar correos malformados.
-    3. POLÍTICAS DE CONTRASEÑA: Se evalúa validate_password para cumplir con las políticas
-       configuradas en settings.py (longitud mínima, no numérica, no común).
-    4. EXPERIENCIA DE USUARIO: Los datos ingresados (form_data) se devuelven a la plantilla
-       en caso de error para que el usuario no deba reescribirlos.
     """
     if request.user.is_authenticated:
         return redirect('index')
@@ -799,33 +1228,33 @@ def registro_view(request):
         # 1. Validaciones de presencia de campos obligatorios
         if not username or not email or not password:
             messages.error(request, 'Por favor completa todos los campos obligatorios.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 2. Validación de aceptación de términos del servicio
         if not terminos:
             messages.error(request, 'Debes aceptar los términos de servicio y políticas de privacidad para registrarte.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 3. Validación de coincidencia de contraseñas
         if password != confirm_password:
             messages.error(request, 'Las contraseñas ingresadas no coinciden.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 4. Validación de formato de correo electrónico
         try:
             validate_email(email)
         except ValidationError:
             messages.error(request, 'El correo electrónico ingresado no tiene un formato válido.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 5. Validación de unicidad de usuario y correo (insensible a mayúsculas)
         if User.objects.filter(username__iexact=username).exists():
             messages.error(request, 'El nombre de usuario ya se encuentra registrado.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         if User.objects.filter(email__iexact=email).exists():
             messages.error(request, 'El correo electrónico ya está en uso.')
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 6. Validación de robustez de contraseña mediante validadores de Django
         try:
@@ -833,7 +1262,7 @@ def registro_view(request):
         except ValidationError as e:
             for err in e.messages:
                 messages.error(request, err)
-            return render(request, 'principal/Registro.html', {'form_data': form_data})
+            return render(request, 'principal/registro.html', {'form_data': form_data})
 
         # 7. Crear el usuario base de autenticación con rol 'cliente' seguro
         nuevo_usuario = User.objects.create_user(
@@ -857,14 +1286,14 @@ def registro_view(request):
         messages.success(request, f'¡Bienvenido a Al Paso Frutería, {username}!')
         return redirect('index')
 
-    return render(request, 'principal/Registro.html', {'form_data': form_data})
+    return render(request, 'principal/registro.html', {'form_data': form_data})
 
 
 # ==============================================================================
 # CRUD SEGURO GUIA 4 (PRODUCTOS Y CATEGORIAS - FBV Y CBV)
 # ==============================================================================
 
-@login_required
+@personal_requerido
 def producto_listar(request):
     """
     Lista todos los productos del catálogo ordenados alfabéticamente (FBV).
@@ -877,7 +1306,7 @@ def producto_listar(request):
     )
 
 
-@login_required
+@personal_requerido
 def producto_crear(request):
     """
     Crea un nuevo producto mediante formulario validado (FBV).
@@ -897,7 +1326,7 @@ def producto_crear(request):
     )
 
 
-@login_required
+@personal_requerido
 def producto_editar(request, pk):
     """
     Actualiza la información de un producto existente (FBV).
@@ -922,7 +1351,7 @@ def producto_editar(request, pk):
     )
 
 
-@login_required
+@personal_requerido
 def producto_eliminar(request, pk):
     """
     Elimina un producto previa confirmación y petición POST segura (FBV).
@@ -941,7 +1370,7 @@ def producto_eliminar(request, pk):
     )
 
 
-class CategoriaListaView(LoginRequiredMixin, ListView):
+class CategoriaListaView(PersonalRequeridoMixin, ListView):
     """
     Vista basada en clases para listar categorías ordenadas por nombre (CBV).
     """
@@ -956,7 +1385,7 @@ class CategoriaListaView(LoginRequiredMixin, ListView):
         return contexto
 
 
-class CategoriaCrearView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class CategoriaCrearView(PersonalRequeridoMixin, SuccessMessageMixin, CreateView):
     """
     Vista basada en clases para registrar una nueva categoría (CBV).
     """
@@ -972,7 +1401,7 @@ class CategoriaCrearView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return contexto
 
 
-class CategoriaEditarView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class CategoriaEditarView(PersonalRequeridoMixin, SuccessMessageMixin, UpdateView):
     """
     Vista basada en clases para editar una categoría existente (CBV).
     """
@@ -988,7 +1417,7 @@ class CategoriaEditarView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return contexto
 
 
-class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
+class CategoriaEliminarView(PersonalRequeridoMixin, DeleteView):
     """
     Vista basada en clases para eliminar una categoría previa confirmación (CBV).
     """
@@ -1004,112 +1433,3 @@ class CategoriaEliminarView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, "La categoria se elimino correctamente.")
         return super().form_valid(form)
-
-
-# ==============================================================================
-# MÓDULO DE GESTIÓN DE VENTAS (PUNTO DE VENTA Y FACTURACIÓN)
-# ==============================================================================
-
-@login_required
-def lista_ventas(request):
-    """
-    1. LISTADO DE VENTAS: Muestra el historial completo de ventas con métricas clave.
-    """
-    ventas = Venta.objects.select_related('id_usuario_cajero').all().order_by('-fecha_venta')
-    total_ingresos = sum(v.total_neto for v in ventas)
-    hoy = timezone.now().date()
-    ventas_hoy = [v for v in ventas if v.fecha_venta and v.fecha_venta.date() == hoy]
-    ventas_hoy_ingresos = sum(v.total_neto for v in ventas_hoy)
-    
-    return render(request, 'principal/ventas/lista_ventas.html', {
-        'ventas': ventas,
-        'total_ingresos': total_ingresos,
-        'total_ventas': ventas.count(),
-        'ventas_hoy_count': len(ventas_hoy),
-        'ventas_hoy_ingresos': ventas_hoy_ingresos,
-        'titulo': 'Gestión de Ventas'
-    })
-
-
-# Crear venta
-@login_required
-def crear_venta(request):
-    if request.method == 'POST':
-        id_cliente = request.POST.get('id_cliente')
-        origen_venta = request.POST.get('origen_venta')
-        subtotal = request.POST.get('subtotal')
-        descuento = request.POST.get('descuento', 0)
-        total_neto = request.POST.get('total_neto')
-        medio_pago = request.POST.get('medio_pago')
-        estado_venta = request.POST.get('estado_venta')
-
-        Venta.objects.create(
-            id_cliente=id_cliente if id_cliente else None,
-            id_usuario_cajero=request.user,  # Asigna automáticamente al cajero logueado
-            origen_venta=origen_venta,
-            subtotal=subtotal,
-            descuento=descuento if descuento else 0,
-            total_neto=total_neto,
-            medio_pago=medio_pago,
-            estado_venta=estado_venta
-        )
-        messages.success(request, "Venta registrada con éxito.")
-        next_url = request.POST.get('next') or request.GET.get('next')
-        return redirect(next_url if next_url else 'lista_ventas')
-        
-    clientes = Cliente.objects.all()
-    productos = Producto.objects.all()
-    return render(request, 'principal/ventas/venta_form.html', {
-        'clientes': clientes,
-        'productos': productos,
-        'titulo': 'Registrar Nueva Venta'
-    })
-
-# Actualizar venta
-@login_required
-def editar_venta(request, pk):
-    venta = get_object_or_404(Venta, pk=pk)
-    
-    if request.method == 'POST':
-        venta.id_cliente = request.POST.get('id_cliente') if request.POST.get('id_cliente') else None
-        venta.origen_venta = request.POST.get('origen_venta')
-        venta.subtotal = request.POST.get('subtotal')
-        venta.descuento = request.POST.get('descuento', 0)
-        venta.total_neto = request.POST.get('total_neto')
-        venta.medio_pago = request.POST.get('medio_pago')
-        venta.estado_venta = request.POST.get('estado_venta')
-        venta.save()
-        
-        messages.success(request, f"Venta #{venta.id_venta} actualizada exitosamente.")
-        next_url = request.POST.get('next') or request.GET.get('next')
-        return redirect(next_url if next_url else 'lista_ventas')
-        
-    clientes = Cliente.objects.all()
-    productos = Producto.objects.all()
-    return render(request, 'principal/ventas/venta_form.html', {
-        'venta': venta,
-        'clientes': clientes,
-        'productos': productos,
-        'titulo': f'Editar Venta #{venta.id_venta}'
-    })
-
-
-@login_required
-def eliminar_venta(request, pk):
-    """
-    4. ELIMINAR VENTA: Muestra pantalla de confirmación y borra el registro de la BD.
-    """
-    venta = get_object_or_404(Venta, pk=pk)
-    if request.method == 'POST':
-        num_venta = venta.id_venta
-        venta.delete()
-        messages.success(request, f"La venta #{num_venta} fue eliminada del sistema.")
-        next_url = request.POST.get('next') or request.GET.get('next')
-        return redirect(next_url if next_url else 'lista_ventas')
-
-    return render(request, 'principal/ventas/venta_confirm_delete.html', {
-        'venta': venta,
-        'titulo': f'Confirmar Eliminación de Venta #{venta.id_venta}'
-    })
-
-

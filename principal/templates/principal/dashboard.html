@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.4">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,8 +23,12 @@
     <!-- Menú con enlaces a vistas de la tienda, catálogo, Django admin y salir -->
     <!-- ====================================================================== -->
     <aside class="sidebar">
-      <!-- Marca corporativa del panel -->
-      <div class="logo">Al Paso Frutería</div>
+      <!-- Marca corporativa del panel: Logo oficial -->
+      <div class="logo">
+        <a href="{% url 'index' %}" class="sidebar-logo-link" title="Ir a la tienda principal Al Paso Frutería">
+          <img src="{% static 'assets/logo_Transparente.png' %}" alt="Al Paso Frutería" class="sidebar-logo-img">
+        </a>
+      </div>
 
       <!-- Menú principal organizado según propuesta de flujo operativo diario -->
       <nav class="navigation" aria-label="Navegación del Panel">
@@ -104,16 +108,24 @@
         </div>
 
         <div class="header-actions">
+          <span class="live-sync-pill" id="liveSyncIndicator" title="Sincronización automática en tiempo real activa con tienda y pedidos">
+            <span class="live-sync-dot"></span> En tiempo real
+          </span>
           <label class="search search-w-280">
             <input
               type="search"
               id="inputBuscarProducto"
-              placeholder="Buscar producto o categoría..."
+              placeholder="Buscar fruta, categoría o venta..."
               aria-label="Buscar en el catálogo"
+              autocomplete="off"
+              oninput="ejecutarBusquedaActiva()"
               onkeyup="ejecutarBusquedaActiva()"
+              onsearch="ejecutarBusquedaActiva()"
             >
             <span aria-hidden="true">⌕</span>
           </label>
+          <!-- Dropdown de resultados rápidos globales del buscador superior -->
+          <div id="globalSearchDropdown" class="global-search-dropdown" role="listbox" aria-label="Resultados de búsqueda rápida"></div>
         </div>
       </header>
 
@@ -160,49 +172,332 @@
             </div>
             {% endif %}
 
-            <!-- KPIs Clave de Operación -->
+            <!-- KPIs Clave de Operación (100% Reales en Base a Productos y Precios) -->
             <div class="stats-row">
               <div class="dash-card">
                 <h5>Productos Registrados</h5>
-                <h3>{{ total_productos }}</h3>
+                <h3 id="kpiTotalProductos">{{ total_productos }}</h3>
                 <span class="kpi-subtext">En {{ categorias.count|default:"5" }} categorías activas</span>
               </div>
               <div class="dash-card">
                 <h5>Ofertas Activas</h5>
-                <h3 class="kpi-val-rose">{{ total_ofertas }}</h3>
+                <h3 class="kpi-val-rose" id="kpiTotalOfertas">{{ total_ofertas }}</h3>
                 <span class="kpi-subtext">Precios promocionales vigentes</span>
               </div>
               <div class="dash-card">
                 <h5>Inversión en Inventario</h5>
-                <h3 class="kpi-val-blue">${{ inversion_total|floatformat:0 }}</h3>
-                <span class="kpi-subtext">Costo total de compra en bodega</span>
+                <h3 class="kpi-val-blue" id="kpiInversionTotal">${{ inversion_total|floatformat:0 }}</h3>
+                <span class="kpi-subtext">Costo real de compra en bodega</span>
               </div>
               <div class="dash-card">
                 <h5>Ganancia Proyectada</h5>
-                <h3 class="kpi-val-green">+${{ ganancia_potencial|floatformat:0 }}</h3>
-                <span class="kpi-subtext">Margen promedio: <strong>{{ margen_promedio|floatformat:1 }}%</strong></span>
+                <h3 class="kpi-val-green" id="kpiGananciaPotencial">+${{ ganancia_potencial|floatformat:0 }}</h3>
+                <span class="kpi-subtext">Margen real sobre costo: <strong id="kpiMargenPromedio">{{ margen_promedio|floatformat:1 }}%</strong></span>
               </div>
             </div>
 
-            <!-- Analítica Visual (Chart.js) -->
+            <!-- ============================================================== -->
+            <!-- FILTRO INTERACTIVO DE GANANCIAS EN GENERAL (DÍA, MES, AÑO)      -->
+            <!-- Calcula las ganancias netas reales de todo lo vendido          -->
+            <!-- ============================================================== -->
+            <div class="profit-filter-panel" id="panelFiltroGanancias">
+              <div class="profit-filter-header">
+                <div class="profit-filter-title-wrap">
+                  <h4>
+                    <span>💰</span> Control de Ganancias Reales (Ventas vs Costos de Productos)
+                    <span class="finanzas-badge-pill" id="badgePeriodoActivo">Todo lo Vendido (Histórico)</span>
+                  </h4>
+                  <p>Consulta únicamente las ganancias netas reales obtenidas en el Día, Mes, Año o el Proyectado en Bodega.</p>
+                </div>
+                <div class="profit-period-tabs" role="tablist" aria-label="Filtrar ganancias por período">
+                  <button type="button" class="profit-period-btn" data-periodo="dia" onclick="filtrarGananciasPeriodo('dia', this)">
+                    📅 Hoy (Día)
+                  </button>
+                  <button type="button" class="profit-period-btn" data-periodo="mes" onclick="filtrarGananciasPeriodo('mes', this)">
+                    🗓️ Este Mes
+                  </button>
+                  <button type="button" class="profit-period-btn" data-periodo="anio" onclick="filtrarGananciasPeriodo('anio', this)">
+                    📆 Este Año
+                  </button>
+                  <button type="button" class="profit-period-btn active" data-periodo="general" onclick="filtrarGananciasPeriodo('general', this)">
+                    🌎 General (Ventas)
+                  </button>
+                  <button type="button" class="profit-period-btn" data-periodo="catalogo" onclick="filtrarGananciasPeriodo('catalogo', this)">
+                    📦 Catálogo Bodega
+                  </button>
+                </div>
+              </div>
+
+              <div class="profit-kpis-grid">
+                <div class="profit-kpi-box highlight-profit">
+                  <span class="profit-kpi-label" id="lblProfitBoxTitle">Ganancia Neta General (Lo Vendido)</span>
+                  <div class="profit-kpi-val green" id="valFiltroGanancia">+${{ ganancias_periodos.general.ganancia|floatformat:0 }} COP</div>
+                  <div class="profit-kpi-sub" id="subFiltroGanancia">
+                    Utilidad limpia descontando costos • Rentabilidad: <strong>{{ ganancias_periodos.general.margen_pct|floatformat:1 }}%</strong>
+                  </div>
+                </div>
+                <div class="profit-kpi-box">
+                  <span class="profit-kpi-label">Total Vendido (Ingresos Netos)</span>
+                  <div class="profit-kpi-val blue" id="valFiltroIngresos">${{ ganancias_periodos.general.ingresos|floatformat:0 }} COP</div>
+                  <div class="profit-kpi-sub" id="subFiltroIngresos">Facturación real registrada en el período</div>
+                </div>
+                <div class="profit-kpi-box">
+                  <span class="profit-kpi-label">Costo de Mercancía Vendida</span>
+                  <div class="profit-kpi-val slate" id="valFiltroCostos">${{ ganancias_periodos.general.costo|floatformat:0 }} COP</div>
+                  <div class="profit-kpi-sub" id="subFiltroCostos">Base de compra a fincas productoras</div>
+                </div>
+                <div class="profit-kpi-box">
+                  <span class="profit-kpi-label">Operaciones Computadas</span>
+                  <div class="profit-kpi-val amber" id="valFiltroCount">{{ ganancias_periodos.general.ventas_count }} ventas</div>
+                  <div class="profit-kpi-sub" id="subFiltroCount">Sincronizado en tiempo real con pedidos</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analítica Visual (Chart.js) — Se actualiza según búsqueda y período -->
             <div class="dash-charts-grid">
               <div class="dash-chart-card">
-                <div class="dash-chart-header">
-                  <h4>Distribución por Categorías</h4>
-                  <span class="dash-chart-sub">Volumen de productos clasificados por grupo taxonómico</span>
+                <div class="dash-chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                  <div>
+                    <h4 id="chartIzqTitulo">Distribución por Categorías y Ganancias</h4>
+                    <span class="dash-chart-sub" id="chartIzqSub">Volumen de productos clasificados por grupo taxonómico</span>
+                  </div>
+                  <div style="display: flex; gap: 4px;">
+                    <button type="button" class="quick-filter-btn active" id="btnChartModoCat" onclick="cambiarModoGraficaIzquierda('categorias')" style="padding: 3px 9px; font-size: 0.72rem;">
+                      Categorías
+                    </button>
+                    <button type="button" class="quick-filter-btn" id="btnChartModoPer" onclick="cambiarModoGraficaIzquierda('periodos')" style="padding: 3px 9px; font-size: 0.72rem;">
+                      Ganancias Día/Mes/Año
+                    </button>
+                  </div>
                 </div>
                 <div class="dash-chart-canvas-wrap">
                   <canvas id="chartCategorias"></canvas>
                 </div>
               </div>
               <div class="dash-chart-card">
-                <div class="dash-chart-header">
-                  <h4>Rentabilidad y Márgenes de Ganancia</h4>
-                  <span class="dash-chart-sub">Comparativa Costo de Compra vs Precio de Venta ($ COP)</span>
+                <div class="dash-chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                  <div>
+                    <h4 id="chartDerTitulo">Rentabilidad y Márgenes Reales por Producto</h4>
+                    <span class="dash-chart-sub" id="chartDerSub">Comparativa Costo de Compra vs Precio Venta Vigente vs Ganancia ($ COP)</span>
+                  </div>
+                  <span class="finanzas-badge-pill" id="chartDerBadge">{{ total_productos }} productos reales</span>
                 </div>
                 <div class="dash-chart-canvas-wrap">
                   <canvas id="chartMargenes"></canvas>
                 </div>
+              </div>
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- TABLA 1 EN RESUMEN: GANANCIAS DE TODO LO VENDIDO (DÍA/MES/AÑO) -->
+            <!-- Se actualiza en vivo con el filtro Día / Mes / Año / General   -->
+            <!-- ============================================================== -->
+            <div class="products-table-container" style="margin-bottom: 1.35rem;">
+              <div class="catalog-inv-header" style="margin-bottom: 0.85rem;">
+                <div>
+                  <h3 class="catalog-inv-title" style="font-size: 1.12rem; display: flex; align-items: center; gap: 8px;">
+                    <span>📈</span> Desglose de Ganancias por Ventas Realizadas
+                    <span class="finanzas-badge-pill" id="lblTablaVentasPeriodo">Período: General (Todas las Ventas)</span>
+                  </h3>
+                  <p class="catalog-inv-subtitle">
+                    Muestra cada venta registrada en el período seleccionado (Día, Mes, Año o General) y la ganancia neta obtenida.
+                  </p>
+                </div>
+                <div class="catalog-inv-actions">
+                  <button type="button" class="btn-primary-dash" onclick="mostrarSeccion('ventas'); abrirModalNuevaVenta();" style="padding: 6px 12px; font-size: 0.8rem;">
+                    + Registrar Venta
+                  </button>
+                  <button type="button" class="btn-secondary-dash" onclick="mostrarSeccion('ventas')" style="padding: 6px 12px; font-size: 0.8rem;">
+                    Ir a Gestión de Ventas →
+                  </button>
+                </div>
+              </div>
+              <div class="table-scroll-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">N° Venta</th>
+                      <th scope="col">Fecha y Hora</th>
+                      <th scope="col">Cajero / Cliente</th>
+                      <th scope="col">Origen / Medio</th>
+                      <th scope="col" style="text-align: right;">Total Vendido</th>
+                      <th scope="col" style="text-align: right;">Costo Base Est.</th>
+                      <th scope="col" style="text-align: right;">Ganancia Neta</th>
+                      <th scope="col" style="text-align: center;">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaGananciasVentasBody">
+                    {% for v in ventas %}
+                    <tr class="fila-resumen-venta"
+                        data-id="{{ v.id_venta }}"
+                        data-es-hoy="{% if v.es_hoy %}1{% else %}0{% endif %}"
+                        data-es-mes="{% if v.es_mes %}1{% else %}0{% endif %}"
+                        data-es-anio="{% if v.es_anio %}1{% else %}0{% endif %}"
+                        data-anulada="{% if v.estado_venta == 'Anulada' %}1{% else %}0{% endif %}"
+                        data-ingreso="{{ v.total_neto }}"
+                        data-costo="{{ v.costo_estimado }}"
+                        data-ganancia="{{ v.ganancia_estimada }}"
+                        data-busqueda="venta #vta-{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.origen_venta|lower }} {{ v.medio_pago|lower }} {{ v.estado_venta|lower }}">
+                      <td><strong style="color: #059669;">#VTA-{{ v.id_venta }}</strong></td>
+                      <td>
+                        <div>{{ v.fecha_venta|date:"d/m/Y" }}</div>
+                        <small style="color: #64748b; font-size: 0.74rem;">{{ v.fecha_venta|date:"H:i A" }}</small>
+                      </td>
+                      <td>
+                        <strong>{{ v.id_usuario_cajero.username|capfirst }}</strong>
+                        {% if v.id_cliente %}<div style="font-size: 0.73rem; color: #64748b;">Cliente #{{ v.id_cliente }}</div>{% endif %}
+                      </td>
+                      <td>
+                        <span class="badge-cat">{{ v.origen_venta|default:"Tienda Física" }}</span>
+                        <small style="display: block; color: #64748b; font-size: 0.73rem; margin-top: 2px;">{{ v.medio_pago }}</small>
+                      </td>
+                      <td style="text-align: right; font-weight: 600; color: #1e293b;">
+                        ${{ v.total_neto|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #64748b;">
+                        ${{ v.costo_estimado|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right;">
+                        {% if v.estado_venta == 'Anulada' %}
+                          <span class="badge-normal">$0 COP (Anulada)</span>
+                        {% else %}
+                          <span class="badge-margen">+${{ v.ganancia_estimada|floatformat:0 }} COP</span>
+                        {% endif %}
+                      </td>
+                      <td style="text-align: center;">
+                        {% if v.estado_venta == "Completada" or not v.estado_venta %}
+                          <span class="badge-status badge-status-activo">Completada</span>
+                        {% elif v.estado_venta == "Pendiente" %}
+                          <span class="badge-status" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a;">Pendiente</span>
+                        {% else %}
+                          <span class="badge-status badge-status-inactivo">{{ v.estado_venta }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="filaSinVentasResumen">
+                      <td colspan="8" class="empty-products">No hay ventas registradas para este período.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background: #f0fdf4; border-top: 2px solid #bbf7d0; font-weight: 800;">
+                      <td colspan="4" style="color: #166534; font-size: 0.84rem;" id="tfootVentasLabel">
+                        TOTAL ACUMULADO DEL PERÍODO SELECCIONADO ({{ ganancias_periodos.general.ventas_count }} ventas):
+                      </td>
+                      <td style="text-align: right; color: #0284c7; font-size: 0.9rem;" id="tfootVentasIngresos">
+                        ${{ ganancias_periodos.general.ingresos|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #475569; font-size: 0.9rem;" id="tfootVentasCosto">
+                        ${{ ganancias_periodos.general.costo|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #15803d; font-size: 0.96rem;" id="tfootVentasGanancia">
+                        +${{ ganancias_periodos.general.ganancia|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: center; font-size: 0.78rem; color: #166534;" id="tfootVentasMargen">
+                        {{ ganancias_periodos.general.margen_pct|floatformat:1 }}%
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            <!-- ============================================================== -->
+            <!-- TABLA 2 EN RESUMEN: RENTABILIDAD REAL POR PRODUCTO DEL CATÁLOGO-->
+            <!-- Basada en los productos, costos, ofertas y stock reales        -->
+            <!-- ============================================================== -->
+            <div class="products-table-container" style="margin-bottom: 1.35rem;">
+              <div class="catalog-inv-header" style="margin-bottom: 0.85rem;">
+                <div>
+                  <h3 class="catalog-inv-title" style="font-size: 1.12rem; display: flex; align-items: center; gap: 8px;">
+                    <span>🍎</span> Tabla de Rentabilidad Real por Producto en Catálogo
+                    <span class="finanzas-badge-pill" id="lblConteoProductosResumen">{{ total_productos }} referencias reales</span>
+                  </h3>
+                  <p class="catalog-inv-subtitle">
+                    Cálculo exacto en base a los productos y precios reales en bodega (incluyendo descuentos de oferta activos). Usa el buscador superior para filtrar productos y gráficas.
+                  </p>
+                </div>
+                <div class="catalog-inv-actions">
+                  <button type="button" class="btn-secondary-dash" onclick="mostrarSeccion('inventario')" style="padding: 6px 12px; font-size: 0.8rem;">
+                    Editar Precios en Inventario →
+                  </button>
+                </div>
+              </div>
+              <div class="table-scroll-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Producto</th>
+                      <th scope="col">Categoría</th>
+                      <th scope="col" style="text-align: center;">Stock</th>
+                      <th scope="col" style="text-align: right;">Costo Unitario</th>
+                      <th scope="col" style="text-align: right;">Precio Vigente</th>
+                      <th scope="col" style="text-align: right;">Ganancia / Und</th>
+                      <th scope="col" style="text-align: right;">Inversión Bodega</th>
+                      <th scope="col" style="text-align: right;">Valor Venta Total</th>
+                      <th scope="col" style="text-align: right;">Ganancia Total Stock</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaRentabilidadProductosBody">
+                    {% for pr in productos_resumen %}
+                    <tr class="fila-resumen-producto"
+                        data-id="{{ pr.id }}"
+                        data-busqueda="{{ pr.nombre|lower }} {{ pr.categoria|lower }} {{ pr.estado|lower }}">
+                      <td>
+                        <div class="table-prod-info">
+                          <span class="table-prod-icon">{{ pr.nombre|slice:":1"|upper }}</span>
+                          <div>
+                            <strong>{{ pr.nombre }}</strong>
+                            {% if pr.en_oferta %}
+                              <span class="badge-oferta" style="margin-left: 4px; font-size: 0.65rem; padding: 1px 6px;">Oferta</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </td>
+                      <td><span class="badge-cat">{{ pr.categoria }}</span></td>
+                      <td style="text-align: center;">
+                        <strong>{{ pr.stock_actual|floatformat:0 }}</strong> {{ pr.unidad_medida }}
+                      </td>
+                      <td style="text-align: right; color: #475569;">
+                        ${{ pr.costo_compra|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right; font-weight: 700; color: {% if pr.en_oferta %}#e11d48{% else %}#0f172a{% endif %};">
+                        ${{ pr.precio_efectivo|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right;">
+                        <span class="badge-margen">+${{ pr.margen_unitario|floatformat:0 }} ({{ pr.porcentaje_margen|floatformat:1 }}%)</span>
+                      </td>
+                      <td style="text-align: right; color: #2563eb; font-weight: 600;">
+                        ${{ pr.inversion_stock|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right; color: #0f172a; font-weight: 600;">
+                        ${{ pr.venta_stock|floatformat:0 }}
+                      </td>
+                      <td style="text-align: right; color: #15803d; font-weight: 800;">
+                        +${{ pr.ganancia_stock|floatformat:0 }} COP
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background: #f8fafc; border-top: 2px solid #e2e8f0; font-weight: 800;">
+                      <td colspan="6" style="color: #1e293b; font-size: 0.84rem;" id="tfootProdLabel">
+                        TOTALES REALES DEL CATÁLOGO EN BODEGA ({{ total_productos }} productos):
+                      </td>
+                      <td style="text-align: right; color: #2563eb; font-size: 0.9rem;" id="tfootProdInversion">
+                        ${{ inversion_total|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #0f172a; font-size: 0.9rem;" id="tfootProdVenta">
+                        ${{ valor_venta_potencial|floatformat:0 }} COP
+                      </td>
+                      <td style="text-align: right; color: #15803d; font-size: 0.95rem;" id="tfootProdGanancia">
+                        +${{ ganancia_potencial|floatformat:0 }} COP
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
 
@@ -212,30 +507,30 @@
               <div class="finanzas-card">
                 <div class="finanzas-header">
                   <h3>Rentabilidad y Finanzas</h3>
-                  <span class="finanzas-badge-pill">
-                    Margen Promedio: {{ margen_promedio|floatformat:1 }}%
+                  <span class="finanzas-badge-pill" id="finanzasMargenPill">
+                    Margen Real: {{ margen_promedio|floatformat:1 }}%
                   </span>
                 </div>
                 <div>
                   <div class="finanzas-metric-row">
                     <span class="finanzas-metric-label">Inversión Total en Compras:</span>
-                    <span class="val">${{ inversion_total|floatformat:0 }} COP</span>
+                    <span class="val" id="finanzasInversionVal">${{ inversion_total|floatformat:0 }} COP</span>
                   </div>
                   <div class="finanzas-metric-row">
                     <span class="finanzas-metric-label">Valor Comercial de Venta:</span>
-                    <span class="val">${{ valor_venta_potencial|floatformat:0 }} COP</span>
+                    <span class="val" id="finanzasVentaVal">${{ valor_venta_potencial|floatformat:0 }} COP</span>
                   </div>
                   <div class="finanzas-metric-row">
                     <span class="finanzas-metric-label">Utilidad Bruta Estimada:</span>
-                    <span class="val green">+${{ ganancia_potencial|floatformat:0 }} COP</span>
+                    <span class="val green" id="finanzasGananciaVal">+${{ ganancia_potencial|floatformat:0 }} COP</span>
                   </div>
                   <div class="finanzas-metric-row">
-                    <span class="finanzas-metric-label">Promoción / Descuentos:</span>
-                    <span class="val finanzas-val-rebajados">{{ total_ofertas }} productos rebajados</span>
+                    <span class="finanzas-metric-label">Ganancia Real de Ventas (Hoy / General):</span>
+                    <span class="val green" id="finanzasGananciaRealVentas">+${{ ganancias_periodos.dia.ganancia|floatformat:0 }} hoy / +${{ ganancias_periodos.general.ganancia|floatformat:0 }} total</span>
                   </div>
                 </div>
                 <div class="finanzas-note-box">
-                  <em>Nota: Todos los cálculos toman en consideración los precios normales y los precios de oferta vigentes multiplicados por las existencias en bodega.</em>
+                  <em>Nota: Todos los cálculos toman en consideración los costos reales de compra, los precios de oferta vigentes multiplicados por las existencias en bodega y las ventas facturadas en tiempo real.</em>
                 </div>
               </div>
 
@@ -877,7 +1172,7 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #059669;">${{ total_ventas_ingresos|floatformat:0 }}</h3>
+                <h3 style="color: #059669;" id="kpiVentasRecaudado">${{ total_ventas_ingresos|floatformat:0 }}</h3>
                 <span class="kpi-badge kpi-badge-green"><span class="kpi-dot"></span> Recaudado</span>
               </div>
               <div class="dash-card-footer">
@@ -895,7 +1190,7 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #0284c7;">{{ total_ventas_count }}</h3>
+                <h3 style="color: #0284c7;" id="kpiVentasCount">{{ total_ventas_count }}</h3>
                 <span class="kpi-badge kpi-badge-blue">Transacciones</span>
               </div>
               <div class="dash-card-footer">
@@ -913,8 +1208,8 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #d97706;">{{ ventas_hoy_count }}</h3>
-                <span class="kpi-badge kpi-badge-amber">${{ ventas_hoy_ingresos|floatformat:0 }}</span>
+                <h3 style="color: #d97706;" id="kpiVentasHoyCount">{{ ventas_hoy_count }}</h3>
+                <span class="kpi-badge kpi-badge-amber" id="kpiVentasHoyIngresos">${{ ventas_hoy_ingresos|floatformat:0 }}</span>
               </div>
               <div class="dash-card-footer">
                 <span class="kpi-subtext">Recaudo jornada actual</span>
@@ -931,7 +1226,7 @@
                 </span>
               </div>
               <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                <h3 style="color: #7c3aed;">${{ ticket_promedio|floatformat:0 }}</h3>
+                <h3 style="color: #7c3aed;" id="kpiVentasTicket">${{ ticket_promedio|floatformat:0 }}</h3>
                 <span class="kpi-badge kpi-badge-purple">Promedio</span>
               </div>
               <div class="dash-card-footer">
@@ -960,21 +1255,21 @@
               <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
                 <label class="search" style="padding: 6px 12px; border-radius: 8px; width: 240px;">
                   <input type="search" id="inputBuscarVenta" placeholder="Buscar por ID, cajero, medio..."
-                    aria-label="Buscar venta" onkeyup="filtrarTablaVentas()" style="font-size: 0.85rem;">
+                    aria-label="Buscar venta" oninput="filtrarTablaVentas()" onkeyup="filtrarTablaVentas()" onsearch="filtrarTablaVentas()" style="font-size: 0.85rem;">
                   <span aria-hidden="true">⌕</span>
                 </label>
-                <span class="badge-margen" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
+                <span class="badge-margen" id="badgeTotalVentasCount" style="font-size: 0.82rem; padding: 6px 12px; font-weight: 700; background: #d1fae5; color: #065f46; border-color: #a7f3d0;">
                   Total: {{ total_ventas_count }} ventas
                 </span>
+                <a href="{% url 'dashboard_exportar_ventas_csv' %}" class="btn-secondary-dash"
+                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Exportar historial de ventas a Excel (CSV)">
+                  📥 Exportar CSV
+                </a>
                 <button type="button" class="btn-primary-dash" onclick="abrirModalNuevaVenta()"
                   style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nueva venta">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   + Nueva Venta
                 </button>
-                <a href="{% url 'lista_ventas' %}" class="btn-secondary-dash"
-                  style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Ver módulo completo de ventas">
-                  Ver Módulo Completo ↗
-                </a>
               </div>
             </div>
 
@@ -988,13 +1283,14 @@
                   <th scope="col">Medio de Pago</th>
                   <th scope="col" style="text-align: right;">Subtotal</th>
                   <th scope="col" style="text-align: right;">Total Neto</th>
+                  <th scope="col" style="text-align: right;">Ganancia Neta</th>
                   <th scope="col" style="text-align: center;">Estado</th>
                   <th scope="col" style="text-align: center;">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tablaVentasBody">
                 {% for v in ventas %}
-                <tr class="fila-venta" data-busqueda="venta #{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.medio_pago|lower }} {{ v.origen_venta|lower }} {{ v.estado_venta|lower }}">
+                <tr class="fila-venta" data-id="{{ v.id_venta }}" data-busqueda="venta #vta-{{ v.id_venta }} {{ v.id_usuario_cajero.username|lower }} {{ v.medio_pago|lower }} {{ v.origen_venta|lower }} {{ v.estado_venta|lower }}">
                   <td>
                     <strong style="color: #059669;">#VTA-{{ v.id_venta }}</strong>
                   </td>
@@ -1024,6 +1320,13 @@
                   <td style="text-align: right; font-weight: 700; color: #059669; font-size: 0.95rem;">
                     ${{ v.total_neto|floatformat:2 }} COP
                   </td>
+                  <td style="text-align: right;">
+                    {% if v.estado_venta == "Anulada" %}
+                      <span class="badge-normal">$0 COP</span>
+                    {% else %}
+                      <span class="badge-margen">+${{ v.ganancia_estimada|floatformat:0 }} COP</span>
+                    {% endif %}
+                  </td>
                   <td style="text-align: center;">
                     {% if v.estado_venta == "Completada" or not v.estado_venta %}
                       <span class="badge-status badge-status-activo">Completada</span>
@@ -1034,6 +1337,13 @@
                     {% endif %}
                   </td>
                   <td style="text-align: center; white-space: nowrap;">
+                    <!-- Botón de Comprobante / Recibo Imprimible -->
+                    <a href="{% url 'dashboard_recibo_venta' v.id_venta %}" target="_blank" rel="noopener"
+                      style="margin-right: 6px; display: inline-block; text-decoration: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;"
+                      title="Abrir comprobante imprimible de la venta">
+                      🖨️ Recibo
+                    </a>
+
                     <!-- Botón de Editar (Modal Nativo en Dashboard) -->
                     <button type="button" class="btn-action-edit"
                       data-id="{{ v.id_venta }}"
@@ -1064,7 +1374,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td class="empty-products" colspan="9">
+                  <td class="empty-products" colspan="10">
                     No hay ventas registradas aún. ¡Haz clic en "+ Nueva Venta" para registrar la primera!
                   </td>
                 </tr>
@@ -1913,657 +2223,17 @@
   {{ chart_prod_costos|json_script:"data-prod-costos" }}
   {{ chart_prod_precios|json_script:"data-prod-precios" }}
   {{ chart_prod_margenes|json_script:"data-prod-margenes" }}
+  {{ ganancias_periodos|json_script:"data-ganancias-periodos" }}
+  {{ productos_resumen|json_script:"data-productos-resumen" }}
+  {{ ventas_json|json_script:"data-ventas-json" }}
 
   <!-- ====================================================================== -->
-  <!-- JAVASCRIPT: CONTROLADORES DE MODALES, CÁLCULO DE MÁRGENES Y BÚSQUEDA    -->
+  <!-- JAVASCRIPT EXTERNO DEL DASHBOARD (principal/static/js/dashboard.js)    -->
+  <!-- NOTA TÉCNICA PARA EL EQUIPO:                                           -->
+  <!-- Se extrajo el bloque de ~650 líneas de <script> inline hacia el        -->
+  <!-- archivo estático 'js/dashboard.js' para separar responsabilidades      -->
+  <!-- (HTML vs JS) y mejorar el almacenamiento en caché del navegador.       -->
   <!-- ====================================================================== -->
-  <script>
-    // 1. Funciones para Modal Nuevo Producto
-    function abrirModalNuevoProducto() {
-      document.getElementById('modalNuevoProducto').classList.add('open');
-      document.getElementById('nuevo_nombre').focus();
-    }
-    function cerrarModalNuevoProducto() {
-      document.getElementById('modalNuevoProducto').classList.remove('open');
-    }
-    function toggleOfertaNuevo() {
-      const chk = document.getElementById('nuevo_en_oferta');
-      const wrap = document.getElementById('wrapOfertaNuevo');
-      wrap.style.display = chk.checked ? 'block' : 'none';
-      if (!chk.checked) {
-        document.getElementById('nuevo_precio_oferta').value = '';
-      }
-      calcularMargenNuevo();
-    }
-    function calcularMargenNuevo() {
-      const costo = parseFloat(document.getElementById('nuevo_costo').value) || 0;
-      const precio = parseFloat(document.getElementById('nuevo_precio').value) || 0;
-      const enOferta = document.getElementById('nuevo_en_oferta').checked;
-      const precioOferta = parseFloat(document.getElementById('nuevo_precio_oferta').value) || 0;
-
-      const precioEfectivo = (enOferta && precioOferta > 0) ? precioOferta : precio;
-      const ganancia = precioEfectivo - costo;
-      const margenPorcentaje = costo > 0 ? ((ganancia / costo) * 100).toFixed(1) : '0.0';
-
-      const valBox = document.getElementById('calcValNuevo');
-      valBox.textContent = `+$${Math.round(ganancia).toLocaleString('es-CO')} COP (${margenPorcentaje}%)`;
-      valBox.style.color = ganancia >= 0 ? '#15803d' : '#dc2626';
-    }
-
-    // 2. Funciones para Modal Editar Producto
-    function abrirModalEditar(btn) {
-      const id = btn.getAttribute('data-id');
-      const nombre = btn.getAttribute('data-nombre');
-      const catId = btn.getAttribute('data-categoria');
-      const costo = btn.getAttribute('data-costo');
-      const precio = btn.getAttribute('data-precio');
-      const enOferta = btn.getAttribute('data-oferta') === 'true';
-      const precioOferta = btn.getAttribute('data-precio-oferta');
-      const stock = btn.getAttribute('data-stock');
-      const stockMin = btn.getAttribute('data-stock-min');
-      const unidad = btn.getAttribute('data-unidad');
-      const origen = btn.getAttribute('data-origen');
-      const imagen = btn.getAttribute('data-imagen');
-      const estado = btn.getAttribute('data-estado');
-
-      // Actualizar action del formulario
-      document.getElementById('formEditarProducto').action = `/dashboard/producto/${id}/editar/`;
-
-      // Cargar valores en los inputs
-      document.getElementById('edit_nombre').value = nombre || '';
-      document.getElementById('edit_categoria').value = catId || '';
-      document.getElementById('edit_costo').value = costo || '';
-      document.getElementById('edit_precio').value = precio || '';
-      document.getElementById('edit_stock').value = stock || '';
-      document.getElementById('edit_stock_min').value = stockMin || '';
-      document.getElementById('edit_unidad').value = unidad || 'kg';
-      document.getElementById('edit_origen').value = origen || '';
-      document.getElementById('edit_imagen').value = imagen || '';
-      document.getElementById('edit_estado').value = estado || 'Disponible';
-
-      const chkOferta = document.getElementById('edit_en_oferta');
-      chkOferta.checked = enOferta;
-      document.getElementById('wrapOfertaEditar').style.display = enOferta ? 'block' : 'none';
-      document.getElementById('edit_precio_oferta').value = precioOferta || '';
-
-      calcularMargenEditar();
-      document.getElementById('modalEditarProducto').classList.add('open');
-    }
-    function cerrarModalEditar() {
-      document.getElementById('modalEditarProducto').classList.remove('open');
-    }
-    function toggleOfertaEditar() {
-      const chk = document.getElementById('edit_en_oferta');
-      const wrap = document.getElementById('wrapOfertaEditar');
-      wrap.style.display = chk.checked ? 'block' : 'none';
-      if (!chk.checked) {
-        document.getElementById('edit_precio_oferta').value = '';
-      }
-      calcularMargenEditar();
-    }
-    function calcularMargenEditar() {
-      const costo = parseFloat(document.getElementById('edit_costo').value) || 0;
-      const precio = parseFloat(document.getElementById('edit_precio').value) || 0;
-      const enOferta = document.getElementById('edit_en_oferta').checked;
-      const precioOferta = parseFloat(document.getElementById('edit_precio_oferta').value) || 0;
-
-      const precioEfectivo = (enOferta && precioOferta > 0) ? precioOferta : precio;
-      const ganancia = precioEfectivo - costo;
-      const margenPorcentaje = costo > 0 ? ((ganancia / costo) * 100).toFixed(1) : '0.0';
-
-      const valBox = document.getElementById('calcValEditar');
-      valBox.textContent = `+$${Math.round(ganancia).toLocaleString('es-CO')} COP (${margenPorcentaje}%)`;
-      valBox.style.color = ganancia >= 0 ? '#15803d' : '#dc2626';
-    }
-
-    // 3. Funciones para Modal Eliminar Producto
-    function abrirModalEliminar(btn) {
-      const id = btn.getAttribute('data-id');
-      const nombre = btn.getAttribute('data-nombre');
-      document.getElementById('formEliminarProducto').action = `/dashboard/producto/${id}/eliminar/`;
-      document.getElementById('eliminarNombreProducto').textContent = `"${nombre}"`;
-      document.getElementById('modalEliminarProducto').classList.add('open');
-    }
-    function cerrarModalEliminar() {
-      document.getElementById('modalEliminarProducto').classList.remove('open');
-    }
-
-    // 4. Funciones para Modal Categoría
-    function abrirModalNuevaCategoria() {
-      document.getElementById('modalNuevaCategoria').classList.add('open');
-      document.getElementById('cat_nombre').focus();
-    }
-    function cerrarModalNuevaCategoria() {
-      document.getElementById('modalNuevaCategoria').classList.remove('open');
-    }
-
-    // 5. Funciones para Modal Proveedores
-    function abrirModalNuevoProveedor() {
-      document.getElementById('modalNuevoProveedor').classList.add('open');
-      const input = document.getElementById('nuevo_prov_razon');
-      if (input) input.focus();
-    }
-    function cerrarModalNuevoProveedor() {
-      document.getElementById('modalNuevoProveedor').classList.remove('open');
-    }
-    function abrirModalEditarProveedor(btn) {
-      const id = btn.getAttribute('data-id');
-      document.getElementById('formEditarProveedor').action = `/dashboard/proveedor/${id}/editar/`;
-      document.getElementById('edit_prov_razon').value = btn.getAttribute('data-razon') || '';
-      document.getElementById('edit_prov_nit').value = btn.getAttribute('data-nit') || '';
-      document.getElementById('edit_prov_contacto').value = btn.getAttribute('data-contacto') || '';
-      document.getElementById('edit_prov_telefono').value = btn.getAttribute('data-telefono') || '';
-      document.getElementById('edit_prov_email').value = btn.getAttribute('data-email') || '';
-      document.getElementById('edit_prov_calif').value = btn.getAttribute('data-calificacion') || '5.0';
-      document.getElementById('edit_prov_estado').value = btn.getAttribute('data-estado') || 'Activo';
-      document.getElementById('modalEditarProveedor').classList.add('open');
-    }
-    function cerrarModalEditarProveedor() {
-      document.getElementById('modalEditarProveedor').classList.remove('open');
-    }
-    function abrirModalEliminarProveedor(btn) {
-      const id = btn.getAttribute('data-id');
-      document.getElementById('formEliminarProveedor').action = `/dashboard/proveedor/${id}/eliminar/`;
-      document.getElementById('eliminarRazonProveedor').textContent = `"${btn.getAttribute('data-razon')}"`;
-      document.getElementById('modalEliminarProveedor').classList.add('open');
-    }
-    function cerrarModalEliminarProveedor() {
-      document.getElementById('modalEliminarProveedor').classList.remove('open');
-    }
-
-    // 5.1 Funciones para Modales de Usuarios y Roles (RBAC)
-    function abrirModalNuevoUsuario() {
-      const modal = document.getElementById('modalNuevoUsuario');
-      if (modal) {
-        modal.classList.add('open');
-        const input = document.getElementById('nuevo_usu_username');
-        if (input) input.focus();
-      }
-    }
-    function cerrarModalNuevoUsuario() {
-      const modal = document.getElementById('modalNuevoUsuario');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function abrirModalEditarUsuario(btn) {
-      const id = btn.getAttribute('data-id');
-      const username = btn.getAttribute('data-username');
-      const firstname = btn.getAttribute('data-firstname');
-      const lastname = btn.getAttribute('data-lastname');
-      const email = btn.getAttribute('data-email');
-      const telefono = btn.getAttribute('data-telefono');
-      const rol = btn.getAttribute('data-rol');
-      const estado = btn.getAttribute('data-estado');
-
-      document.getElementById('formEditarUsuario').action = `/dashboard/usuario/${id}/editar/`;
-      document.getElementById('edit_usu_username').value = username || '';
-      document.getElementById('edit_usu_firstname').value = firstname || '';
-      document.getElementById('edit_usu_lastname').value = lastname || '';
-      document.getElementById('edit_usu_email').value = email || '';
-      document.getElementById('edit_usu_telefono').value = telefono || '';
-      document.getElementById('edit_usu_rol').value = rol || 'cajero';
-      document.getElementById('edit_usu_estado').value = estado || 'activo';
-      document.getElementById('edit_usu_password').value = '';
-
-      document.getElementById('modalEditarUsuario').classList.add('open');
-    }
-    function cerrarModalEditarUsuario() {
-      const modal = document.getElementById('modalEditarUsuario');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function abrirModalEliminarUsuario(btn) {
-      const id = btn.getAttribute('data-id');
-      const username = btn.getAttribute('data-username');
-      const rol = btn.getAttribute('data-rol');
-
-      document.getElementById('formEliminarUsuario').action = `/dashboard/usuario/${id}/eliminar/`;
-      document.getElementById('eliminarNombreUsuario').textContent = `@${username}`;
-      document.getElementById('eliminarRolUsuario').textContent = `Rol asignado: ${rol ? rol.toUpperCase() : 'USUARIO'}`;
-
-      document.getElementById('modalEliminarUsuario').classList.add('open');
-    }
-    function cerrarModalEliminarUsuario() {
-      const modal = document.getElementById('modalEliminarUsuario');
-      if (modal) modal.classList.remove('open');
-    }
-
-    // 5.2 Funciones para Modales de Ventas (Nativo en Dashboard)
-    function abrirModalNuevaVenta() {
-      const modal = document.getElementById('modalNuevaVenta');
-      if (modal) {
-        modal.classList.add('open');
-        recalcularTotalesNuevaVenta();
-      }
-    }
-    function cerrarModalNuevaVenta() {
-      const modal = document.getElementById('modalNuevaVenta');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function recalcularTotalesNuevaVenta() {
-      const sub = parseFloat(document.getElementById('nueva_venta_subtotal').value) || 0;
-      let desc = parseFloat(document.getElementById('nueva_venta_descuento').value) || 0;
-      if (desc > sub) {
-        desc = sub;
-        document.getElementById('nueva_venta_descuento').value = desc.toFixed(2);
-      }
-      const total = Math.max(0, sub - desc);
-      document.getElementById('nueva_venta_total').value = total.toFixed(2);
-      document.getElementById('nv_lbl_total').textContent = '$' + total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' COP';
-    }
-
-    function sumarFrutaNuevaVenta() {
-      const sel = document.getElementById('nv_sel_fruta');
-      const precio = parseFloat(sel.options[sel.selectedIndex]?.getAttribute('data-precio')) || 0;
-      const cant = parseFloat(document.getElementById('nv_cant_fruta').value) || 0;
-      if (precio > 0 && cant > 0) {
-        const monto = precio * cant;
-        let sub = parseFloat(document.getElementById('nueva_venta_subtotal').value) || 0;
-        sub += monto;
-        document.getElementById('nueva_venta_subtotal').value = sub.toFixed(2);
-        recalcularTotalesNuevaVenta();
-      }
-    }
-
-    function abrirModalEditarVenta(btn) {
-      const id = btn.getAttribute('data-id');
-      const cliente = btn.getAttribute('data-cliente') || '';
-      const origen = btn.getAttribute('data-origen') || 'Tienda Física';
-      const medio = btn.getAttribute('data-medio') || 'Efectivo';
-      const subtotal = parseFloat(btn.getAttribute('data-subtotal')) || 0;
-      const descuento = parseFloat(btn.getAttribute('data-descuento')) || 0;
-      const total = parseFloat(btn.getAttribute('data-total')) || 0;
-      const estado = btn.getAttribute('data-estado') || 'Completada';
-
-      document.getElementById('formEditarVenta').action = `/dashboard/venta/${id}/editar/`;
-      document.getElementById('lblEditarIdVenta').textContent = `#VTA-${id}`;
-      document.getElementById('edit_venta_origen').value = origen;
-      document.getElementById('edit_venta_cliente').value = cliente;
-      document.getElementById('edit_venta_medio').value = medio;
-      document.getElementById('edit_venta_estado').value = estado;
-      document.getElementById('edit_venta_subtotal').value = subtotal.toFixed(2);
-      document.getElementById('edit_venta_descuento').value = descuento.toFixed(2);
-      document.getElementById('edit_venta_total').value = total.toFixed(2);
-      document.getElementById('edit_lbl_total').textContent = '$' + total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' COP';
-
-      const modal = document.getElementById('modalEditarVenta');
-      if (modal) modal.classList.add('open');
-    }
-    function cerrarModalEditarVenta() {
-      const modal = document.getElementById('modalEditarVenta');
-      if (modal) modal.classList.remove('open');
-    }
-
-    function recalcularTotalesEditarVenta() {
-      const sub = parseFloat(document.getElementById('edit_venta_subtotal').value) || 0;
-      let desc = parseFloat(document.getElementById('edit_venta_descuento').value) || 0;
-      if (desc > sub) {
-        desc = sub;
-        document.getElementById('edit_venta_descuento').value = desc.toFixed(2);
-      }
-      const total = Math.max(0, sub - desc);
-      document.getElementById('edit_venta_total').value = total.toFixed(2);
-      document.getElementById('edit_lbl_total').textContent = '$' + total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' COP';
-    }
-
-    function abrirModalEliminarVenta(btn) {
-      const id = btn.getAttribute('data-id');
-      const total = parseFloat(btn.getAttribute('data-total')) || 0;
-      const cajero = btn.getAttribute('data-cajero') || '';
-
-      document.getElementById('formEliminarVenta').action = `/dashboard/venta/${id}/eliminar/`;
-      document.getElementById('eliminarIdVenta').textContent = `#VTA-${id}`;
-      document.getElementById('eliminarTotalVenta').textContent = `Total Neto: $${total.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} COP • Cajero: ${cajero}`;
-
-      const modal = document.getElementById('modalEliminarVenta');
-      if (modal) modal.classList.add('open');
-    }
-    function cerrarModalEliminarVenta() {
-      const modal = document.getElementById('modalEliminarVenta');
-      if (modal) modal.classList.remove('open');
-    }
-
-    // 6. Filtros combinados (Búsqueda por texto + Filtro rápido por estado)
-    let filtroEstadoActual = 'todos';
-
-    function filtrarPorEstado(tipo, btn) {
-      filtroEstadoActual = tipo;
-      document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      aplicarFiltrosCombinados();
-    }
-
-    // Control de Secciones SPA en el Dashboard (Aislamiento Total de Módulos)
-    function mostrarSeccion(seccionId, navEl) {
-      const secKey = seccionId.replace('seccion-', '');
-
-      // 1. Ocultar todas las secciones del dashboard
-      document.querySelectorAll('.dashboard-section').forEach(sec => {
-        sec.classList.remove('active');
-        sec.style.display = 'none';
-      });
-
-      // 2. Mostrar exclusivamente la sección seleccionada
-      const secDestino = document.getElementById('seccion-' + secKey);
-      if (secDestino) {
-        secDestino.classList.add('active');
-        secDestino.style.display = 'block';
-      }
-
-      // 3. Actualizar enlaces de navegación lateral
-      document.querySelectorAll('.navigation a[data-section]').forEach(link => {
-        link.classList.remove('active');
-        link.removeAttribute('aria-current');
-      });
-
-      const navActivo = navEl || document.querySelector(`.navigation a[data-section="${secKey}"]`);
-      if (navActivo) {
-        navActivo.classList.add('active');
-        navActivo.setAttribute('aria-current', 'page');
-      }
-
-      // 4. Actualizar título/breadcrumb superior y placeholder del buscador según sección
-      const breadcrumb = document.getElementById('topbarBreadcrumb');
-      const inputBuscar = document.getElementById('inputBuscarProducto');
-      if (secKey === 'resumen') {
-        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Resumen Ejecutivo y Alertas de Inventario</strong>';
-        if (inputBuscar) inputBuscar.placeholder = 'Buscar en el catálogo...';
-      } else if (secKey === 'inventario') {
-        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Catálogo e Inventario en Tiempo Real</strong>';
-        if (inputBuscar) inputBuscar.placeholder = 'Buscar producto o categoría...';
-      } else if (secKey === 'ventas') {
-        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Gestión y Control de Ventas</strong>';
-        if (inputBuscar) inputBuscar.placeholder = 'Buscar venta por ID, cajero, medio de pago...';
-      } else if (secKey === 'proveedores') {
-        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Directorio de Productores y Proveedores</strong>';
-        if (inputBuscar) inputBuscar.placeholder = 'Buscar razón social, NIT o contacto...';
-      } else if (secKey === 'usuarios') {
-        if (breadcrumb) breadcrumb.innerHTML = '» &nbsp; Al Paso Frutería • <strong>Administradores del Sistema y Roles</strong>';
-        if (inputBuscar) inputBuscar.placeholder = 'Buscar administrador o email...';
-      }
-
-      // 5. Scroll suave al inicio del contenido
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // 6. Actualizar URL hash de forma limpia
-      if (history.replaceState) {
-        history.replaceState(null, null, '#' + secKey);
-      }
-    }
-
-    function ejecutarBusquedaActiva() {
-      const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
-      const secUsuarios = document.getElementById('seccion-usuarios');
-      const secProveedores = document.getElementById('seccion-proveedores');
-      const secVentas = document.getElementById('seccion-ventas');
-      const esUsuarios = secUsuarios && secUsuarios.classList.contains('active');
-      const esProveedores = secProveedores && secProveedores.classList.contains('active');
-      const esVentas = secVentas && secVentas.classList.contains('active');
-
-      if (esUsuarios) {
-        const inputUsu = document.getElementById('inputBuscarUsuario');
-        if (inputUsu) inputUsu.value = termino;
-        filtrarTablaUsuarios(termino);
-      } else if (esVentas) {
-        const inputVta = document.getElementById('inputBuscarVenta');
-        if (inputVta) inputVta.value = termino;
-        if (typeof filtrarTablaVentas === 'function') filtrarTablaVentas(termino);
-      } else if (esProveedores) {
-        filtrarTablaProveedores(termino);
-      } else {
-        filtrarTablaProductos();
-      }
-    }
-
-    function filtrarTablaProveedores(terminoDirecto) {
-      const input = document.getElementById('inputBuscarProducto');
-      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
-      const filas = document.querySelectorAll('#seccion-proveedores tbody tr');
-
-      filas.forEach(fila => {
-        const texto = fila.textContent.toLowerCase();
-        fila.style.display = texto.includes(termino) ? '' : 'none';
-      });
-    }
-
-    function filtrarTablaUsuarios(terminoDirecto) {
-      const input = document.getElementById('inputBuscarUsuario');
-      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
-      const filas = document.querySelectorAll('#tablaUsuariosBody tr.fila-usuario');
-
-      filas.forEach(fila => {
-        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
-        fila.style.display = busquedaTexto.includes(termino) ? '' : 'none';
-      });
-    }
-
-    function filtrarTablaVentas(terminoDirecto) {
-      const input = document.getElementById('inputBuscarVenta');
-      const termino = terminoDirecto !== undefined ? terminoDirecto : (input ? input.value.toLowerCase().trim() : '');
-      const filas = document.querySelectorAll('#tablaVentasBody tr.fila-venta');
-
-      filas.forEach(fila => {
-        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
-        fila.style.display = busquedaTexto.includes(termino) ? '' : 'none';
-      });
-    }
-
-    function filtrarPorRol(filtro, btn) {
-      document.querySelectorAll('.btn-role-tab').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-
-      const filas = document.querySelectorAll('#tablaUsuariosBody tr.fila-usuario');
-      filas.forEach(fila => {
-        const busquedaTexto = (fila.getAttribute('data-busqueda') || '').toLowerCase();
-        if (filtro === 'todos') {
-          fila.style.display = '';
-        } else {
-          fila.style.display = busquedaTexto.includes(filtro.toLowerCase()) ? '' : 'none';
-        }
-      });
-    }
-
-    function sincronizarSeccionUrl() {
-      const hash = (window.location.hash || '').replace('#', '').trim();
-      const seccionesValidas = ['resumen', 'inventario', 'ventas', 'proveedores', 'usuarios'];
-      if (seccionesValidas.includes(hash)) {
-        mostrarSeccion(hash);
-      } else {
-        mostrarSeccion('resumen');
-      }
-    }
-
-    window.addEventListener('DOMContentLoaded', sincronizarSeccionUrl);
-    window.addEventListener('hashchange', sincronizarSeccionUrl);
-
-    function filtrarTablaProductos() {
-      aplicarFiltrosCombinados();
-    }
-
-    function aplicarFiltrosCombinados() {
-      const termino = (document.getElementById('inputBuscarProducto').value || '').toLowerCase().trim();
-      const filas = document.querySelectorAll('#tablaProductosBody tr.fila-producto');
-
-      filas.forEach(fila => {
-        const busquedaTexto = fila.getAttribute('data-busqueda') || '';
-        const coincideTexto = busquedaTexto.includes(termino);
-
-        let coincideEstado = true;
-        if (filtroEstadoActual === 'oferta') {
-          coincideEstado = fila.getAttribute('data-oferta') === '1';
-        } else if (filtroEstadoActual === 'bajo_stock') {
-          coincideEstado = fila.getAttribute('data-bajo-stock') === '1';
-        } else if (filtroEstadoActual === 'agotado') {
-          coincideEstado = fila.getAttribute('data-agotado') === '1';
-        }
-
-        if (coincideTexto && coincideEstado) {
-          fila.style.display = '';
-        } else {
-          fila.style.display = 'none';
-        }
-      });
-    }
-
-    // 7. Cerrar modales con tecla Escape o clic fuera
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        cerrarModalNuevoProducto();
-        cerrarModalEditar();
-        cerrarModalEliminar();
-        cerrarModalNuevaCategoria();
-        cerrarModalNuevoProveedor();
-        cerrarModalEditarProveedor();
-        cerrarModalEliminarProveedor();
-        cerrarModalNuevoUsuario();
-        cerrarModalEditarUsuario();
-        cerrarModalEliminarUsuario();
-        cerrarModalNuevaVenta();
-        cerrarModalEditarVenta();
-        cerrarModalEliminarVenta();
-      }
-    });
-
-    document.querySelectorAll('.dash-modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.classList.remove('open');
-        }
-      });
-    });
-
-    // 7. Inicialización de Gráficos Ejecutivos con Chart.js
-    document.addEventListener('DOMContentLoaded', function() {
-      try {
-        const parseJsonSafe = (id, fallback) => {
-          const el = document.getElementById(id);
-          if (!el) return fallback;
-          try { return JSON.parse(el.textContent); } catch (e) { return fallback; }
-        };
-
-        const catLabels = parseJsonSafe('data-cat-labels', []);
-        const catData = parseJsonSafe('data-cat-data', []);
-        const prodLabels = parseJsonSafe('data-prod-labels', []);
-        const prodCostos = parseJsonSafe('data-prod-costos', []);
-        const prodPrecios = parseJsonSafe('data-prod-precios', []);
-        const prodMargenes = parseJsonSafe('data-prod-margenes', []);
-
-        // Paleta moderna, vibrante y limpia
-        const coloresCategorias = [
-          '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
-        ];
-
-        // Gráfico 1: Doughnut Categorías
-        const ctxCat = document.getElementById('chartCategorias');
-        if (ctxCat && catLabels.length > 0 && typeof Chart !== 'undefined') {
-          new Chart(ctxCat, {
-            type: 'doughnut',
-            data: {
-              labels: catLabels,
-              datasets: [{
-                data: catData,
-                backgroundColor: coloresCategorias.slice(0, catLabels.length),
-                borderColor: '#ffffff',
-                borderWidth: 2,
-                hoverOffset: 6
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'right',
-                  labels: {
-                    boxWidth: 12,
-                    font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
-                    padding: 8
-                  }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return ` ${context.label}: ${context.raw} productos`;
-                    }
-                  }
-                }
-              },
-              cutout: '62%'
-            }
-          });
-        }
-
-        // Gráfico 2: Barras Rentabilidad y Precios
-        const ctxMargenes = document.getElementById('chartMargenes');
-        if (ctxMargenes && prodLabels.length > 0 && typeof Chart !== 'undefined') {
-          new Chart(ctxMargenes, {
-            type: 'bar',
-            data: {
-              labels: prodLabels,
-              datasets: [
-                {
-                  label: 'Costo Compra',
-                  data: prodCostos,
-                  backgroundColor: '#94a3b8',
-                  borderRadius: 6
-                },
-                {
-                  label: 'Precio Venta',
-                  data: prodPrecios,
-                  backgroundColor: '#10b981',
-                  borderRadius: 6
-                },
-                {
-                  label: 'Margen Bruto',
-                  data: prodMargenes,
-                  backgroundColor: '#0284c7',
-                  borderRadius: 6
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: 'top',
-                  labels: {
-                    boxWidth: 12,
-                    font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" },
-                    padding: 10
-                  }
-                },
-                tooltip: {
-                  callbacks: {
-                    label: function(context) {
-                      return ` ${context.dataset.label}: $${Number(context.raw).toLocaleString('es-CO')} COP`;
-                    }
-                  }
-                }
-              },
-              scales: {
-                x: {
-                  grid: { display: false },
-                  ticks: { font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } }
-                },
-                y: {
-                  grid: { color: '#f1f5f9' },
-                  ticks: {
-                    font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
-                    callback: function(value) {
-                      return '$' + Number(value).toLocaleString('es-CO');
-                    }
-                  }
-                }
-              }
-            }
-          });
-        }
-      } catch (err) {
-        console.error('Error al inicializar Chart.js:', err);
-      }
-    });
-  </script>
+  <script src="{% static 'js/dashboard.js' %}?v=2.0"></script>
 </body>
 </html>
