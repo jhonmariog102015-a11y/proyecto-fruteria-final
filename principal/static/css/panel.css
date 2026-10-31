@@ -428,6 +428,59 @@ button {
   font-size: 10px;
 }
 
+/* ==========================================================================
+   DRAWER MÓVIL Y ACCESIBILIDAD EN PANEL ADMINISTRATIVO
+   ========================================================================== */
+.dash-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #1e293b;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.dash-menu-toggle:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.sidebar-close-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+}
+
+.dash-sidebar-backdrop {
+  display: none;
+}
+
+body.dash-drawer-locked {
+  overflow: hidden !important;
+}
+
 /* Cabecera y Espacio de Trabajo Principal */
 
 .main {
@@ -531,114 +584,308 @@ button {
   font-size: 10px;
 }
 
-/* Responsive */
+/* ==========================================================================
+   ARQUITECTURA RESPONSIVA INTEGRAL DEL PANEL DE CONTROL (MOBILE & TABLET)
+   ========================================================================== */
 
-@media (max-width: 1100px) {
-  body {
-    padding: 0;
-  }
-
+/* 1. Ajustes para pantallas medianas (<= 1200px) */
+@media (max-width: 1200px) {
   .content,
   .topbar {
     padding-right: 20px;
     padding-left: 20px;
   }
-
-  .panel {
-    padding: 13px;
-  }
-
-  .search input {
-    width: 120px;
+  .stats-row,
+  .dashboard-products .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   }
 }
 
-@media (max-width: 900px) {
-  .greeting {
-    gap: 7px;
-  }
-
-  .greeting h1 {
-    font-size: 17px;
-  }
-
-  .date {
-    width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 0;
-    overflow: auto;
-    background: var(--background);
-  }
-
+/* 2. Transformación a Drawer Off-Canvas en Tablets y Móviles (<= 992px) */
+@media (max-width: 992px) {
   .dashboard {
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    overflow: visible;
-    border-radius: 0;
-  }
-
-  .sidebar {
+    position: relative;
     width: 100%;
-    min-width: 100%;
-    max-width: 100%;
-    height: auto;
-    max-height: none;
-    overflow-y: visible;
-    flex: none;
-    padding: 16px 14px;
-  }
-
-  .main {
-    height: auto;
-    max-height: none;
-    overflow-y: visible;
-  }
-
-  .logo {
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-  }
-
-  .navigation {
-    display: flex;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     flex-direction: row;
-    gap: 7px;
-    overflow-x: auto;
   }
 
-  .navigation a {
-    flex-shrink: 0;
-    padding: 9px 12px;
-    font-size: 11.5px;
+  /* Botón hamburguesa visible */
+  .dash-menu-toggle {
+    display: inline-flex;
   }
 
+  /* Fondo oscurecido con desenfoque */
+  .dash-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(3px);
+    z-index: 1045;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+  }
+
+  .dash-sidebar-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Sidebar convertido en cajón lateral deslizante (Drawer) */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 86vw;
+    height: 100%;
+    height: 100dvh;
+    z-index: 1050;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 16px;
+    background: var(--sidebar);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+    box-shadow: 14px 0 40px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Botón de cierre superior dentro del cajón */
+  .sidebar-close-btn {
+    display: inline-flex;
+    position: absolute;
+    top: 18px;
+    right: 14px;
+    z-index: 10;
+  }
+
+  /* La zona inferior permanece 100% visible: Logout, Perfil y Django Admin */
   .sidebar-bottom {
-    display: none;
+    display: block !important;
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .badge-super-pill {
+    font-size: 7.5px;
+    padding: 2px 6px;
+  }
+
+  /* Espacio principal de trabajo fluido */
+  .main {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .topbar {
-    position: static;
-    flex-wrap: wrap;
-    padding: 16px 14px;
+    padding: 12px 18px;
+    gap: 14px;
+  }
+
+  .greeting {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .greeting h1 {
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+
+  .date {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .header-actions {
     flex: 1;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .search {
+    flex: 1;
+    max-width: 260px;
+    min-width: 120px;
+    padding: 8px 12px;
   }
 
   .search input {
-    width: 95px;
+    width: 100%;
+    min-width: 50px;
+    font-size: 12px;
+  }
+
+  .dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-row,
+  .dashboard-products .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .profit-kpis-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+
+  .finanzas-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 3. Optimización para Tablets Compactas y Celulares (<= 768px) */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .date {
+    display: none;
+  }
+
+  .live-sync-pill {
+    padding: 3px 8px;
+    font-size: 11px;
   }
 
   .content {
-    padding: 20px 16px;
+    padding: 16px 14px 28px;
+  }
+
+  .dash-stock-alert-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .btn-alert-action {
+    width: 100%;
+    text-align: center;
+  }
+
+  .quick-filters-row {
+    gap: 6px;
+  }
+
+  .profit-filter-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .profit-period-btns {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .profit-period-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* 4. Optimización para Móviles Estrechos (<= 540px) */
+@media (max-width: 540px) {
+  .topbar {
+    padding: 9px 12px;
+    gap: 8px;
+  }
+
+  .greeting h1 {
+    font-size: 1rem;
+  }
+
+  .search {
+    max-width: 155px;
+    padding: 6px 9px;
+  }
+
+  .search input {
+    font-size: 11px;
+  }
+
+  .live-sync-pill {
+    padding: 6px;
+    border-radius: 50%;
+    min-width: 22px;
+    height: 22px;
+    justify-content: center;
+  }
+
+  .live-sync-pill span:not(.live-sync-dot) {
+    display: none;
+  }
+
+  .content {
+    padding: 12px 10px 24px;
+  }
+
+  .stats-row,
+  .dashboard-products .stats-row {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .dash-card,
+  .dashboard-products .dash-card {
+    padding: 1rem 1.15rem;
+  }
+
+  .dash-card h3,
+  .dashboard-products .dash-card h3 {
+    font-size: 1.65rem;
+  }
+
+  .profit-kpis-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .profit-kpi-box {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .profit-kpi-box strong {
+    font-size: 1.15rem;
+  }
+
+  .dash-chart-card {
+    padding: 1rem;
+  }
+
+  .dash-chart-canvas-wrap {
+    min-height: 200px;
+  }
+
+  .quick-action-card {
+    padding: 10px 12px;
   }
 }
   .dashboard-products {
@@ -946,14 +1193,73 @@ button {
     .dash-modal {
       background: #ffffff;
       border-radius: 16px;
-      width: 100%;
+      width: min(95vw, 600px);
       max-width: 600px;
       max-height: 90vh;
-      overflow-y: auto;
+      max-height: 90dvh;
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
       border: 1px solid #e5e7eb;
       transform: translateY(20px) scale(0.97);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      margin: auto;
+    }
+
+    .dash-modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1 1 auto;
+      max-height: calc(88vh - 130px);
+    }
+
+    @media (max-width: 600px) {
+      .dash-modal,
+      .dash-modal-sm,
+      .dash-modal-md,
+      .dash-modal-lg {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        max-height: 90vh !important;
+        max-height: 90dvh !important;
+        border-radius: 14px;
+        margin: auto;
+      }
+
+      .dash-modal-header {
+        padding: 1rem 1.15rem;
+      }
+
+      .dash-modal-header h3 {
+        font-size: 1.05rem;
+      }
+
+      .dash-modal-body {
+        padding: 1.1rem 1rem;
+        max-height: calc(85vh - 120px);
+      }
+
+      .dash-modal-footer {
+        padding: 0.85rem 1rem;
+        flex-direction: column-reverse;
+        gap: 8px;
+      }
+
+      .dash-modal-footer button,
+      .dash-modal-footer a,
+      .dash-modal-footer .btn-delete-confirm {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        height: 44px;
+      }
+
+      .form-row-2 {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
     }
     .dash-modal-overlay.open .dash-modal {
       transform: translateY(0) scale(1);
@@ -1321,7 +1627,42 @@ button {
 
     /* Proveedores y Fincas Productoras */
     .table-scroll-wrap {
+      width: 100%;
+      max-width: 100%;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 10px;
+      background: #ffffff;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 #f8fafc;
+    }
+
+    .table-scroll-wrap::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .table-scroll-wrap::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+
+    .table-scroll-wrap::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 6px;
+    }
+
+    .table-scroll-wrap > table {
+      min-width: 680px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    /* Tablas extensas con múltiples columnas */
+    #tablaProductos,
+    #tablaVentas,
+    #tablaProveedores,
+    #tablaUsuarios {
+      min-width: 740px;
     }
     .prov-name {
       color: #0f172a;

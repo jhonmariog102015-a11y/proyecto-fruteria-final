@@ -359,6 +359,29 @@ function filtrarPorEstado(tipo, btn) {
   aplicarFiltrosCombinados();
 }
 
+// ============================================================================
+// 4.1. CONTROL RESPONSIVO DEL MENÚ LATERAL (DRAWER EN MÓVILES Y TABLETS)
+// ============================================================================
+function toggleDashboardSidebar(open) {
+  const sidebar = document.getElementById('dashSidebar') || document.querySelector('.sidebar');
+  const overlay = document.getElementById('dashSidebarOverlay');
+  const menuBtn = document.getElementById('btnDashboardMenu');
+  if (!sidebar) return;
+
+  const shouldOpen = (open !== undefined) ? Boolean(open) : !sidebar.classList.contains('sidebar-open');
+  if (shouldOpen) {
+    sidebar.classList.add('sidebar-open');
+    if (overlay) overlay.classList.add('open');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('dash-drawer-locked');
+  } else {
+    sidebar.classList.remove('sidebar-open');
+    if (overlay) overlay.classList.remove('open');
+    if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('dash-drawer-locked');
+  }
+}
+
 function mostrarSeccion(seccionId, navEl) {
   const secKey = seccionId.replace('seccion-', '');
 
@@ -410,6 +433,11 @@ function mostrarSeccion(seccionId, navEl) {
 
   if (history.replaceState) {
     history.replaceState(null, null, '#' + secKey);
+  }
+
+  // En dispositivos móviles y tablets (<= 992px), cierra automáticamente el drawer al seleccionar sección
+  if (window.innerWidth <= 992) {
+    toggleDashboardSidebar(false);
   }
 }
 
@@ -1409,4 +1437,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Iniciar sincronización en tiempo real cada 3 segundos
   setInterval(sincronizarEstadoTiempoReal, 3000);
+
+  // Control accesible del drawer lateral con la tecla ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      toggleDashboardSidebar(false);
+    }
+  });
+
+  // Limpieza al redimensionar a pantallas de escritorio
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 992) {
+      toggleDashboardSidebar(false);
+    }
+  });
 });

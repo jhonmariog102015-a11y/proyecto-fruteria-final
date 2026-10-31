@@ -436,18 +436,45 @@
         const mainNavLinks = document.getElementById('mainNavLinks');
 
         if (hamburgerBtn && mainNavLinks) {
-            hamburgerBtn.addEventListener('click', () => {
+            function closeMobileNav() {
+                hamburgerBtn.classList.remove('open');
+                mainNavLinks.classList.remove('active-menu');
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            hamburgerBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const isOpen = hamburgerBtn.classList.toggle('open');
                 mainNavLinks.classList.toggle('active-menu', isOpen);
                 hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
             });
 
-            mainNavLinks.querySelectorAll('.nav-link:not(.nav-link-dropdown)').forEach((link) => {
+            // Cerrar al hacer clic en cualquier enlace (incluyendo ítems del dropdown e Inicio)
+            mainNavLinks.querySelectorAll('a').forEach((link) => {
                 link.addEventListener('click', () => {
-                    hamburgerBtn.classList.remove('open');
-                    mainNavLinks.classList.remove('active-menu');
-                    hamburgerBtn.setAttribute('aria-expanded', 'false');
+                    closeMobileNav();
                 });
+            });
+
+            // Cerrar al hacer clic fuera del menú de navegación
+            document.addEventListener('click', (e) => {
+                if (!mainNavLinks.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                    closeMobileNav();
+                }
+            });
+
+            // Cerrar con la tecla Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeMobileNav();
+                }
+            });
+
+            // Limpieza al regresar a vista de escritorio
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 900) {
+                    closeMobileNav();
+                }
             });
         }
     </script>

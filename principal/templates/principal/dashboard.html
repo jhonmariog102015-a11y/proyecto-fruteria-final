@@ -22,7 +22,15 @@
     <!-- 1. BARRA LATERAL (Sidebar de Navegación)                               -->
     <!-- Menú con enlaces a vistas de la tienda, catálogo, Django admin y salir -->
     <!-- ====================================================================== -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="dashSidebar">
+      <!-- Botón de cierre para menú lateral en móviles y tablets -->
+      <button type="button" class="sidebar-close-btn" id="btnSidebarClose" aria-label="Cerrar menú lateral" onclick="toggleDashboardSidebar(false)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
       <!-- Marca corporativa del panel: Logo oficial -->
       <div class="logo">
         <a href="{% url 'index' %}" class="sidebar-logo-link" title="Ir a la tienda principal Al Paso Frutería">
@@ -95,6 +103,9 @@
       </div>
     </aside>
 
+    <!-- Fondo oscuro interactivo (Backdrop) para cerrar el menú lateral en móviles -->
+    <div class="dash-sidebar-backdrop" id="dashSidebarOverlay" onclick="toggleDashboardSidebar(false)" aria-hidden="true"></div>
+
     <!-- ====================================================================== -->
     <!-- 2. CONTENIDO PRINCIPAL DEL DASHBOARD (Main Workspace)                  -->
     <!-- Topbar, KPIs en tiempo real y tabla interactiva de inventario          -->
@@ -102,6 +113,15 @@
     <main class="main" id="overview">
       <!-- Barra superior con saludo al usuario y buscador rápido -->
       <header class="topbar">
+        <!-- Botón hamburguesa para abrir el menú lateral en móviles y tablets -->
+        <button type="button" class="dash-menu-toggle" id="btnDashboardMenu" aria-label="Abrir menú de navegación" aria-expanded="false" onclick="toggleDashboardSidebar(true)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
         <div class="greeting">
           <h1>Hola, {{ request.user.username|capfirst }}</h1>
           <span class="date" id="topbarBreadcrumb">» &nbsp; Al Paso Frutería • Panel de Control Integral</span>

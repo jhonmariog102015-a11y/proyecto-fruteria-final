@@ -257,10 +257,12 @@
         if (mobileBar) {
             if (count > 0) {
                 mobileBar.classList.add('visible');
+                document.body.classList.add('has-mobile-cart');
                 if (mobileCount) mobileCount.textContent = count;
                 if (mobileTotal) mobileTotal.textContent = '$' + Math.round(total).toLocaleString('es-CO');
             } else {
                 mobileBar.classList.remove('visible');
+                document.body.classList.remove('has-mobile-cart');
             }
         }
 
