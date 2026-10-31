@@ -697,7 +697,7 @@ function filtrarSeccionResumenEnVivo(terminoNorm) {
 // ============================================================================
 // 5.2. FILTRO DE GANANCIAS EN GENERAL (DÍA, MES, AÑO, GENERAL, CATÁLOGO)
 // ============================================================================
-function filtrarGananciasPeriodo(periodo, btn) {
+function filtrarGananciasPeriodo(periodo, btn, actualizarModo = true) {
   periodoGananciaActual = periodo || 'general';
 
   document.querySelectorAll('.profit-period-btn').forEach(b => b.classList.remove('active'));
@@ -753,14 +753,20 @@ function filtrarGananciasPeriodo(periodo, btn) {
   const term = normalizarTexto(document.getElementById('inputBuscarProducto')?.value || '');
   aplicarFiltroTablaGananciasVentas(periodoGananciaActual, term);
 
-  // Actualizar las gráficas para reflejar el período seleccionado
-  if (periodoGananciaActual === 'dia' || periodoGananciaActual === 'mes' || periodoGananciaActual === 'anio') {
-    cambiarModoGraficaIzquierda('periodos');
-  } else if (periodoGananciaActual === 'catalogo') {
-    cambiarModoGraficaIzquierda('categorias');
-  } else {
-    actualizarGraficaIzquierda();
+  // Sincronizar el modo de visualización de la gráfica izquierda según el botón presionado
+  if (actualizarModo) {
+    if (periodoGananciaActual === 'catalogo') {
+      modoGraficaIzquierda = 'categorias';
+    } else {
+      modoGraficaIzquierda = 'periodos';
+    }
+    const btnCat = document.getElementById('btnChartModoCat');
+    const btnPer = document.getElementById('btnChartModoPer');
+    if (btnCat) btnCat.classList.toggle('active', modoGraficaIzquierda === 'categorias');
+    if (btnPer) btnPer.classList.toggle('active', modoGraficaIzquierda === 'periodos');
   }
+
+  actualizarGraficaIzquierda();
   actualizarGraficaMargenesProductos(term);
 }
 
@@ -961,17 +967,61 @@ function actualizarGraficaIzquierda() {
 
   const tituloEl = document.getElementById('chartIzqTitulo');
   const subEl = document.getElementById('chartIzqSub');
+  const gp = estadoDashboard.gananciasPeriodos || {};
 
   if (modoGraficaIzquierda === 'periodos') {
-    if (tituloEl) tituloEl.textContent = 'Ganancias Reales por Período (Día, Mes, Año y General)';
-    if (subEl) subEl.textContent = 'Comparativa de Ingresos Vendidos vs Costos vs Ganancia Neta ($ COP)';
+    const periodosMap = {
+      dia: { nombre: 'Hoy (Día)', key: 'dia' },
+      mes: { nombre: 'Este Mes', key: 'mes' },
+      anio: { nombre: 'Este Año', key: 'anio' },
+      general: { nombre: 'General', key: 'general' }
+    };
 
-    const gp = estadoDashboard.gananciasPeriodos || {};
+    const activoKey = ['dia', 'mes', 'anio', 'general'].includes(periodoGananciaActual)
+      ? periodoGananciaActual
+      : 'general';
+    const cfg = periodosMap[activoKey] || periodosMap['general'];
+    const datosPeriodo = gp[activoKey] || { ingresos: 0, costo: 0, ganancia: 0, margen_pct: 0 };
+
+    if (tituloEl) {
+      if (activoKey === 'dia') {
+        tituloEl.textContent = 'Ganancias Reales — Hoy (Día)';
+      } else if (activoKey === 'mes') {
+        tituloEl.textContent = 'Ganancias Reales — Este Mes';
+      } else if (activoKey === 'anio') {
+        tituloEl.textContent = 'Ganancias Reales — Este Año';
+      } else {
+        tituloEl.textContent = 'Ganancias Reales por Período (Día, Mes, Año y General)';
+      }
+    }
+    if (subEl) {
+      if (activoKey === 'general') {
+        subEl.textContent = 'Comparativa de Ingresos Vendidos vs Costos vs Ganancia Neta ($ COP)';
+      } else {
+        subEl.textContent = `Período ${cfg.nombre}: Ingresos $${Math.round(datosPeriodo.ingresos).toLocaleString('es-CO')} • Ganancia Neta +$${Math.round(datosPeriodo.ganancia).toLocaleString('es-CO')} (${Number(datosPeriodo.margen_pct || 0).toFixed(1)}%)`;
+      }
+    }
+
     const labels = ['Hoy (Día)', 'Este Mes', 'Este Año', 'General (Total)'];
     const keys = ['dia', 'mes', 'anio', 'general'];
     const dataIngresos = keys.map(k => Math.round(gp[k]?.ingresos || 0));
     const dataCostos = keys.map(k => Math.round(gp[k]?.costo || 0));
     const dataGanancias = keys.map(k => Math.round(gp[k]?.ganancia || 0));
+
+    // Resaltar visualmente el período activo manteniendo contexto general
+    const opacidades = keys.map(k => {
+      if (activoKey === 'general') return 1.0;
+      return k === activoKey ? 1.0 : 0.35;
+    });
+
+    const bgIngresos = opacidades.map(op => `rgba(59, 130, 246, ${op})`);
+    const bgCostos = opacidades.map(op => `rgba(148, 163, 184, ${op})`);
+    const bgGanancias = opacidades.map(op => `rgba(16, 185, 129, ${op})`);
+
+    const borderIngresos = keys.map(k => k === activoKey && activoKey !== 'general' ? '#1d4ed8' : 'transparent');
+    const borderCostos = keys.map(k => k === activoKey && activoKey !== 'general' ? '#475569' : 'transparent');
+    const borderGanancias = keys.map(k => k === activoKey && activoKey !== 'general' ? '#047857' : 'transparent');
+    const borderWidths = keys.map(k => k === activoKey && activoKey !== 'general' ? 2 : 0);
 
     chartCategoriasInstance = new Chart(ctxCat, {
       type: 'bar',
@@ -981,19 +1031,25 @@ function actualizarGraficaIzquierda() {
           {
             label: 'Total Vendido',
             data: dataIngresos,
-            backgroundColor: '#3b82f6',
+            backgroundColor: bgIngresos,
+            borderColor: borderIngresos,
+            borderWidth: borderWidths,
             borderRadius: 6
           },
           {
             label: 'Costo Mercancía',
             data: dataCostos,
-            backgroundColor: '#94a3b8',
+            backgroundColor: bgCostos,
+            borderColor: borderCostos,
+            borderWidth: borderWidths,
             borderRadius: 6
           },
           {
             label: 'Ganancia Neta',
             data: dataGanancias,
-            backgroundColor: '#10b981',
+            backgroundColor: bgGanancias,
+            borderColor: borderGanancias,
+            borderWidth: borderWidths,
             borderRadius: 6
           }
         ]
@@ -1028,8 +1084,15 @@ function actualizarGraficaIzquierda() {
       }
     });
   } else {
-    if (tituloEl) tituloEl.textContent = 'Distribución por Categorías';
-    if (subEl) subEl.textContent = 'Volumen de productos clasificados por grupo taxonómico';
+    // Modo Categorías
+    if (tituloEl) {
+      tituloEl.textContent = periodoGananciaActual === 'catalogo'
+        ? 'Distribución por Categorías en Bodega'
+        : 'Distribución del Catálogo por Categorías';
+    }
+    if (subEl) {
+      subEl.textContent = 'Volumen de productos clasificados por grupo taxonómico en inventario';
+    }
 
     const coloresCategorias = [
       '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
@@ -1091,9 +1154,19 @@ function actualizarGraficaMargenesProductos(terminoNorm) {
   const precios = listaFiltrada.map(p => p.precio_efectivo);
   const margenes = listaFiltrada.map(p => p.margen_unitario);
 
+  const tituloEl = document.getElementById('chartDerTitulo');
+  const subEl = document.getElementById('chartDerSub');
   const badgeEl = document.getElementById('chartDerBadge');
-  if (badgeEl) {
-    badgeEl.textContent = `${listaFiltrada.length} productos reales`;
+
+  if (periodoGananciaActual === 'catalogo') {
+    if (tituloEl) tituloEl.textContent = 'Rentabilidad y Márgenes en Bodega por Producto';
+    if (subEl) subEl.textContent = 'Comparativa Costo de Compra vs Precio Venta Vigente vs Margen Unitario ($ COP)';
+    if (badgeEl) badgeEl.textContent = `${listaFiltrada.length} productos en bodega`;
+  } else {
+    const nombresPeriodo = { dia: 'Hoy (Día)', mes: 'Este Mes', anio: 'Este Año', general: 'General' };
+    if (tituloEl) tituloEl.textContent = `Rentabilidad y Márgenes de Productos (${nombresPeriodo[periodoGananciaActual] || 'General'})`;
+    if (subEl) subEl.textContent = 'Base de precios y márgenes unitarios que sustentan las ganancias registradas';
+    if (badgeEl) badgeEl.textContent = `${listaFiltrada.length} referencias activas`;
   }
 
   if (chartMargenesInstance) {
@@ -1399,7 +1472,7 @@ async function sincronizarEstadoTiempoReal() {
       if (termVta) filtrarTablaVentas(termVta);
     }
 
-    filtrarGananciasPeriodo(periodoGananciaActual);
+    filtrarGananciasPeriodo(periodoGananciaActual, null, false);
   } catch (err) {
     // Silencioso ante desconexiones momentáneas
   }
