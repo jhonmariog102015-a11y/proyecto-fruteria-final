@@ -11,6 +11,59 @@
   box-sizing: border-box;
 }
 
+/* ============================================================================
+   SCROLLBAR VERDE INSTITUCIONAL — PANEL ADMINISTRATIVO
+   ============================================================================ */
+html,
+body,
+.main,
+.sidebar,
+.dash-modal-body,
+.table-scroll-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: #2E7D32 #eef4f0;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.main::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar,
+.dash-modal-body::-webkit-scrollbar,
+.table-scroll-wrap::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.main::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track,
+.dash-modal-body::-webkit-scrollbar-track,
+.table-scroll-wrap::-webkit-scrollbar-track {
+  background: #eef4f0;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.main::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb,
+.dash-modal-body::-webkit-scrollbar-thumb,
+.table-scroll-wrap::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #4CAF70 0%, #2E7D32 100%);
+  border-radius: 999px;
+  border: 2px solid #eef4f0;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.main::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover,
+.dash-modal-body::-webkit-scrollbar-thumb:hover,
+.table-scroll-wrap::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #2E6B43 0%, #1A3A26 100%);
+}
+
 html {
   height: 100%;
 }
@@ -264,9 +317,74 @@ button {
 }
 
 .nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.nav-icon-svg {
   width: 17px;
-  text-align: center;
-  font-size: 15px;
+  height: 17px;
+  display: block;
+  object-fit: contain;
+  filter: brightness(0) invert(0.9);
+  transition: filter 0.16s ease, transform 0.16s ease;
+}
+
+.navigation a:hover .nav-icon-svg,
+.navigation a.active .nav-icon-svg {
+  filter: brightness(0) invert(1);
+}
+
+.ui-icon {
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  vertical-align: -2px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ui-icon-lg {
+  width: 20px;
+  height: 20px;
+  vertical-align: -4px;
+}
+
+.ui-icon-white {
+  filter: brightness(0) invert(1);
+}
+
+.ui-icon-green {
+  filter: brightness(0) saturate(100%) invert(26%) sepia(65%) saturate(850%) hue-rotate(102deg) brightness(92%) contrast(94%);
+}
+
+.ui-icon-amber {
+  filter: brightness(0) saturate(100%) invert(42%) sepia(92%) saturate(1350%) hue-rotate(22deg) brightness(94%) contrast(95%);
+}
+
+.ui-icon-red {
+  filter: brightness(0) saturate(100%) invert(20%) sepia(88%) saturate(2600%) hue-rotate(348deg) brightness(90%) contrast(95%);
+}
+
+.ui-icon-purple {
+  filter: brightness(0) saturate(100%) invert(24%) sepia(84%) saturate(1800%) hue-rotate(256deg) brightness(90%) contrast(95%);
+}
+
+.ui-icon-blue {
+  filter: brightness(0) saturate(100%) invert(32%) sepia(84%) saturate(1500%) hue-rotate(196deg) brightness(92%) contrast(95%);
+}
+
+.sidebar-logout-icon {
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  flex-shrink: 0;
+  filter: brightness(0) saturate(100%) invert(76%) sepia(28%) saturate(1850%) hue-rotate(314deg) brightness(102%) contrast(98%);
 }
 
 /* Alerta de Stock Bajo en Dashboard */
@@ -2093,6 +2211,9 @@ body.dash-drawer-locked {
 }
 
 .profit-period-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 0.5rem 1rem;
   border-radius: 999px;
   border: 1px solid #cbd5e1;
@@ -2115,6 +2236,10 @@ body.dash-drawer-locked {
   color: #ffffff;
   border-color: #059669;
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+}
+
+.profit-period-btn.active .ui-icon {
+  filter: brightness(0) invert(1);
 }
 
 .profit-kpis-grid {

@@ -1,0 +1,76 @@
+/* ==============================================================================
+   AL PASO FRUTERÍA — CORRECCIONES DE CONTENEDORES Y TABLAS EN DJANGO ADMIN
+   Evita desbordamientos horizontales en #changelist, inputs list_editable,
+   colisiones con #changelist-filter y formularios con inlines.
+   ============================================================================== */
+
+#changelist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#changelist .changelist-form-container {
+    flex: 1 1 0%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+#changelist #changelist-filter {
+    flex: 0 0 240px;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: static;
+    margin-left: 0;
+}
+
+#changelist .results {
+    overflow-x: auto;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+#result_list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#result_list th,
+#result_list td {
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 8px 10px;
+}
+
+#result_list input[type="number"],
+#result_list input[type="text"],
+#result_list select {
+    width: 86px;
+    min-width: 68px;
+    max-width: 110px;
+    box-sizing: border-box;
+    padding: 4px 6px;
+    border-radius: 5px;
+    font-size: 0.82rem;
+}
+
+.inline-group,
+.tabular,
+.aligned .form-row {
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+    #changelist #changelist-filter {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}

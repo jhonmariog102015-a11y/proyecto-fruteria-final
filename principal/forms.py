@@ -107,7 +107,7 @@ class ProductoForm(forms.ModelForm):
 
             # Respaldos predeterminados para asegurar consistencia
             if not data.get('imagen_url'):
-                data['imagen_url'] = getattr(inst, 'imagen_url', '') or 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop'
+                data['imagen_url'] = getattr(inst, 'imagen_url', '') or ''
             if not data.get('origen'):
                 data['origen'] = getattr(inst, 'origen', '') or 'Cosecha: Hace 1 día • Finca El Campo'
             if 'icono_emoji' not in data:

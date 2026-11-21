@@ -5,7 +5,7 @@
 {% block meta_description %}Catálogo completo de frutas frescas cultivadas directamente en el campo. Variedades cítricas, tropicales, berries, importadas y exóticas.{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/frutas.css' %}?v=2.3">
+<link rel="stylesheet" href="{% static 'css/frutas.css' %}?v=2.4">
 {% endblock %}
 
 {% block content %}
@@ -35,16 +35,14 @@
         </div>
     </div>
 
-    <!-- FILTROS POR PESTAÑAS (CHIPS) SIN EMOJIS -->
+    <!-- FILTROS POR PESTAÑAS (CHIPS) + CATEGORÍAS DINÁMICAS CON PRODUCTOS VISIBLES -->
     <div class="filters-bar" role="tablist">
         <span class="filter-label">Filtrar:</span>
         <button class="filter-chip active" data-filter="all" role="tab">Todas</button>
         <button class="filter-chip" data-filter="ofertas" role="tab">Ofertas</button>
-        <button class="filter-chip" data-filter="citricos" role="tab">Cítricos</button>
-        <button class="filter-chip" data-filter="tropicales" role="tab">Tropicales</button>
-        <button class="filter-chip" data-filter="berries" role="tab">Berries</button>
-        <button class="filter-chip" data-filter="importadas" role="tab">Importadas</button>
-        <button class="filter-chip" data-filter="exoticas" role="tab">Exóticas</button>
+        {% for cat in categorias %}
+          <button class="filter-chip" data-filter="{% if 'ít' in cat.nombre %}citricos{% elif 'rop' in cat.nombre %}tropicales{% elif 'mpor' in cat.nombre %}importadas{% elif 'xót' in cat.nombre %}exoticas{% else %}{{ cat.nombre|lower|slugify }}{% endif %}" role="tab">{{ cat.nombre }}</button>
+        {% endfor %}
     </div>
 
     <!-- CONTADOR DE REFERENCIAS -->
@@ -66,7 +64,7 @@
                 <div class="card-top">
                     <div class="card-top-left">
                         <div class="fruit-visual">
-                            <img src="{{ producto.imagen_url|default:'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=400&auto=format&fit=crop' }}" alt="{{ producto.nombre }}" loading="lazy">
+                            <img src="{{ producto.imagen_resuelta }}" alt="{{ producto.nombre }}" loading="lazy" onerror="this.onerror=null;this.src='{% static 'img/productos/default_fruta.jpg' %}';">
                         </div>
                         <div class="card-badges-col">
                             {% if producto.estado == 'Agotado' or producto.stock_actual <= 0 %}
@@ -79,7 +77,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    <button type="button" class="btn-card-fav" aria-label="Agregar a favoritos" title="Agregar a favoritos" data-id="{{ producto.id_producto }}" data-nombre="{{ producto.nombre }}" data-precio="{% if producto.en_oferta and producto.precio_oferta %}{{ producto.precio_oferta }}{% else %}{{ producto.precio_venta_unitario }}{% endif %}" data-imagen="{{ producto.imagen_url|default:'' }}" data-unidad="{{ producto.unidad_medida }}" data-origen="{{ producto.origen }}">
+                    <button type="button" class="btn-card-fav" aria-label="Agregar a favoritos" title="Agregar a favoritos" data-id="{{ producto.id_producto }}" data-nombre="{{ producto.nombre }}" data-precio="{% if producto.en_oferta and producto.precio_oferta %}{{ producto.precio_oferta }}{% else %}{{ producto.precio_venta_unitario }}{% endif %}" data-imagen="{{ producto.imagen_resuelta }}" data-unidad="{{ producto.unidad_medida }}" data-origen="{{ producto.origen }}">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                         </svg>

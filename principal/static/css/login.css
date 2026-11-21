@@ -71,8 +71,7 @@ body.login-body::before {
    CONTENEDOR Y TARJETA DEL LOGIN
    ============================================================================== */
 
-.login-wrapper,
-.login-container {
+.login-wrapper {
     width: 100%;
     max-width: 440px;
     position: relative;
@@ -343,8 +342,7 @@ body.login-body::before {
    BOTÓN PRINCIPAL DE INGRESO
    ============================================================================== */
 
-.btn-submit,
-.login-button {
+.btn-submit {
     width: 100%;
     height: 50px;
     background: linear-gradient(135deg, var(--verde-primario) 0%, var(--verde-hover) 100%);
@@ -365,15 +363,13 @@ body.login-body::before {
     text-decoration: none;
 }
 
-.btn-submit:hover,
-.login-button:hover {
+.btn-submit:hover {
     background: linear-gradient(135deg, var(--verde-hover) 0%, #144618 100%);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(46, 125, 50, 0.38);
 }
 
-.btn-submit:active,
-.login-button:active {
+.btn-submit:active {
     transform: translateY(0);
     box-shadow: 0 3px 8px rgba(46, 125, 50, 0.2);
 }
@@ -405,14 +401,12 @@ body.login-body::before {
 }
 
 .login-footer-links,
-.login-links,
 .text-center {
     margin-top: 1rem;
     text-align: center;
 }
 
-.login-back-link,
-.login-back {
+.login-back-link {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -423,8 +417,7 @@ body.login-body::before {
     transition: all 0.2s ease;
 }
 
-.login-back-link:hover,
-.login-back:hover {
+.login-back-link:hover {
     color: var(--verde-hover);
     transform: translateX(-3px);
     text-decoration: underline;
@@ -455,9 +448,39 @@ body.login-body::before {
     }
 
     .form-group input,
-    .btn-submit,
-    .login-button {
+    .btn-submit {
         height: 46px;
         font-size: 0.9rem;
     }
+}
+
+/* Scrollbar verde para vistas de autenticación */
+@supports not selector(::-webkit-scrollbar) {
+    html,
+    body.login-body {
+        scrollbar-width: thin;
+        scrollbar-color: #2E7D32 #0e2a1e;
+    }
+}
+
+html::-webkit-scrollbar,
+body.login-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+html::-webkit-scrollbar-track,
+body.login-body::-webkit-scrollbar-track {
+    background: #0e2a1e;
+}
+
+html::-webkit-scrollbar-thumb,
+body.login-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #4CAF70 0%, #2E7D32 100%);
+    border-radius: 999px;
+    border: 2px solid #0e2a1e;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body.login-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #66bb6a 0%, #2E7D32 100%);
 }

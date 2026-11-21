@@ -4,6 +4,7 @@
 # Basado en la guía de diseño de datos SENA ADSO (Ficha 3321349).
 # ==============================================================================
 
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -170,6 +171,43 @@ class Producto(models.Model):
     def stock(self):
         """Retorna el stock entero para badges de cantidad en templates"""
         return int(self.stock_actual)
+
+    @property
+    def imagen_resuelta(self):
+        """
+        Resuelve la ruta de imagen priorizando archivos locales en 'static/img/':
+        - Si imagen_url coincide con fotos base descargadas en local, retorna la copia local
+          para que siga funcionando aunque caiga Unsplash o internet externo.
+        - Si el administrador configuró una URL externa personalizada, la conserva.
+        - Si está vacía, asigna la imagen local de respaldo.
+        """
+        base_static = getattr(settings, "STATIC_URL", "/static/").rstrip("/")
+        mapa_local = {
+            "photo-1619566636858-adf3ef46400b": "img/categorias/citricos.jpg",
+            "photo-1550258987-190a2d41a8ba": "img/categorias/tropicales.jpg",
+            "photo-1586201375761-83865001e31c": "img/productos/frijol.jpg",
+            "photo-1610832958506-aa56368176cf": "img/categorias/ver_todo.jpg",
+            "photo-1488459716781-31db52582fe9": "img/secciones/finca_boyaca.jpg",
+            "photo-1464965911861-746a04b4bca6": "img/productos/agraz.jpg",
+            "photo-1498557850523-fd3d118b962e": "img/productos/arandano.jpg",
+            "photo-1607623814075-e51df1bdc82f": "img/productos/mortadela.jpg",
+            "photo-1611080626919-7cf5a9dbab5b": "img/productos/naranja.jpg",
+            "photo-1590502593747-42a996133562": "img/productos/limon.jpg",
+            "photo-1585059895524-72359e06133a": "img/productos/kiwi.jpg",
+            "photo-1587049352846-4a222e784d38": "img/productos/sandia.jpg",
+            "photo-1528825871115-3581a5387919": "img/productos/banano.jpg",
+            "photo-1560806887-1e4cd0b6cbd6": "img/productos/manzana.jpg",
+            "photo-1603833665858-e61d17a86224": "img/productos/platano.jpg",
+            "photo-1618897996318-5a901fa6ca71": "img/productos/lulo.jpg",
+            "photo-1595152772835-219674b2a8a6": "img/productos/durazno.jpg",
+        }
+        raw_url = (self.imagen_url or "").strip()
+        if raw_url:
+            for unsplash_id, rel_path in mapa_local.items():
+                if unsplash_id in raw_url:
+                    return f"{base_static}/{rel_path}"
+            return raw_url
+        return f"{base_static}/img/productos/default_fruta.jpg"
 
     def __str__(self):
         oferta_tag = f" [OFERTA: ${self.precio_oferta:,.0f}]" if self.en_oferta and self.precio_oferta else ""

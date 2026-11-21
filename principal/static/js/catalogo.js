@@ -97,24 +97,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeFilter = 'ofertas';
             }
         } else if (urlCat) {
-            const catClean = urlCat.trim().toLowerCase();
-            if (catClean === 'frutas' || catClean === 'frutas-y-verduras') {
+            const aliasesCat = {
+                'frutas': 'all',
+                'frutas-y-verduras': 'all',
+                'carnes': 'granos-y-abarrotes',
+                'granos': 'granos-y-abarrotes',
+                'lacteos': 'ofertas'
+            };
+            const rawCat = urlCat.trim().toLowerCase();
+            const catClean = aliasesCat[rawCat] || rawCat;
+            const catChip = document.querySelector(`.filter-chip[data-filter="${catClean}"]`);
+            if (catChip) {
+                chips.forEach(c => c.classList.remove('active'));
+                catChip.classList.add('active');
+                activeFilter = catClean;
+            } else {
                 const todasChip = document.querySelector('.filter-chip[data-filter="all"]');
                 if (todasChip) {
                     chips.forEach(c => c.classList.remove('active'));
                     todasChip.classList.add('active');
-                    activeFilter = 'all';
                 }
-            } else {
-                const catChip = document.querySelector(`.filter-chip[data-filter="${catClean}"]`);
-                if (catChip) {
-                    chips.forEach(c => c.classList.remove('active'));
-                    catChip.classList.add('active');
-                    activeFilter = catClean;
-                } else {
-                    chips.forEach(c => c.classList.remove('active'));
-                    activeFilter = catClean;
-                }
+                activeFilter = 'all';
             }
         }
 

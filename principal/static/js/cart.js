@@ -220,7 +220,7 @@
             itemDiv.className = 'cart-item';
             itemDiv.innerHTML = `
                 <div class="cart-item-visual">
-                    ${item.imagen ? `<img src="${item.imagen}" alt="${item.nombre}">` : initial}
+                    ${item.imagen ? `<img src="${item.imagen}" alt="${item.nombre}" onerror="this.onerror=null;this.src='/static/img/productos/default_fruta.jpg';">` : `<img src="/static/img/productos/default_fruta.jpg" alt="${item.nombre}">`}
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-title">${item.nombre}</div>

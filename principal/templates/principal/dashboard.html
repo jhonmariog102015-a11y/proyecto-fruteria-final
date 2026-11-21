@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Paso Frutería — Panel de Control Administrativo</title>
   <!-- Hoja de estilos del Dashboard con tema moderno y limpio -->
-  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=2.7">
+  <link rel="stylesheet" href="{% static 'css/panel.css' %}?v=3.5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,14 +23,6 @@
     <!-- Menú con enlaces a vistas de la tienda, catálogo, Django admin y salir -->
     <!-- ====================================================================== -->
     <aside class="sidebar" id="dashSidebar">
-      <!-- Botón de cierre para menú lateral en móviles y tablets -->
-      <button type="button" class="sidebar-close-btn" id="btnSidebarClose" aria-label="Cerrar menú lateral" onclick="toggleDashboardSidebar(false)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-
       <!-- Marca corporativa del panel: Logo oficial -->
       <div class="logo">
         <a href="{% url 'index' %}" class="sidebar-logo-link" title="Ir a la tienda principal Al Paso Frutería">
@@ -42,22 +34,22 @@
       <nav class="navigation" aria-label="Navegación del Panel">
         <div class="nav-section-title">OPERACIÓN</div>
         <a class="active" onclick="mostrarSeccion('resumen', this)" data-section="resumen" id="nav-resumen" aria-current="page">
-          <span class="nav-icon">📊</span> Resumen y Alertas
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/resumen.svg' %}" alt="" class="nav-icon-svg"></span> Resumen y Alertas
         </a>
         <a onclick="mostrarSeccion('inventario', this)" data-section="inventario" id="nav-inventario">
-          <span class="nav-icon">📦</span> Inventario
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/inventario.svg' %}" alt="" class="nav-icon-svg"></span> Inventario
         </a>
         <a onclick="mostrarSeccion('ventas', this)" data-section="ventas" id="nav-ventas">
-          <span class="nav-icon">💵</span> Gestión de Ventas
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/ventas.svg' %}" alt="" class="nav-icon-svg"></span> Gestión de Ventas
         </a>
         <a onclick="mostrarSeccion('proveedores', this)" data-section="proveedores" id="nav-proveedores">
-          <span class="nav-icon">🚜</span> Proveedores
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/abastecimiento.svg' %}" alt="" class="nav-icon-svg"></span> Proveedores
         </a>
 
         {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
         <div class="nav-section-title">ADMINISTRACIÓN</div>
         <a onclick="mostrarSeccion('usuarios', this)" data-section="usuarios" id="nav-usuarios">
-          <span class="nav-icon">👥</span> Usuarios y Roles
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/usuarios.svg' %}" alt="" class="nav-icon-svg"></span> Usuarios y Roles
         </a>
         {% endif %}
 
@@ -65,13 +57,13 @@
 
         <div class="nav-section-title">ACCESOS EXTERNOS</div>
         <a href="{% url 'index' %}" target="_blank" rel="noopener noreferrer" class="nav-link-store" title="Abrir tienda en nueva pestaña">
-          <span class="nav-icon">🏪</span>
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/tienda.svg' %}" alt="" class="nav-icon-svg"></span>
           <span>Ver Tienda</span>
           <span class="nav-arrow-ext">↗</span>
         </a>
         {% if request.user.is_superuser %}
         <a href="/admin/" target="_blank" rel="noopener noreferrer" class="nav-link-django-admin" title="Abrir Panel Maestro de Django Admin">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon"><img src="{% static 'assets/icons/sidebar/admin.svg' %}" alt="" class="nav-icon-svg"></span>
           <span>Django Admin</span>
           <span class="badge-super-pill">Super Admin</span>
         </a>
@@ -83,11 +75,7 @@
         <form action="{% url 'logout' %}" method="post" class="sidebar-logout-form">
           {% csrf_token %}
           <button type="submit" class="sidebar-logout-btn" title="Cerrar sesión de administrador">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
+            <img src="{% static 'assets/icons/sidebar/cerrar_sesion.svg' %}" alt="" class="sidebar-logout-icon">
             <span>Cerrar Sesión</span>
           </button>
         </form>
@@ -174,7 +162,7 @@
             <!-- Alerta Operativa de Stock Bajo -->
             {% if total_bajo_stock > 0 %}
             <div class="dash-stock-alert-banner" id="dashStockAlertBanner">
-              <div class="dash-stock-alert-icon">⚠️</div>
+              <div class="dash-stock-alert-icon"><img src="{% static 'assets/icons/ui/alerta.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-amber"></div>
               <div class="dash-stock-alert-content">
                 <h4>Alerta de Inventario: {{ total_bajo_stock }} producto(s) en o por debajo del stock mínimo</h4>
                 <p>Se recomienda coordinar reabastecimiento con los proveedores para evitar agotados en la tienda:</p>
@@ -224,26 +212,26 @@
               <div class="profit-filter-header">
                 <div class="profit-filter-title-wrap">
                   <h4>
-                    <span>💰</span> Control de Ganancias Reales (Ventas vs Costos de Productos)
+                    <img src="{% static 'assets/icons/ui/ganancias.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-green"> Control de Ganancias Reales (Ventas vs Costos de Productos)
                     <span class="finanzas-badge-pill" id="badgePeriodoActivo">Todo lo Vendido (Histórico)</span>
                   </h4>
                   <p>Consulta únicamente las ganancias netas reales obtenidas en el Día, Mes, Año o el Proyectado en Bodega.</p>
                 </div>
                 <div class="profit-period-tabs" role="tablist" aria-label="Filtrar ganancias por período">
                   <button type="button" class="profit-period-btn" data-periodo="dia" onclick="filtrarGananciasPeriodo('dia', this)">
-                    📅 Hoy (Día)
+                    <img src="{% static 'assets/icons/ui/calendario.svg' %}" alt="" class="ui-icon"> Hoy (Día)
                   </button>
                   <button type="button" class="profit-period-btn" data-periodo="mes" onclick="filtrarGananciasPeriodo('mes', this)">
-                    🗓️ Este Mes
+                    <img src="{% static 'assets/icons/ui/calendario.svg' %}" alt="" class="ui-icon"> Este Mes
                   </button>
                   <button type="button" class="profit-period-btn" data-periodo="anio" onclick="filtrarGananciasPeriodo('anio', this)">
-                    📆 Este Año
+                    <img src="{% static 'assets/icons/ui/calendario.svg' %}" alt="" class="ui-icon"> Este Año
                   </button>
                   <button type="button" class="profit-period-btn active" data-periodo="general" onclick="filtrarGananciasPeriodo('general', this)">
-                    🌎 General (Ventas)
+                    <img src="{% static 'assets/icons/ui/mundo.svg' %}" alt="" class="ui-icon"> General (Ventas)
                   </button>
                   <button type="button" class="profit-period-btn" data-periodo="catalogo" onclick="filtrarGananciasPeriodo('catalogo', this)">
-                    📦 Catálogo Bodega
+                    <img src="{% static 'assets/icons/sidebar/inventario.svg' %}" alt="" class="ui-icon"> Catálogo Bodega
                   </button>
                 </div>
               </div>
@@ -317,7 +305,7 @@
               <div class="catalog-inv-header" style="margin-bottom: 0.85rem;">
                 <div>
                   <h3 class="catalog-inv-title" style="font-size: 1.12rem; display: flex; align-items: center; gap: 8px;">
-                    <span>📈</span> Desglose de Ganancias por Ventas Realizadas
+                    <img src="{% static 'assets/icons/sidebar/resumen.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-green"> Desglose de Ganancias por Ventas Realizadas
                     <span class="finanzas-badge-pill" id="lblTablaVentasPeriodo">Período: General (Todas las Ventas)</span>
                   </h3>
                   <p class="catalog-inv-subtitle">
@@ -432,7 +420,7 @@
               <div class="catalog-inv-header" style="margin-bottom: 0.85rem;">
                 <div>
                   <h3 class="catalog-inv-title" style="font-size: 1.12rem; display: flex; align-items: center; gap: 8px;">
-                    <span>🍎</span> Tabla de Rentabilidad Real por Producto en Catálogo
+                    <img src="{% static 'assets/icons/ui/fruta.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-green"> Tabla de Rentabilidad Real por Producto en Catálogo
                     <span class="finanzas-badge-pill" id="lblConteoProductosResumen">{{ total_productos }} referencias reales</span>
                   </h3>
                   <p class="catalog-inv-subtitle">
@@ -562,7 +550,7 @@
                 </div>
                 <div class="dash-quick-actions-grid">
                   <button type="button" class="quick-action-card" onclick="mostrarSeccion('inventario')">
-                    <span class="action-icon">📦</span>
+                    <span class="action-icon"><img src="{% static 'assets/icons/sidebar/inventario.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-green"></span>
                     <div>
                       <strong>Ir a Inventario y Catálogo</strong>
                       <small>{{ total_productos }} referencias disponibles</small>
@@ -570,7 +558,7 @@
                     <span class="action-arrow">→</span>
                   </button>
                   <button type="button" class="quick-action-card" onclick="mostrarSeccion('proveedores')">
-                    <span class="action-icon">🚜</span>
+                    <span class="action-icon"><img src="{% static 'assets/icons/sidebar/abastecimiento.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-green"></span>
                     <div>
                       <strong>Directorio de Proveedores</strong>
                       <small>{{ total_proveedores }} fincas productoras</small>
@@ -579,7 +567,7 @@
                   </button>
                   {% if request.user.is_superuser or request.user.perfil.rol == 'admin' %}
                   <button type="button" class="quick-action-card" onclick="mostrarSeccion('usuarios')">
-                    <span class="action-icon">👥</span>
+                    <span class="action-icon"><img src="{% static 'assets/icons/sidebar/usuarios.svg' %}" alt="" class="ui-icon ui-icon-lg ui-icon-green"></span>
                     <div>
                       <strong>Administradores y Roles</strong>
                       <small>{{ total_activos }} cuentas con acceso</small>
@@ -1283,7 +1271,7 @@
                 </span>
                 <a href="{% url 'dashboard_exportar_ventas_csv' %}" class="btn-secondary-dash"
                   style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; text-decoration: none;" title="Exportar historial de ventas a Excel (CSV)">
-                  📥 Exportar CSV
+                  <img src="{% static 'assets/icons/ui/recepcion.svg' %}" alt="" class="ui-icon"> Exportar CSV
                 </a>
                 <button type="button" class="btn-primary-dash" onclick="abrirModalNuevaVenta()"
                   style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 0.85rem; cursor: pointer;" title="Registrar nueva venta">
@@ -1359,9 +1347,9 @@
                   <td style="text-align: center; white-space: nowrap;">
                     <!-- Botón de Comprobante / Recibo Imprimible -->
                     <a href="{% url 'dashboard_recibo_venta' v.id_venta %}" target="_blank" rel="noopener"
-                      style="margin-right: 6px; display: inline-block; text-decoration: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;"
+                      style="margin-right: 6px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;"
                       title="Abrir comprobante imprimible de la venta">
-                      🖨️ Recibo
+                      <img src="{% static 'assets/icons/ui/imprimir.svg' %}" alt="" class="ui-icon ui-icon-green"> Recibo
                     </a>
 
                     <!-- Botón de Editar (Modal Nativo en Dashboard) -->
@@ -1503,7 +1491,7 @@
 
           <div class="form-group">
             <label for="nuevo_imagen">URL de Imagen (Opcional)</label>
-            <input type="url" id="nuevo_imagen" name="imagen_url" class="form-input" placeholder="https://images.unsplash.com/...">
+            <input type="url" id="nuevo_imagen" name="imagen_url" class="form-input" placeholder="/static/img/productos/default_fruta.jpg o https://...">
           </div>
         </div>
         <div class="dash-modal-footer">
@@ -1996,7 +1984,7 @@
     <div class="dash-modal" style="max-width: 580px;">
       <div class="dash-modal-header">
         <h3 style="display: flex; align-items: center; gap: 8px;">
-          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #dcfce7; color: #15803d; font-size: 0.9rem;">🛒</span>
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #dcfce7; color: #15803d;"><img src="{% static 'assets/icons/ui/carrito.svg' %}" alt="" class="ui-icon ui-icon-green"></span>
           Registrar Nueva Venta
         </h3>
         <button type="button" class="dash-modal-close" onclick="cerrarModalNuevaVenta()">✕</button>
@@ -2006,8 +1994,8 @@
         <div class="dash-modal-body">
           <!-- Info de cajero activo -->
           <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 8px 12px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.82rem; color: #166534; font-weight: 600;">
-              👤 Cajero en turno: <strong>{{ request.user.username|capfirst }}</strong>
+            <span style="font-size: 0.82rem; color: #166534; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+              <img src="{% static 'assets/icons/sidebar/usuarios.svg' %}" alt="" class="ui-icon ui-icon-green"> Cajero en turno: <strong>{{ request.user.username|capfirst }}</strong>
             </span>
             <span class="badge-status badge-status-activo" style="font-size: 0.72rem; padding: 2px 8px;">Sesión Activa</span>
           </div>
@@ -2057,7 +2045,7 @@
           <!-- Asistente de cálculo rápido con frutas del inventario -->
           <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 0.9rem; margin-bottom: 1rem;">
             <div style="font-size: 0.8rem; font-weight: 700; color: #166534; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
-              <span>🍎</span> Calculadora Rápida de Frutas por Peso
+              <img src="{% static 'assets/icons/ui/fruta.svg' %}" alt="" class="ui-icon ui-icon-green"> Calculadora Rápida de Frutas por Peso
             </div>
             <div style="display: grid; grid-template-columns: 1fr 90px auto; gap: 8px; align-items: center;">
               <select id="nv_sel_fruta" class="form-select" style="font-size: 0.82rem; padding: 6px 10px;">
@@ -2254,6 +2242,6 @@
   <!-- archivo estático 'js/dashboard.js' para separar responsabilidades      -->
   <!-- (HTML vs JS) y mejorar el almacenamiento en caché del navegador.       -->
   <!-- ====================================================================== -->
-  <script src="{% static 'js/dashboard.js' %}?v=2.0"></script>
+  <script src="{% static 'js/dashboard.js' %}?v=2.5"></script>
 </body>
 </html>

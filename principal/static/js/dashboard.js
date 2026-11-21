@@ -1298,9 +1298,9 @@ function renderizarTablasVentasTiempoReal(ventas) {
             <td style="text-align: center;">${badgeEstado}</td>
             <td style="text-align: center; white-space: nowrap;">
               <a href="/dashboard/venta/${v.id_venta}/recibo/" target="_blank" rel="noopener"
-                style="margin-right: 6px; display: inline-block; text-decoration: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;"
+                style="margin-right: 6px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;"
                 title="Abrir comprobante imprimible de la venta">
-                🖨️ Recibo
+                <img src="/static/assets/icons/ui/imprimir.svg" alt="" class="ui-icon ui-icon-green"> Recibo
               </a>
               <button type="button" class="btn-action-edit"
                 data-id="${v.id_venta}"

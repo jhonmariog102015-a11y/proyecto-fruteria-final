@@ -18,21 +18,30 @@ from django.utils.safestring import mark_safe
 from .models import Categoria, Proveedor, Producto, Cliente, RegistroLogin, PerfilUsuario, Venta
 
 
+class FruteriaAdminMediaMixin:
+    """Inyecta estilos responsivos en Django Admin para evitar desbordes horizontales."""
+
+    class Media:
+        css = {
+            "all": ("css/admin_custom.css",)
+        }
+
+
 @admin.register(Categoria)
-class CategoriaAdmin(admin.ModelAdmin):
+class CategoriaAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = ('id_categoria', 'nombre', 'descripcion')
     search_fields = ('nombre',)
 
 
 @admin.register(Proveedor)
-class ProveedorAdmin(admin.ModelAdmin):
+class ProveedorAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = ('id_proveedor', 'razon_social', 'nit_rut', 'contacto_nombre', 'telefono', 'calificacion_estrellas', 'estado')
     search_fields = ('razon_social', 'nit_rut', 'contacto_nombre')
     list_filter = ('estado',)
 
 
 @admin.register(Producto)
-class ProductoAdmin(admin.ModelAdmin):
+class ProductoAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = (
         'id_producto',
         'nombre',
@@ -91,13 +100,13 @@ class ProductoAdmin(admin.ModelAdmin):
 
 
 @admin.register(Cliente)
-class ClienteAdmin(admin.ModelAdmin):
+class ClienteAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = ('id_cliente', 'tipo_cliente', 'cupo_credito', 'puntos_fidelidad')
     list_filter = ('tipo_cliente',)
 
 
 @admin.register(Venta)
-class VentaAdmin(admin.ModelAdmin):
+class VentaAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = (
         'id_venta',
         'id_usuario_cajero',
@@ -115,7 +124,7 @@ class VentaAdmin(admin.ModelAdmin):
 
 
 @admin.register(RegistroLogin)
-class RegistroLoginAdmin(admin.ModelAdmin):
+class RegistroLoginAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = ('fecha_creacion', 'identificador', 'rol', 'telefono', 'estado', 'ip_origen')
     list_filter = ('estado', 'rol', 'fecha_creacion')
     search_fields = ('identificador', 'telefono', 'ip_origen')
@@ -126,7 +135,7 @@ class RegistroLoginAdmin(admin.ModelAdmin):
 
 
 @admin.register(PerfilUsuario)
-class PerfilUsuarioAdmin(admin.ModelAdmin):
+class PerfilUsuarioAdmin(FruteriaAdminMediaMixin, admin.ModelAdmin):
     list_display = ('usuario', 'mostrar_rol', 'telefono', 'mostrar_estado', 'fecha_creacion')
     list_filter = ('rol', 'estado', 'fecha_creacion')
     search_fields = ('usuario__username', 'usuario__email', 'telefono')
@@ -169,7 +178,7 @@ except admin.sites.NotRegistered:
 
 
 @admin.register(User)
-class CustomUserAdmin(BaseUserAdmin):
+class CustomUserAdmin(FruteriaAdminMediaMixin, BaseUserAdmin):
     inlines = (PerfilUsuarioInline,)
     list_display = ('username', 'email', 'mostrar_rol', 'mostrar_telefono', 'mostrar_estado', 'is_staff')
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'perfil__rol', 'perfil__estado')

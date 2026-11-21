@@ -5,7 +5,7 @@
 {% block meta_description %}Al Paso Frutería — Frutas frescas y de temporada directas del campo a tu mesa en Sogamoso. Cosecha campesina diaria sin intermediarios.{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/index.css' %}?v=2.5">
+<link rel="stylesheet" href="{% static 'css/index.css' %}?v=2.7">
 {% endblock %}
 
 {% block content %}
@@ -65,7 +65,7 @@
             <!-- Tarjeta 1: Cítricos (Enlace filtrado en catálogo) -->
             <a href="{% url 'catalogo_frutas' %}?categoria=citricos" class="cat-card cat-citricos">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=600&auto=format&fit=crop"
+                    <img src="{% static 'img/categorias/citricos.jpg' %}"
                         alt="Cítricos frescos">
                 </div>
                 <div class="cat-info">
@@ -77,7 +77,7 @@
             <!-- Tarjeta 2: Tropicales (Enlace filtrado en catálogo) -->
             <a href="{% url 'catalogo_frutas' %}?categoria=tropicales" class="cat-card cat-tropicales">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1550258987-190a2d41a8ba?q=80&w=600&auto=format&fit=crop"
+                    <img src="{% static 'img/categorias/tropicales.jpg' %}"
                         alt="Frutas tropicales">
                 </div>
                 <div class="cat-info">
@@ -86,22 +86,22 @@
                 </div>
             </a>
 
-            <!-- Tarjeta 3: Berries y Silvestres (Enlace filtrado en catálogo) -->
-            <a href="{% url 'catalogo_frutas' %}?categoria=berries" class="cat-card cat-berries">
+            <!-- Tarjeta 3: Granos y Despensa (Enlace filtrado en catálogo) -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=granos-y-abarrotes" class="cat-card cat-berries">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=600&auto=format&fit=crop"
-                        alt="Berries y frutos rojos">
+                    <img src="{% static 'img/categorias/granos.jpg' %}"
+                        alt="Granos y abarrotes">
                 </div>
                 <div class="cat-info">
-                    <h3>Berries</h3>
-                    <p>Fresas y moras de altura →</p>
+                    <h3>Granos y Despensa</h3>
+                    <p>Arroz, granos y abarrotes →</p>
                 </div>
             </a>
 
             <!-- Tarjeta 4: Catálogo Completo / Importadas y Exóticas -->
             <a href="{% url 'catalogo_frutas' %}" class="cat-card cat-general">
                 <div class="cat-img">
-                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=600&auto=format&fit=crop"
+                    <img src="{% static 'img/categorias/ver_todo.jpg' %}"
                         alt="Todas las frutas">
                 </div>
                 <div class="cat-info">
@@ -127,7 +127,7 @@
             <!-- Paso 1 -->
             <div class="step-card">
                 <span class="step-num-badge">Paso 01</span>
-                <div class="step-icon-circle">🛒</div>
+                <div class="step-icon-circle"><img src="{% static 'assets/icons/ui/carrito.svg' %}" alt="" class="step-icon-svg"></div>
                 <h3>1. Elige tu Fruta Fresca</h3>
                 <p>Explora nuestro catálogo en vivo o las ofertas de la semana. Agrega fácilmente tus frutas favoritas a tu canasta con el botón (+).</p>
             </div>
@@ -135,7 +135,7 @@
             <!-- Paso 2 -->
             <div class="step-card">
                 <span class="step-num-badge">Paso 02</span>
-                <div class="step-icon-circle">🧺</div>
+                <div class="step-icon-circle"><img src="{% static 'assets/icons/ui/canasta.svg' %}" alt="" class="step-icon-svg"></div>
                 <h3>2. Revisa tu Canasta</h3>
                 <p>Ajusta las cantidades por kilo o unidad y verifica tu total estimado en tiempo real. Sin necesidad de crear cuentas ni recordar contraseñas.</p>
             </div>
@@ -143,7 +143,7 @@
             <!-- Paso 3 -->
             <div class="step-card">
                 <span class="step-num-badge">Paso 03</span>
-                <div class="step-icon-circle">💬</div>
+                <div class="step-icon-circle"><img src="{% static 'assets/icons/ui/mensaje.svg' %}" alt="" class="step-icon-svg"></div>
                 <h3>3. Confirma por WhatsApp</h3>
                 <p>Con un solo clic se envía tu pedido detallado a nuestro equipo. Te confirmamos el despacho a tu puerta y pagas contra entrega o transferencia.</p>
             </div>
@@ -161,7 +161,7 @@
     <section class="about-strip" id="nosotros">
         <!-- Columna izquierda: Imagen de la finca campesina con insignia destacada -->
         <div class="about-image">
-            <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=800&auto=format&fit=crop"
+            <img src="{% static 'img/secciones/finca_boyaca.jpg' %}"
                 alt="Finca productora en Boyacá">
             <div class="about-years-badge">+30<br><span>años</span></div>
         </div>
@@ -199,7 +199,7 @@
     <!-- ====================================================================== -->
     <section class="schedule" id="contacto">
         <div class="schedule-bg">
-            <img src="https://images.unsplash.com/photo-1488459716781-31db52582fe9?q=80&w=1600&auto=format&fit=crop"
+            <img src="{% static 'img/secciones/finca_boyaca.jpg' %}"
                 alt="Mercado de frutas">
             <div class="schedule-overlay"></div>
         </div>
@@ -226,8 +226,8 @@
 
             <!-- Botones de contacto directo telefónico y WhatsApp -->
             <div class="schedule-cta-group">
-                <a href="tel:+573001234567" class="schedule-phone">📞 Llámanos: 300 123 4567</a>
-                <a href="https://wa.me/573001234567?text=Hola%20Al%20Paso%20Fruter%C3%ADa,%20quisiera%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="schedule-whatsapp-btn">💬 Escribir al WhatsApp</a>
+                <a href="tel:+573001234567" class="schedule-phone"><img src="{% static 'assets/icons/ui/telefono.svg' %}" alt="" class="ui-icon-img ui-icon-white"> Llámanos: 300 123 4567</a>
+                <a href="https://wa.me/573001234567?text=Hola%20Al%20Paso%20Fruter%C3%ADa,%20quisiera%20hacer%20un%20pedido" target="_blank" rel="noopener noreferrer" class="schedule-whatsapp-btn"><img src="{% static 'assets/icons/ui/mensaje.svg' %}" alt="" class="ui-icon-img ui-icon-white"> Escribir al WhatsApp</a>
             </div>
         </div>
     </section>

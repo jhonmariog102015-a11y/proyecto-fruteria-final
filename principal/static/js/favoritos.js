@@ -111,7 +111,7 @@
             item.className = 'fav-item-row';
             item.innerHTML = `
                 <div class="fav-item-img">
-                    <img src="${fruit.imagen || 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?q=80&w=200&auto=format&fit=crop'}" alt="${fruit.nombre}">
+                    <img src="${fruit.imagen || '/static/img/productos/default_fruta.jpg'}" alt="${fruit.nombre}" onerror="this.onerror=null;this.src='/static/img/productos/default_fruta.jpg';">
                 </div>
                 <div class="fav-item-details">
                     <h4>${fruit.nombre}</h4>
@@ -194,9 +194,17 @@
             const btnAddFav = e.target.closest('.btn-fav-add-cart');
             if (btnAddFav) {
                 e.preventDefault();
+                const prodId = btnAddFav.dataset.id;
+                const cardDom = document.querySelector(`.fruit-card[data-id="${prodId}"]`);
+                if (cardDom && cardDom.classList.contains('card-agotada')) {
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(`${btnAddFav.dataset.nombre} está agotado temporalmente.`);
+                    }
+                    return;
+                }
                 if (window.addToCart) {
                     window.addToCart({
-                        id: btnAddFav.dataset.id,
+                        id: prodId,
                         nombre: btnAddFav.dataset.nombre,
                         precio: parseFloat(btnAddFav.dataset.precio) || 0,
                         imagen: btnAddFav.dataset.imagen,

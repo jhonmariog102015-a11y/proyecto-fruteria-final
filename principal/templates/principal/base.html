@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <!-- Estilos específicos de cada página y carrito universal -->
-    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1.3">
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}?v=1.6">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -41,108 +41,66 @@
 
         <!-- Enlaces de navegación con menú Inicio desplegable y categorías ilustradas -->
         <nav class="nav-links" id="mainNavLinks">
-            <!-- 1. Menú Desplegable de Inicio (contiene Portada, Cómo Pedir, Nosotros, Contacto) -->
+            <!-- 1. Menú Desplegable de Inicio (Portada, Cómo Pedir, Nosotros, Contacto) -->
             <div class="nav-item-dropdown">
                 <a href="{% url 'index' %}" class="nav-link nav-link-cat nav-link-dropdown {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'inicio' %}active{% endif %}" title="Inicio">
-                    <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <!-- Sol campesino de fondo -->
-                        <circle cx="37" cy="13" r="6" fill="#FFC400" stroke="#1E293B" stroke-width="2"/>
-                        <!-- Paredes de la casa campesina blanca -->
-                        <rect x="11" y="21" width="26" height="20" rx="2" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5"/>
-                        <!-- Techo campesino verde esmeralda -->
-                        <path d="M7 23L24 8l17 15" stroke="#1E293B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M10 22L24 10l14 12" fill="#2E7D32"/>
-                        <!-- Puerta de madera amarilla con arco -->
-                        <path d="M20 41V29a4 4 0 0 1 8 0v12" fill="#FFC400" stroke="#1E293B" stroke-width="2"/>
-                        <!-- Ventana superior circular con marco -->
-                        <circle cx="24" cy="18" r="3" fill="#FFFFFF" stroke="#1E293B" stroke-width="1.8"/>
-                    </svg>
-                    <span class="nav-cat-label">Inicio<span class="dropdown-arrow">▾</span></span>
+                    <span class="cat-icon-badge cat-badge-home" aria-hidden="true">
+                        <img src="{% static 'assets/icons/categorias/inicio.svg' %}" alt="" class="cat-nav-icon">
+                    </span>
+                    <span class="nav-cat-label">Inicio<span class="dropdown-arrow" aria-hidden="true">▾</span></span>
                 </a>
                 <div class="dropdown-menu">
                     <a href="{% url 'index' %}" class="dropdown-item featured">
-                        <span class="item-icon">🏡</span>
+                        <span class="item-icon"><img src="{% static 'assets/icons/ui/casa.svg' %}" alt="" class="ui-icon-img ui-icon-green"></span>
                         <span>Portada Principal</span>
                     </a>
                     <div class="dropdown-divider"></div>
                     <a href="{% url 'catalogo_frutas' %}" class="dropdown-item">
-                        <span class="item-icon">🧺</span>
+                        <span class="item-icon"><img src="{% static 'assets/icons/ui/canasta.svg' %}" alt="" class="ui-icon-img ui-icon-green"></span>
                         <span>Catálogo Completo</span>
                     </a>
                     <a href="{% url 'catalogo_frutas' %}?filtro=ofertas" class="dropdown-item">
-                        <span class="item-icon">🔥</span>
+                        <span class="item-icon"><img src="{% static 'assets/icons/ui/oferta.svg' %}" alt="" class="ui-icon-img ui-icon-green"></span>
                         <span>Ofertas de la Semana</span>
                     </a>
                     <div class="dropdown-divider"></div>
                     <a href="{% url 'index' %}#como-pedir" class="dropdown-item">
-                        <span class="item-icon">📋</span>
+                        <span class="item-icon"><img src="{% static 'assets/icons/ui/lista.svg' %}" alt="" class="ui-icon-img ui-icon-green"></span>
                         <span>Cómo Pedir</span>
                     </a>
                     <a href="{% url 'index' %}#nosotros" class="dropdown-item">
-                        <span class="item-icon">🌱</span>
+                        <span class="item-icon"><img src="{% static 'assets/icons/ui/campo.svg' %}" alt="" class="ui-icon-img ui-icon-green"></span>
                         <span>Nosotros</span>
                     </a>
                     <a href="{% url 'index' %}#contacto" class="dropdown-item">
-                        <span class="item-icon">📞</span>
+                        <span class="item-icon"><img src="{% static 'assets/icons/ui/telefono.svg' %}" alt="" class="ui-icon-img ui-icon-green"></span>
                         <span>Contacto</span>
                     </a>
                 </div>
             </div>
 
-            <!-- 4. Categoría: Frutas y Verduras -->
-            <a href="{% url 'catalogo_frutas' %}?categoria=frutas" class="nav-link nav-link-cat" title="Frutas y Verduras">
-                <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Manzana Roja Campesina (Fruta) -->
-                    <path d="M14 10c0-4 4-5 6-3 0 4-4 5-6 3z" fill="#22C55E" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M15 12c1-3 2.5-5 4-6" stroke="#78350F" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M16 14c-3-2-7-1-9.5 1.5C3.5 19 3.5 26.5 6.5 31c2.5 3.5 6 5 9.5 5 2 0 3-.7 4-.7s2 .7 4 .7c3.5 0 7-1.5 9.5-5 3-4.5 3-12-.5-15.5-2.5-2.5-6.5-3.5-9.5-1.5-1.5 1-6 1-7.5 0z" fill="#EF4444" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M8 19c-1 3 0 7 1.5 8.5" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round"/>
-                    <!-- Zanahoria Naranja (Verdura) -->
-                    <path d="M37 12c1-4 4-6 6-7M37 12c3-1 6 0 8 2M37 12c0-3-2-6-4-7" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round"/>
-                    <path d="M31 16c1.5-1.5 4.5-.5 6 1l2 2c1.5 1.5 1 4 0 5.5l-9 16c-.8 1.5-2.5 1.8-3.5 1-.8-.8-.8-2.2 0-3.5l7-18-2.5-4z" fill="#F97316" stroke="#1E293B" stroke-width="2.4" stroke-linejoin="round"/>
-                    <path d="M34 21l3 1.5M32 26l3 1.5M30 32l2.5 1.5" stroke="#C2410C" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
+            <!-- 2. Categoría: Frutas y Verduras -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=frutas" class="nav-link nav-link-cat {% if request.resolver_match.url_name == 'catalogo_frutas' and request.GET.categoria == 'frutas' %}active{% endif %}" title="Frutas y Verduras">
+                <span class="cat-icon-badge cat-badge-fruits" aria-hidden="true">
+                    <img src="{% static 'assets/icons/categorias/frutas_verduras.svg' %}" alt="" class="cat-nav-icon">
+                </span>
                 <span class="nav-cat-label">Frutas y Verduras</span>
             </a>
 
-            <!-- 5. Categoría: Carne, Pollo y Pescado -->
-            <a href="{% url 'catalogo_frutas' %}?categoria=carnes" class="nav-link nav-link-cat" title="Carne, Pollo y Pescado">
-                <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Pescado azul fresco (Pescado) -->
-                    <path d="M33 11l6-4v8l-6-4z" fill="#0284C7" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M21 11c3-4 10-5 14-1-1 3-1 5 0 7-4 4-11 3-14-1 1-1 1.5-2 1.5-2.5s-.5-1.5-1.5-2.5z" fill="#38BDF8" stroke="#1E293B" stroke-width="2.2" stroke-linejoin="round"/>
-                    <circle cx="30" cy="9.5" r="1.3" fill="#1E293B"/>
-                    <!-- Bistec de carne roja (Carne) -->
-                    <path d="M6 24c-2 4-1 9 2 12s8 3 13 1c3-1 5-4 5-7s-1-7-4-9-8-1-11 0-3 0-5 3z" fill="#E11D48" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M8 34c3 2 7 1 11 0" stroke="#FFE4E6" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="12" cy="28" r="3" fill="#FFFFFF" stroke="#1E293B" stroke-width="2"/>
-                    <path d="M12 28h5" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-                    <!-- Muslo de pollo dorado (Pollo) -->
-                    <path d="M33 34l7 7M36 43a2 2 0 1 0 3-3" stroke="#1E293B" stroke-width="2.5" stroke-linecap="round"/>
-                    <path d="M24 28c3-4 8-5 12-2s4 8 1 11-8 2-11 0c-3-2-4-5-2-9z" fill="#F59E0B" stroke="#1E293B" stroke-width="2.4" stroke-linejoin="round"/>
-                    <path d="M28 30c1-2 4-3 6-1" stroke="#FEF3C7" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span class="nav-cat-label">Carne, Pollo y Pescado</span>
+            <!-- 3. Categoría: Granos y Despensa -->
+            <a href="{% url 'catalogo_frutas' %}?categoria=granos-y-abarrotes" class="nav-link nav-link-cat {% if request.resolver_match.url_name == 'catalogo_frutas' and request.GET.categoria == 'granos-y-abarrotes' %}active{% endif %}" title="Granos y Despensa">
+                <span class="cat-icon-badge cat-badge-grains" aria-hidden="true">
+                    <img src="{% static 'assets/icons/categorias/granos_despensa.svg' %}" alt="" class="cat-nav-icon">
+                </span>
+                <span class="nav-cat-label">Granos y Despensa</span>
             </a>
 
-            <!-- 6. Categoría: Lácteos, Huevos y Refrigerados -->
-            <a href="{% url 'catalogo_frutas' %}?categoria=lacteos" class="nav-link nav-link-cat" title="Lácteos, Huevos y Refrigerados">
-                <svg class="cat-nav-icon" width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <!-- Botella de Leche fresca (Lácteos) -->
-                    <path d="M11 14h8v3l3 4v17a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V21l3-4v-3z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M12 9h6a1 1 0 0 1 1 1v4h-8v-4a1 1 0 0 1 1-1z" fill="#0284C7" stroke="#1E293B" stroke-width="2"/>
-                    <rect x="9" y="24" width="12" height="7" rx="1" fill="#E0F2FE" stroke="#1E293B" stroke-width="1.8"/>
-                    <!-- Cuña de Queso Suizo (Refrigerados) -->
-                    <path d="M24 22l18-4v16a3 3 0 0 1-3 3H25a2 2 0 0 1-2-2V23l1-1z" fill="#FFC400" stroke="#1E293B" stroke-width="2.5" stroke-linejoin="round"/>
-                    <path d="M24 22l-4 4 18-1 4-3-18 0z" fill="#FDE047" stroke="#1E293B" stroke-width="2" stroke-linejoin="round"/>
-                    <circle cx="31" cy="29" r="2.2" fill="#EAB308" stroke="#1E293B" stroke-width="1.5"/>
-                    <circle cx="37" cy="26" r="1.4" fill="#EAB308" stroke="#1E293B" stroke-width="1.5"/>
-                    <circle cx="35" cy="33" r="1.8" fill="#EAB308" stroke="#1E293B" stroke-width="1.5"/>
-                    <!-- Huevo de Granja (Huevos) -->
-                    <ellipse cx="21" cy="35" rx="5.5" ry="7" fill="#FED7AA" stroke="#1E293B" stroke-width="2.2"/>
-                    <path d="M19 32c0-1.5 1-2.5 2-2.5" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
-                </svg>
-                <span class="nav-cat-label">Lácteos, Huevos y Refrigerados</span>
+            <!-- 4. Categoría: Ofertas del Día -->
+            <a href="{% url 'catalogo_frutas' %}?filtro=ofertas" class="nav-link nav-link-cat {% if request.resolver_match.url_name == 'catalogo_frutas' and request.GET.filtro == 'ofertas' %}active{% endif %}" title="Ofertas del Día">
+                <span class="cat-icon-badge cat-badge-offers" aria-hidden="true">
+                    <img src="{% static 'assets/icons/categorias/ofertas_dia.svg' %}" alt="" class="cat-nav-icon">
+                </span>
+                <span class="nav-cat-label">Ofertas del Día</span>
             </a>
         </nav>
 
@@ -179,7 +137,7 @@
                     </a>
                     {% if user.is_superuser %}
                     <a href="/admin/" class="user-popover-link django-admin-link" target="_blank" rel="noopener">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                        <img src="{% static 'assets/icons/sidebar/admin.svg' %}" alt="" class="ui-icon-img ui-icon-muted">
                         <span>Django Admin ↗</span>
                     </a>
                     {% endif %}
@@ -306,7 +264,7 @@
                     Frutas y productos de cosecha campesina directa. Del campo boyacense a tu mesa, garantizando frescura, dulzor natural y precios justos sin intermediarios.
                 </p>
                 <div class="footer-badge-campesino">
-                    <span>🌱</span> 100% Cosecha Directa de Finca
+                    <img src="{% static 'assets/icons/ui/campo.svg' %}" alt="" class="ui-icon-img ui-icon-white"> 100% Cosecha Directa de Finca
                 </div>
             </div>
 
@@ -340,11 +298,11 @@
                     <p>Acceso restringido para personal de bodega, caja y administración.</p>
                     {% if user.is_authenticated %}
                         <a href="{% url 'dashboard' %}" class="btn-footer-employee">
-                            <span>📊</span> Panel de Control
+                            <img src="{% static 'assets/icons/sidebar/resumen.svg' %}" alt="" class="ui-icon-img ui-icon-white"> Panel de Control
                         </a>
                     {% else %}
                         <a href="{% url 'login' %}" class="btn-footer-employee">
-                            <span>🔐</span> Acceso Empleados
+                            <img src="{% static 'assets/icons/ui/candado.svg' %}" alt="" class="ui-icon-img ui-icon-white"> Acceso Empleados
                         </a>
                     {% endif %}
                 </div>
@@ -374,7 +332,7 @@
         </div>
         <div class="fav-drawer-body">
             <div id="favEmptyState" class="fav-empty-state">
-                <div class="fav-empty-icon">🤍</div>
+                <img src="{% static 'assets/icons/ui/corazon.svg' %}" alt="" class="fav-empty-icon-img">
                 <p class="fav-empty-title">Aún no tienes favoritas guardadas</p>
                 <small class="fav-empty-subtitle">Toca el corazón en cualquier fruta para guardarla aquí y pedirla rápido.</small>
                 <a href="{% url 'catalogo_frutas' %}" class="btn-fav-go-catalog">Ver Catálogo de Frutas</a>
@@ -478,8 +436,8 @@
             });
         }
     </script>
-    <script src="{% static 'js/cart.js' %}?v=2.0"></script>
-    <script src="{% static 'js/favoritos.js' %}?v=1.0"></script>
+    <script src="{% static 'js/cart.js' %}?v=2.1"></script>
+    <script src="{% static 'js/favoritos.js' %}?v=1.1"></script>
     {% block extra_js %}{% endblock %}
 
 </body>
